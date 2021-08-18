@@ -25,8 +25,8 @@ public class RoleRelations extends Auditable<String> {
 	
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "id1")
-    private long id;
+	@Column(name = "rolerelationsid")
+    private long rolerelationsid;
 	@Column(name = "parentroleid")
  	private long parentRoleid;
 	@Column(name = "parentpersonid")
@@ -35,13 +35,13 @@ public class RoleRelations extends Auditable<String> {
  	private long childRoleid;
 	@Column(name = "childpersonid")
  	private long childPersonid;
-	@Column(name = "status")
-	private String status;
+	@Column(name = "recordstatus")
+	private String recordstatus;
 	
 	 
 	@Override
 	public String toString() {
-		return "id "+id;
+		return "id "+rolerelationsid;
 	}
 	
 

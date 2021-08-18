@@ -1,6 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +15,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name="Role")
-//, schema="CMTR")
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Getter 
@@ -29,8 +27,8 @@ public class Role extends Auditable<String> {
  	private long roleid;
 	@Column(name = "rolename")
  	private String roleName;
-	@Column(name = "status")
-	private String status;
+	@Column(name = "recordstatus")
+	private String recordstatus;
 	
 	 
 	@Override

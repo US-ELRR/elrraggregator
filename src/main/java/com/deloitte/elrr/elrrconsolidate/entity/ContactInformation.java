@@ -22,7 +22,8 @@ import lombok.Setter;
 @Getter 
 @Setter
 public class ContactInformation extends Auditable<String> {
-	     	
+	
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long contactinformationid;

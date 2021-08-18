@@ -38,8 +38,8 @@ public class Person extends Auditable<String> {
 	private String nameprefix;
 	@Column(name = "titleaffixcode")
 	private String titleaffixcode;
-	@Column(name = "namenuffix")
-	private String namenuffix;
+	@Column(name = "namesuffix")
+	private String namesuffix;
 	@Column(name = "qualificationaffixcode")
 	private String qualificationaffixcode;
 	@Column(name = "maidenname")
@@ -65,7 +65,7 @@ public class Person extends Auditable<String> {
 	public String toString() {
 		return "Person [id=" + personid + ", name=" + name + ",firstName=" + firstname + ", middleName=" + middlename
 				+ ",lastName=" + lastname + ",  namePrefix=" + nameprefix + ",   titleAffixcode=" + titleaffixcode
-				+ ",nameSuffix=" + namenuffix + ",qualificationAffixcode=" + qualificationaffixcode + ",maidenName="
+				+ ",qualificationAffixcode=" + qualificationaffixcode + ",maidenName="
 				+ maidenname + ",preferredName=" + preferredname + ", humanResourceIdentifier="
 				+ humanresourceidentifier + ",        	personnelIdentificationSystem=" + personnelidentificationsystem
 				+ ",  	birthdate=" + birthdate + ", sex=" + sex + ", primaryLanguage=" + primarylanguage

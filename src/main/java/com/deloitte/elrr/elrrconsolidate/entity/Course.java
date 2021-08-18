@@ -23,6 +23,7 @@ import lombok.Setter;
 @Setter
 public class Course extends Auditable<String> {
 
+		
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long courseid;
