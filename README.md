@@ -1,23 +1,21 @@
-# elrrportal     
-elrrportal if front application for ELRR enterprise users
+# elrraggregator     
+Elrr Services for the ELRR Staging Database
 
 # Requirements
-For building and running the elrrportal you need:
-- nodejs 14.17.0
-
+For building and running the elrraggregator you need:
+- JDK 1.8
+- Maven 3
 # Build the application
-- npm run build
-   - Note : To avoid build failures due to SSL certificate issue, please use the command to set the environment
-      - set NODE_TLS_REJECT_UNAUTHORIZED=0
-
+- mvn clean install -Dmaven.test.skip=false
 # Deploying the application on Docker 
 The easiest way to deploy the sample application to Docker is to follow below steps:
-- docker build --file .Dockerfile -t <docker-hub>/newrepository:elrrportal-dck-img .
-- docker run -p port:port  -d -t  <docker-hub>/newrepository:elrrportal-dck-img         
+- mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+- docker build --build-arg JAR_FILE="./target/elrraggregator-0.0.1-SNAPSHOT.jar" --file Dockerfile -t <docker_hub>/test:elrraggregator-dck-img         
+- docker run -p Port:Port -t <docker_hub>/test:elrraggregator-dck-img         
 
 # Running the application locally
- 
-  - npm run
-
+There are several ways to run a Spring Boot application on your local machine. One way is to execute the main method in the com.deloitte.elrr.elrrconsolidate.ElrrConsolidateApplication class from your IDE
+# Alternatively you can use the Spring Boot Maven plugin: 
+- mvn spring-boot:run
 # Optional step 
-- docker push <docker-hub>/newrepository:elrrportal-dck-img         
+- docker push <docker_hub>/test:elrraggregator-dck-img   
