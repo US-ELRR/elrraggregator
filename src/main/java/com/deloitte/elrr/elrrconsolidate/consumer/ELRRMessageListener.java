@@ -32,7 +32,7 @@ public class ELRRMessageListener {
 
 	private LearnerChange getLearnerChange(String payload) {
 	    ObjectMapper mapper = new ObjectMapper();
-	    log.info("payload "+payload);
+	    log.info("payload received "+payload);
 	    MessageVO messageVo = null;
 	    LearnerChange learner=null;
 		try {

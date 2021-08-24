@@ -20,6 +20,9 @@ public class KafkaConsumerConfig {
 	@Value("${brokerUrl}")
 	String brokerUrl;
 
+	@Value("${sasl.jaas.config}")
+	String jaasConfig;
+	
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -38,7 +41,8 @@ public class KafkaConsumerConfig {
         props.put("security.protocol", "SASL_PLAINTEXT");
         props.put("sasl.mechanism", "PLAIN");
 
-        props.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule   required username='kafka-user'   password='TS@%zugQ=8TY$a2_q8W2A!c7V^NC95';");
+        //props.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule   required username='kafka-user'   password='TS@%zugQ=8TY$a2_q8W2A!c7V^NC95';");
+        props.put("sasl.jaas.config", jaasConfig);
 
         return new DefaultKafkaConsumerFactory<>(props);
     }

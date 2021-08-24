@@ -40,8 +40,8 @@ public class Employment extends Auditable<String> {
 	private String occupation;
 	@Column(name = "employed")
 	private String employed;
-	@Column(name = "primarycarrercategory")
-	private String primarycarrercategory;
+	@Column(name = "primarycareercategory")
+	private String primarycareercategory;
 	@Column(name = "recordstatus")
 	private String recordstatus;
 	
