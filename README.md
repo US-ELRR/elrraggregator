@@ -1,5 +1,5 @@
 # elrraggregator     
-Elrr Services for the ELRR Staging Database
+ELRR service which aggregates learner profiles 
 
 # Requirements
 For building and running the elrraggregator you need:
