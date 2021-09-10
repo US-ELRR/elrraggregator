@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.deloitte.elrr</groupId>
-	<artifactId>elrrconsolidate</artifactId>
+	<artifactId>elrraggregator</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>elrrconsolidate</name>
+	<name>elrraggregator</name>
 	<description>ELRR Consolidate project</description>
 	<properties>
 		<java.version>11</java.version>
