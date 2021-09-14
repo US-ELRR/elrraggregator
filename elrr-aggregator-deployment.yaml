@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: elrrdatasync-dck-cont
-          image: docker.io/arundar/test:elrraggregator-dck-img
+          image: docker.io/mohannelakurti/newrepository:elrraggregator-dck-img
           env:
             - name: "ENV"
               value: "dev"
