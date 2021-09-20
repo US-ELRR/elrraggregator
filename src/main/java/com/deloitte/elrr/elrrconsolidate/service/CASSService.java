@@ -93,9 +93,6 @@ public class CASSService {
 		return courseIdentier;
 	}
 
-	private String getKey(String contactEmailAddress) {
-		return contactEmailAddress.replace("mailto:", "");
-	}
 
 	/*
 	 * Expectign this external service will provide all the information that will be
