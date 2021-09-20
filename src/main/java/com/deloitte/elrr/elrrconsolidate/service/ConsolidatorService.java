@@ -20,7 +20,7 @@ public class ConsolidatorService {
 	@Autowired
 	LearnerProfileSvc learnerProfileService;
 	
-	public void consolidate(ContactInformation contactInforation, List<Course> courses, List<CourseCompetency> competencies) {
+	public void consolidate(ContactInformation contactInforation, List<CourseCompetency> competencies) {
 
 		try {
 		for (CourseCompetency courseCompetency: competencies) {
@@ -33,7 +33,7 @@ public class ConsolidatorService {
 				profile.setCompetencyid(courseCompetency.getCompetencyId());
 				profile.setCourseid(courseCompetency.getCourseId());
 				profile.setActivitystatus(courseCompetency.getStatus());
-				//TODO remove hardcoded
+				
 				profile.setEmploymentid(100L);
 				learnerProfileService.save(profile);
 			} else {

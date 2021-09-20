@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.elrrconsolidate.dto.CourseCompetency;
 import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
-import com.deloitte.elrr.elrrconsolidate.entity.Competency;
 import com.deloitte.elrr.elrrconsolidate.entity.ContactInformation;
 import com.deloitte.elrr.elrrconsolidate.entity.Course;
 
@@ -21,25 +20,23 @@ public class MessageConsolidatorService {
 	HRService hrService;
 	@Autowired
 	ECCService eccService;
-	
+
 	@Autowired
 	CASSService cassService;
 	@Autowired
 	ConsolidatorService consolidatorService;
-	
-	
+
 	public void process(LearnerChange learnerChange) {
-		
+
 		ContactInformation contact = hrService.getContactInformation(learnerChange);
 		List<Course> courses = eccService.getCourses(learnerChange);
-		List<CourseCompetency> competencies = cassService.getCompetencies(learnerChange,courses);
-		consolidateAndUpdate(contact,courses,competencies);
+		List<CourseCompetency> competencies = cassService.getCompetencies(learnerChange, courses);
+		consolidateAndUpdate(contact, competencies);
 	}
 
-	private void consolidateAndUpdate(ContactInformation contact, List<Course> courses,
-			List<CourseCompetency> competencies) {
-		consolidatorService.consolidate(contact, courses,competencies);
-		
+	private void consolidateAndUpdate(ContactInformation contact, List<CourseCompetency> competencies) {
+		consolidatorService.consolidate(contact, competencies);
+
 	}
 
 }

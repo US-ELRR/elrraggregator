@@ -15,13 +15,13 @@ public class ELRRAuditLogService implements CommonSvc<ELRRAuditLog, Long> {
 	
 	@Override
 	public Long getId(ELRRAuditLog entity) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public CrudRepository<ELRRAuditLog, Long> getRepository() {
-		// TODO Auto-generated method stub
+		
 		return elrrAuditLogRepository;
 	}
 

@@ -1,7 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
-import java.sql.Timestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,24 +19,21 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "ELRRAUDITLOG")
-@TypeDef(
-	    name = "json",
-	    typeClass = JsonType.class)
+@TypeDef(name = "json", typeClass = JsonType.class)
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class ELRRAuditLog extends Auditable<String>{
+public class ELRRAuditLog extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long auditlogid;
-	
+
 	private long syncid;
-	
-	 @Type(type = "json")
-	 @Column(columnDefinition = "jsonb")
-	 private String  payload;
-	
+
+	@Type(type = "json")
+	@Column(columnDefinition = "jsonb")
+	private String payload;
 
 }

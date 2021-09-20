@@ -25,7 +25,7 @@ public class ELRRMessageListener {
 	 
 	@KafkaListener(topics = "${kafka.topic}", groupId = "${kafka.groupId}")
 	public void listen(String message) {
-	   System.out.println("Received Messasge in group - group-id: " + message);
+		log.info("Received Messasge in group - group-id: " + message);
 	   LearnerChange learnerChange  = getLearnerChange(message);
 	   messageService.process(learnerChange);
 	}

@@ -30,7 +30,7 @@ public class ECCService {
 				log.info("course "+course);
 				if (course == null) {
 					log.info("course is null");
-					course = invokeExternalService(courseIdentifier);
+					course = invokeExternalService();
 					//courseService.save(course);
 				}
 				list.add(course);
@@ -43,7 +43,7 @@ public class ECCService {
 	 * Invokes external ECCService to get course details
 	 * if course does not find in the database
 	 */
-	private Course invokeExternalService(String courseId) {
+	private Course invokeExternalService() {
 		log.info("invoking externalService for Course");
 		return null;
 	}

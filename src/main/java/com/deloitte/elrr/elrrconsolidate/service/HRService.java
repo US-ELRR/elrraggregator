@@ -26,11 +26,11 @@ public class HRService {
 		
 		String key = getKey(learnerChange.getContactEmailAddress());
 		ContactInformation contact = contactInformationService.getContactInformationByElectronicmailaddress(key);
-		//TODO what is the criteria to get the data changed..is it every week or 2 weeks or something else
+		
 		if (contact == null) {
 			log.info("contact information not found and creating a new one");
-			contact = invokeExternalService(learnerChange, key);
-			Person person = createPerson(contact,learnerChange);
+			contact = invokeExternalService(key);
+			Person person = createPerson(learnerChange);
 			contact.setPersonid(person.getPersonid());
 			contact.setElectronicmailaddresstype("Personal");
 			contact.setTelephonetype("Private");
@@ -43,17 +43,17 @@ public class HRService {
 		}
 		return contact;
 	}
-	private Person createPerson(ContactInformation contact,LearnerChange learnerChange) {
+	private Person createPerson(LearnerChange learnerChange) {
 		log.info("creating new person");
 		Person person = new Person();
 		person.setName(learnerChange.getName());
-		String tokens[] = learnerChange.getName().split(" ");
+		String [] tokens = learnerChange.getName().split(" ");
 		person.setFirstname(tokens[0]);
 		person.setLastname(tokens[1]);
 		personService.save(person);
 		return person;
 	}
-	private ContactInformation invokeExternalService(LearnerChange learnerChange, String key) {
+	private ContactInformation invokeExternalService(String key) {
 		log.info("invoking externalService to get Contact info");
 		ContactInformation contact = new ContactInformation();
 		contact.setElectronicmailaddress(key);
@@ -62,8 +62,7 @@ public class HRService {
 		return contact;
 	}
 	private String getKey(String contactEmailAddress) {
-		String key = contactEmailAddress.replace("mailto:", "");
-		return key;
+		return contactEmailAddress.replace("mailto:", "");
 	}
 	
 	 	

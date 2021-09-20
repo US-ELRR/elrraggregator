@@ -16,61 +16,63 @@ import lombok.Setter;
 
 @Entity
 @Table(name="PERSON")
-//, schema="CMTR")
+//,schema="CMTR")
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Getter 
+@Getter
 @Setter
-public class Person extends Auditable<String> {
+
+public class Person extends Auditable<String>{
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long personid;
-	@Column(name = "name")
+	@Column(name="name")
 	private String name;
-	@Column(name = "firstname")
+	@Column(name="firstname")
 	private String firstname;
-	@Column(name = "middlename")
+	@Column(name="middlename")
 	private String middlename;
-	@Column(name = "lastname")
+	@Column(name="lastname")
 	private String lastname;
-	@Column(name = "nameprefix")
+	@Column(name="nameprefix")
 	private String nameprefix;
-	@Column(name = "titleaffixcode")
+	@Column(name="titleaffixcode")
 	private String titleaffixcode;
-	@Column(name = "namesuffix")
+	@Column(name="namesuffix")
 	private String namesuffix;
-	@Column(name = "qualificationaffixcode")
+	@Column(name="qualificationaffixcode")
 	private String qualificationaffixcode;
-	@Column(name = "maidenname")
+	@Column(name="maidenname")
 	private String maidenname;
-	@Column(name = "preferredname")
+	@Column(name="preferredname")
 	private String preferredname;
-	@Column(name = "humanresourceidentifier")	
+	@Column(name="humanresourceidentifier")	
 	private String humanresourceidentifier;
-	@Column(name = "personnelidentificationsystem")
+	@Column(name="personnelidentificationsystem")
 	private String personnelidentificationsystem;
-	@Column(name = "birthdate")
+	@Column(name="birthdate")
 	private Date birthdate;
-	@Column(name = "sex")
+	@Column(name="sex")
 	private String sex;
-	@Column(name = "primarylanguage")
+	@Column(name="primarylanguage")
 	private String primarylanguage;
-	@Column(name = "militaryveteranindicator")
+	@Column(name="militaryveteranindicator")
 	private String militaryveteranindicator;
-	@Column(name = "recordstatus")
+	@Column(name="recordstatus")
 	private String recordstatus;
 
 	@Override
 	public String toString() {
-		return "Person [id=" + personid + ", name=" + name + ",firstName=" + firstname + ", middleName=" + middlename
-				+ ",lastName=" + lastname + ",  namePrefix=" + nameprefix + ",   titleAffixcode=" + titleaffixcode
-				+ ",qualificationAffixcode=" + qualificationaffixcode + ",maidenName="
-				+ maidenname + ",preferredName=" + preferredname + ", humanResourceIdentifier="
-				+ humanresourceidentifier + ",        	personnelIdentificationSystem=" + personnelidentificationsystem
-				+ ",  	birthdate=" + birthdate + ", sex=" + sex + ", primaryLanguage=" + primarylanguage
-				+ ",       militaryVeteranindicator=" + militaryveteranindicator + ",       	recordStatus="
-				+ recordstatus + "]";
+		
+		return "Person[id="+personid+",name="+name+",firstName="+firstname+",middleName="+middlename
+				+",lastName="+lastname+",namePrefix="+nameprefix+",titleAffixcode="+titleaffixcode
+				+",qualificationAffixcode="+qualificationaffixcode+",maidenName="
+				+maidenname+",preferredName="+preferredname+",humanResourceIdentifier="
+				+humanresourceidentifier+",personnelIdentificationSystem="+personnelidentificationsystem
+				+",birthdate="+birthdate+",sex="+sex+",primaryLanguage="+primarylanguage
+				+",militaryVeteranindicator="+militaryveteranindicator+",recordStatus="
+				+recordstatus+"]";
 	}
 	
 
