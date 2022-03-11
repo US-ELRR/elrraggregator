@@ -55,17 +55,19 @@ public class CASSService {
 
 		boolean first = true;
 		for (Course course : courses) {
-			CourseCompetency courseCompetency = new CourseCompetency();
-			courseCompetency.setCourseId(course.getCourseid());
-			if (first) {
-				courseCompetency.setCompetencyId(competencies.get(0).getCompetencyid());
-				first = false;
-			} else {
-				courseCompetency.setCompetencyId(competencies.get(1).getCompetencyid());
-				first = true;
-			}
-			courseCompetency.setStatus(getStatus(course.getCourseidentifier(), learnerChange));
-			courseCompetencies.add(courseCompetency);
+		    if(course!=null) {
+    			CourseCompetency courseCompetency = new CourseCompetency();
+    			courseCompetency.setCourseId(course.getCourseid());
+    			if (first) {
+    				courseCompetency.setCompetencyId(competencies.get(0).getCompetencyid());
+    				first = false;
+    			} else {
+    				courseCompetency.setCompetencyId(competencies.get(1).getCompetencyid());
+    				first = true;
+    			}
+    			courseCompetency.setStatus(getStatus(course.getCourseidentifier(), learnerChange));
+    			courseCompetencies.add(courseCompetency);
+		    }
 
 		}
 		return courseCompetencies;

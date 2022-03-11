@@ -28,7 +28,7 @@ public class ELRRAuditLog extends Auditable<String> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long auditlogid;
+	private long elrrauditlogid;
 
 	private long syncid;
 
