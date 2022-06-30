@@ -13,7 +13,14 @@ import lombok.Setter;
 @Setter
 public class MessageVO {
 
-	AuditRecord auditRecord;
-	LearnerChange learnerChange;
+    /**
+    *
+    */
+    private AuditRecord auditRecord;
+
+    /**
+    *
+    */
+    private LearnerChange learnerChange;
 
 }

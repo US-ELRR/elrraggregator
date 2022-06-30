@@ -7,9 +7,17 @@ import org.springframework.stereotype.Repository;
 import com.deloitte.elrr.elrrconsolidate.entity.ContactInformation;
 
 @Repository
-public interface ContactInformationRepository  extends JpaRepository<ContactInformation, Long>{
-	
-	@Query("SELECT c FROM ContactInformation c WHERE LOWER(c.electronicmailaddress) = LOWER(:electronicmailaddress)")
-	public ContactInformation findByEmail(final String electronicmailaddress);
+public interface ContactInformationRepository extends
+JpaRepository<ContactInformation, Long> {
+
+    /**
+     *
+     * @param electronicmailaddress
+     * @return ContactInformation contactInformation
+     */
+    @Query("SELECT c FROM ContactInformation c WHERE "
+            + " LOWER(c.electronicmailaddress)"
+            + " = LOWER(:electronicmailaddress)")
+    ContactInformation findByEmail(String electronicmailaddress);
 
 }

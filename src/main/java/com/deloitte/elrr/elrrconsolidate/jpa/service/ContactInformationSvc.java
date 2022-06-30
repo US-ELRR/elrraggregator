@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -9,38 +9,64 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.elrrconsolidate.entity.ContactInformation;
 import com.deloitte.elrr.elrrconsolidate.repository.ContactInformationRepository;
 
-
 /**
  * @author mnelakurti
  *
  */
 
 @Service
-public class ContactInformationSvc implements CommonSvc<ContactInformation, Long> {
-	private final ContactInformationRepository contactInformationRepository;
+public class ContactInformationSvc
+        implements CommonSvc<ContactInformation, Long> {
 
-	public ContactInformationSvc(final ContactInformationRepository contactInformationRepository) {
-		this.contactInformationRepository = contactInformationRepository;
-	}
+    /**
+     *
+     */
+    private final ContactInformationRepository contactInformationRepository;
 
-	@Override
-	public CrudRepository<ContactInformation, Long> getRepository() {
-		return this.contactInformationRepository;
-	}
+    /**
+     *
+     * @param newcontactInformationRepository
+     */
+    public ContactInformationSvc(
+            final ContactInformationRepository
+            newcontactInformationRepository) {
+        this.contactInformationRepository = newcontactInformationRepository;
+    }
 
-	@Override
-	public Long getId(ContactInformation courseaccreditation) {
-		return courseaccreditation.getContactinformationid();
-		}
+    /**
+     *
+     *
+     */
+    @Override
+    public CrudRepository<ContactInformation, Long> getRepository() {
+        return this.contactInformationRepository;
+    }
 
-	@Override
-	public ContactInformation save(ContactInformation contactInformation) {
-		return CommonSvc.super.save(contactInformation);
-	}
-	
-	public ContactInformation getContactInformationByElectronicmailaddress(String courseidentifier)
-	{
-		return this.contactInformationRepository.findByEmail(courseidentifier);
-	}
+    /**
+     * @param courseaccreditation
+     */
+    @Override
+    public Long getId(final ContactInformation courseaccreditation) {
+        return courseaccreditation.getContactinformationid();
+    }
+
+    /**
+     * @param contactInformation
+     */
+    @Override
+    public ContactInformation save(
+            final ContactInformation contactInformation) {
+        return CommonSvc.super.save(contactInformation);
+    }
+
+    /**
+     *
+     * @param courseidentifier
+     * @return ContactInformation contactInformation
+     */
+    public ContactInformation getContactInformationByElectronicmailaddress(
+            final String courseidentifier) {
+        return this.contactInformationRepository.findByEmail(courseidentifier);
+    }
 
 }

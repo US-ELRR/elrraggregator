@@ -17,43 +17,50 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 @Configuration
 public class KafkaConsumerConfig {
 
-  @Value("${brokerUrl}")
-  String brokerUrl;
+    /**
+     *
+     */
+    @Value("${brokerUrl}")
+    private String brokerUrl;
 
-  @Value("${sasl.jaas.config}")
-  String jaasConfig;
+    /**
+     *
+     */
+    @Value("${sasl.jaas.config}")
+    private String jaasConfig;
 
-  @Bean
-  public ConsumerFactory<String, String> consumerFactory() {
-    Map<String, Object> props = new HashMap<>();
-    props.put(
-        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
-    // "PLAINTEXT_HOST://localhost:29092");
-    props.put(
-        ConsumerConfig.GROUP_ID_CONFIG,
-        "GROUP_ID");
-    props.put(
-        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-        StringDeserializer.class);
-    props.put(
-        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-        StringDeserializer.class);
-    // props.put("security.protocol", "SASL_PLAINTEXT");
-    // props.put("sasl.mechanism", "PLAIN");
+    /**
+     *
+     * @return ConsumerFactory consumerFactory
+     */
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "GROUP_ID");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class);
+        props.put("security.protocol", "SASL_PLAINTEXT");
+        props.put("sasl.mechanism", "PLAIN");
+        props.put("sasl.jaas.config", jaasConfig);
 
-    // props.put("sasl.jaas.config",
-    // "org.apache.kafka.common.security.plain.PlainLoginModule required
-    // username='kafka-user' password='TS@%zugQ=8TY$a2_q8W2A!c7V^NC95';");
-    // props.put("sasl.jaas.config", jaasConfig);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
 
-    return new DefaultKafkaConsumerFactory<>(props);
-  }
+    /**
+     *
+     * @return ConcurrentKafkaListenerContainerFactory
+     *         concurrentKafkaListenerContainerFactory
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String,
+            String> kafkaListenerContainerFactory() {
 
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-
-    ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
-    return factory;
-  }
+        ConcurrentKafkaListenerContainerFactory<String, String> factory
+        = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
 }

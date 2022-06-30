@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -16,30 +16,50 @@ import com.deloitte.elrr.elrrconsolidate.repository.CourseRepository;
 
 @Service
 public class CourseSvc implements CommonSvc<Course, Long> {
-	private final CourseRepository courseRepository;
+    /**
+     *
+     */
+    private final CourseRepository courseRepository;
 
-	public CourseSvc(final CourseRepository courseRepository) {
-		this.courseRepository = courseRepository;
-	}
+    /**
+     *
+     * @param newcourseRepository
+     */
+    public CourseSvc(final CourseRepository newcourseRepository) {
+        this.courseRepository = newcourseRepository;
+    }
 
-	@Override
-	public CrudRepository<Course, Long> getRepository() {
-		return this.courseRepository;
-	}
+    /**
+     *
+     */
+    @Override
+    public CrudRepository<Course, Long> getRepository() {
+        return this.courseRepository;
+    }
 
-	@Override
-	public Long getId(Course course) {
-		return course.getCourseid();
-	}
+    /**
+     *
+     */
+    @Override
+    public Long getId(final Course course) {
+        return course.getCourseid();
+    }
 
-	@Override
-	public Course save(Course course) {
-		return CommonSvc.super.save(course);
-	}
-	
-	public Course getCourseByCourseidentifier(String courseidentifier)
-	{
-		return this.courseRepository.findIdByCourseidentifier(courseidentifier);
-	}
+    /**
+     *
+     */
+    @Override
+    public Course save(final Course course) {
+        return CommonSvc.super.save(course);
+    }
+
+    /**
+     *
+     * @param courseidentifier
+     * @return Course
+     */
+    public Course getCourseByCourseidentifier(final String courseidentifier) {
+        return this.courseRepository.findIdByCourseidentifier(courseidentifier);
+    }
 
 }

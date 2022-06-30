@@ -15,6 +15,13 @@ import lombok.Setter;
 @Setter
 public class AuditRecord {
 
-	Long auditId;
-	List<Long> auditDeailIds;
+    /**
+     *
+     */
+    private Long auditId;
+
+    /**
+     *
+     */
+    private List<Long> auditDeailIds;
 }

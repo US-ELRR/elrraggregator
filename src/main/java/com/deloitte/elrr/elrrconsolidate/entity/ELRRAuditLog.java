@@ -26,14 +26,23 @@ import lombok.Setter;
 @Setter
 public class ELRRAuditLog extends Auditable<String> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long elrrauditlogid;
+    /**
+    *
+    */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long auditlogid;
 
-	private long syncid;
+    /**
+    *
+    */
+    private long syncid;
 
-	@Type(type = "json")
-	@Column(columnDefinition = "jsonb")
-	private String payload;
+    /**
+    *
+    */
+    @Type(type = "json")
+    @Column(columnDefinition = "jsonb")
+    private String payload;
 
 }

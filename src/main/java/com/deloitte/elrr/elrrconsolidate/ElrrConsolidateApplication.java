@@ -8,8 +8,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class ElrrConsolidateApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ElrrConsolidateApplication.class, args);
-	}
+   /**
+     *
+     */
+    protected ElrrConsolidateApplication() {
+
+    }
+    /**
+     *
+     * @param args
+     */
+    public static void main(final String[] args) {
+        SpringApplication.run(ElrrConsolidateApplication.class, args);
+    }
 
 }
