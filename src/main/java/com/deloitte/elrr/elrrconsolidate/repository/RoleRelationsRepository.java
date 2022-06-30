@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.deloitte.elrr.elrrconsolidate.entity.RoleRelations;
 
 @Repository
-public interface RoleRelationsRepository  extends JpaRepository<RoleRelations, Long>{
+public interface RoleRelationsRepository
+        extends JpaRepository<RoleRelations, Long> {
 
 }

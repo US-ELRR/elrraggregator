@@ -19,94 +19,130 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CASSService {
 
-	@Autowired
-	CompetencySvc competencySvc;
+    /**
+     *
+     */
+    @Autowired
+    private CompetencySvc competencySvc;
 
-	public List<CourseCompetency> getCompetencies(LearnerChange learnerChange, List<Course> courses) {
-		log.info("Inside CASSService");
-		List<String> competencyNames = invokeExternalService();
-		List<Competency> competencies = getCompetencies(competencyNames);
-		return getCourseCompetencies(courses, competencies, learnerChange);
-	}
+    /**
+     *
+     * @param learnerChange
+     * @param courses
+     * @return List<CourseCompetency> CourseCompetencies
+     */
+    public List<CourseCompetency> getCompetencies(
+            final LearnerChange learnerChange, final List<Course> courses) {
+        log.info("Inside CASSService");
+        List<String> competencyNames = invokeExternalService();
+        List<Competency> competencies = getCompetencies(competencyNames);
+        return getCourseCompetencies(courses, competencies, learnerChange);
+    }
 
-	private List<Competency> getCompetencies(List<String> competencyNames) {
+    /**
+     *
+     * @param competencyNames
+     * @return List<Competency> competencies
+     */
+    private List<Competency> getCompetencies(
+            final List<String> competencyNames) {
 
-		List<Competency> competencies = new ArrayList<>();
-		for (String name : competencyNames) {
-			log.info("querying Competencny for name " + name);
-			Competency competency = competencySvc.findByCompetencyName(name);
-			if (competency == null) {
-				log.info("competency not found");
-				// Where do we
-				// createNewCompetency();
-			} else {
-				log.info("competency found " + competency.getCompetencyid());
-			}
-			competencies.add(competency);
-		}
+        List<Competency> competencies = new ArrayList<>();
+        for (String name : competencyNames) {
+            log.info("querying Competencny for name " + name);
+            Competency competency = competencySvc.findByCompetencyName(name);
+            if (competency == null) {
+                log.info("competency not found");
+            } else {
+                log.info("competency found " + competency.getCompetencyid());
+            }
+            competencies.add(competency);
+        }
 
-		return competencies;
-	}
+        return competencies;
+    }
 
-	private List<CourseCompetency> getCourseCompetencies(List<Course> courses, List<Competency> competencies,
-			LearnerChange learnerChange) {
+    /**
+     *
+     * @param courses
+     * @param competencies
+     * @param learnerChange
+     * @return List<CourseCompetency> courseCompetencies
+     */
+    private List<CourseCompetency> getCourseCompetencies(
+            final List<Course> courses, final List<Competency> competencies,
+            final LearnerChange learnerChange) {
 
-		List<CourseCompetency> courseCompetencies = new ArrayList<>();
+        List<CourseCompetency> courseCompetencies = new ArrayList<>();
 
-		boolean first = true;
-		for (Course course : courses) {
-		    if(course!=null) {
-    			CourseCompetency courseCompetency = new CourseCompetency();
-    			courseCompetency.setCourseId(course.getCourseid());
-    			if (first) {
-    				courseCompetency.setCompetencyId(competencies.get(0).getCompetencyid());
-    				first = false;
-    			} else {
-    				courseCompetency.setCompetencyId(competencies.get(1).getCompetencyid());
-    				first = true;
-    			}
-    			courseCompetency.setStatus(getStatus(course.getCourseidentifier(), learnerChange));
-    			courseCompetencies.add(courseCompetency);
-		    }
+        boolean first = true;
+        for (Course course : courses) {
+            CourseCompetency courseCompetency = new CourseCompetency();
+            courseCompetency.setCourseId(course.getCourseid());
+            if (first) {
+                courseCompetency
+                        .setCompetencyId(competencies.get(0).getCompetencyid());
+                first = false;
+            } else {
+                courseCompetency
+                        .setCompetencyId(competencies.get(1).getCompetencyid());
+                first = true;
+            }
+            courseCompetency.setStatus(
+                    getStatus(course.getCourseidentifier(), learnerChange));
+            courseCompetencies.add(courseCompetency);
 
-		}
-		return courseCompetencies;
-	}
+        }
+        return courseCompetencies;
+    }
 
-	private String getStatus(String courseidentifier, LearnerChange learnerChange) {
-		String status = "Resumed";
-		for (UserCourse course : learnerChange.getCourses()) {
-			if (courseidentifier.equalsIgnoreCase(findCourseIdentifier(course.getCourseId()))) {
-				log.info("sending status of " + course.getUserCourseStatus());
-				// http://adlnet.gov/expapi/verbs/completed
-				int begin = course.getUserCourseStatus().lastIndexOf("/");
-				status = course.getUserCourseStatus().substring(begin + 1);
-				return status;
-			}
-		}
-		log.info("sending default status " + status);
-		return status;
-	}
+    /**
+     *
+     * @param courseidentifier
+     * @param learnerChange
+     * @return String status
+     */
+    private String getStatus(final String courseidentifier,
+            final LearnerChange learnerChange) {
+        String status = "Resumed";
+        for (UserCourse course : learnerChange.getCourses()) {
+            if (courseidentifier.equalsIgnoreCase(
+                    findCourseIdentifier(course.getCourseId()))) {
+                log.info("sending status of " + course.getUserCourseStatus());
+                // http://adlnet.gov/expapi/verbs/completed
+                int begin = course.getUserCourseStatus().lastIndexOf("/");
+                status = course.getUserCourseStatus().substring(begin + 1);
+                return status;
+            }
+        }
+        log.info("sending default status " + status);
+        return status;
+    }
 
-	private String findCourseIdentifier(String courseId) {
-		int lastIndex = courseId.lastIndexOf("/");
-		String courseIdentier = courseId.substring(lastIndex + 1);
-		courseIdentier = courseIdentier.replace("%20", " ");
-		return courseIdentier;
-	}
+    /**
+     *
+     * @param courseId
+     * @return String courseIdentier
+     */
+    private String findCourseIdentifier(final String courseId) {
+        int lastIndex = courseId.lastIndexOf("/");
+        String courseIdentier = courseId.substring(lastIndex + 1);
+        courseIdentier = courseIdentier.replace("%20", " ");
+        return courseIdentier;
+    }
 
+    /**
+     * Expecting this external service will provide all the information that
+     * will be required to create a competency in the database if not found.
+     *
+     * @return List competencies
+     */
+    private List<String> invokeExternalService() {
 
-	/*
-	 * Expectign this external service will provide all the information that will be
-	 * requied to create a competency in the database if not found
-	 * 
-	 */
-	private List<String> invokeExternalService() {
-
-		List<String> competencies = new ArrayList<>();
-		competencies.add("Skill and Roles: Business Skills and Acumen");
-		competencies.add("Contract Principles: General Contracting Concepts");
-		return competencies;
-	}
+        List<String> competencies = new ArrayList<>();
+        competencies.add("Skill and Roles: Business Skills and Acumen");
+        competencies.add("Contract Principles: General Contracting Concepts");
+        return competencies;
+    }
 
 }

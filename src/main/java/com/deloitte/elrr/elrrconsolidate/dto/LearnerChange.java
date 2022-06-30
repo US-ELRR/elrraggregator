@@ -17,8 +17,19 @@ import lombok.Setter;
 @Setter
 public class LearnerChange {
 
-	String 	contactEmailAddress;
-	String 	name;
- 	List<UserCourse>  courses;
+    /**
+     *
+     */
+    private String contactEmailAddress;
+
+    /**
+    *
+    */
+    private String name;
+
+    /**
+     *
+    */
+    private List<UserCourse> courses;
 
 }

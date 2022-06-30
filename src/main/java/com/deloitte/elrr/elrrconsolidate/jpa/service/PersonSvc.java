@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -19,25 +19,43 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class PersonSvc implements CommonSvc<Person, Long> {
-	private final PersonalRepository personalRepository;
 
-	public PersonSvc(final PersonalRepository personalRepository) {
-		this.personalRepository = personalRepository;
-	}
+    /**
+     *
+     */
+    private final PersonalRepository personalRepository;
 
-	@Override
-	public CrudRepository<Person, Long> getRepository() {
-		return this.personalRepository;
-	}
 
-	@Override
-	public Long getId(Person person) {
-		return person.getPersonid();
-	}
+    /**
+     *
+     * @param newpersonalRepository
+     */
+    public PersonSvc(final PersonalRepository newpersonalRepository) {
+        this.personalRepository = newpersonalRepository;
+    }
 
-	@Override
-	public Person save(Person person) {
-		return CommonSvc.super.save(person);
-	}
+    /**
+     *
+     */
+    @Override
+    public CrudRepository<Person, Long> getRepository() {
+        return this.personalRepository;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Long getId(final Person person) {
+        return person.getPersonid();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Person save(final Person person) {
+        return CommonSvc.super.save(person);
+    }
 
 }

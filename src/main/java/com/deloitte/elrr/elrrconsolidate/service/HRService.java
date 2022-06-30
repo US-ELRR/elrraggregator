@@ -15,56 +15,70 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HRService {
 
-	@Autowired
-	PersonSvc personService;
-	
-	@Autowired
-	ContactInformationSvc contactInformationService;
-	
-	
-	public ContactInformation getContactInformation(LearnerChange learnerChange) {
-		
-		String key = getKey(learnerChange.getContactEmailAddress());
-		ContactInformation contact = contactInformationService.getContactInformationByElectronicmailaddress(key);
-		
-		if (contact == null) {
-			log.info("contact information not found and creating a new one");
-			contact = invokeExternalService(key);
-			Person person = createPerson(learnerChange);
-			contact.setPersonid(person.getPersonid());
-			contact.setElectronicmailaddresstype("Personal");
-			contact.setTelephonetype("Private");
-			contact.setEmergencycontact("Email");
-			contact.setIsprimaryindicator("Y");
-			contactInformationService.save(contact);
-		} else {
-			log.info("contact information and person found "+contact.getContactinformationid() +
-					"personId "+contact.getPersonid());
-		}
-		return contact;
-	}
-	private Person createPerson(LearnerChange learnerChange) {
-		log.info("creating new person");
-		Person person = new Person();
-		person.setName(learnerChange.getName());
-		String [] tokens = learnerChange.getName().split(" ");
-		person.setFirstname(tokens[0]);
-		person.setLastname(tokens[1]);
-		personService.save(person);
-		return person;
-	}
-	private ContactInformation invokeExternalService(String key) {
-		log.info("invoking externalService to get Contact info");
-		ContactInformation contact = new ContactInformation();
-		contact.setElectronicmailaddress(key);
-		contact.setContactinformation("Email");
-		contact.setTelephonenumber("800-922-0222");
-		return contact;
-	}
-	private String getKey(String contactEmailAddress) {
-		return contactEmailAddress.replace("mailto:", "");
-	}
-	
-	 	
-	 
+    /**
+     *
+     */
+    @Autowired
+    private PersonSvc personService;
+
+    /**
+     *
+     */
+    @Autowired
+    private ContactInformationSvc contactInformationService;
+
+    /**
+     *
+     * @param learnerChange
+     * @return ContactInformation contactInformation
+     */
+    public ContactInformation getContactInformation(
+            final LearnerChange learnerChange) {
+
+        String key = getKey(learnerChange.getContactEmailAddress());
+        ContactInformation contact = contactInformationService
+                .getContactInformationByElectronicmailaddress(key);
+
+        if (contact == null) {
+            log.info("contact information not found and creating a new one");
+            contact = invokeExternalService(key);
+            Person person = createPerson(learnerChange);
+            contact.setPersonid(person.getPersonid());
+            contact.setElectronicmailaddresstype("Personal");
+            contact.setTelephonetype("Private");
+            contact.setEmergencycontact("Email");
+            contact.setIsprimaryindicator("Y");
+            contactInformationService.save(contact);
+        } else {
+            log.info("contact information and person found "
+                    + contact.getContactinformationid() + "personId "
+                    + contact.getPersonid());
+        }
+        return contact;
+    }
+
+    private Person createPerson(final LearnerChange learnerChange) {
+        log.info("creating new person");
+        Person person = new Person();
+        person.setName(learnerChange.getName());
+        String[] tokens = learnerChange.getName().split(" ");
+        person.setFirstname(tokens[0]);
+        person.setLastname(tokens[1]);
+        personService.save(person);
+        return person;
+    }
+
+    private ContactInformation invokeExternalService(final String key) {
+        log.info("invoking externalService to get Contact info");
+        ContactInformation contact = new ContactInformation();
+        contact.setElectronicmailaddress(key);
+        contact.setContactInformationData("Email");
+        contact.setTelephonenumber("800-922-0222");
+        return contact;
+    }
+
+    private String getKey(final String contactEmailAddress) {
+        return contactEmailAddress.replace("mailto:", "");
+    }
+
 }

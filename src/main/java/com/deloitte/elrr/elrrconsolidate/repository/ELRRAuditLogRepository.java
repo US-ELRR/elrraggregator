@@ -5,8 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import com.deloitte.elrr.elrrconsolidate.entity.ELRRAuditLog;
 
-	@Repository
-	public interface ELRRAuditLogRepository extends JpaRepository<ELRRAuditLog, Long>{
-	    
-	}
+@Repository
+public interface ELRRAuditLogRepository
+        extends JpaRepository<ELRRAuditLog, Long> {
 
+}

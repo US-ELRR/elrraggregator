@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -16,29 +16,59 @@ import com.deloitte.elrr.elrrconsolidate.repository.LearnerProfileRepository;
 
 @Service
 public class LearnerProfileSvc implements CommonSvc<LearnerProfile, Long> {
-	private final LearnerProfileRepository learnerProfileRepository;
 
-	public LearnerProfileSvc(final LearnerProfileRepository learnerProfileRepository) {
-		this.learnerProfileRepository = learnerProfileRepository;
-	}
-	
-	public LearnerProfile getLearnerProfileByPersonIdCourseId(long personId, long courseId) {
-		return learnerProfileRepository.getLearnerProfileByPersonIdCourseId(personId, courseId);
-	}
+    /**
+     *
+     */
+    private final LearnerProfileRepository learnerProfileRepository;
 
-	@Override
-	public CrudRepository<LearnerProfile, Long> getRepository() {
-		return this.learnerProfileRepository;
-	}
+    /**
+     *
+     * @param newlearnerProfileRepository
+     */
+    public LearnerProfileSvc(final LearnerProfileRepository
+            newlearnerProfileRepository) {
+        this.learnerProfileRepository = newlearnerProfileRepository;
+    }
 
-	@Override
-	public Long getId(LearnerProfile learnerProfileFact) {
-		return learnerProfileFact.getPersonid();
-		}
+    /**
+     *
+     * @param personId
+     * @param courseId
+     * @return LearnerProfile
+     */
+    public LearnerProfile getLearnerProfileByPersonIdCourseId(
+            final long personId, final long courseId) {
+        return learnerProfileRepository.
+                getLearnerProfileByPersonIdCourseId(personId, courseId);
+    }
 
-	@Override
-	public LearnerProfile save(LearnerProfile learnerProfileFact) {
-		return CommonSvc.super.save(learnerProfileFact);
-	}
+    /**
+     *
+     */
+    @Override
+    public CrudRepository<LearnerProfile, Long> getRepository() {
+        return this.learnerProfileRepository;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Long getId(final LearnerProfile learnerProfileFact) {
+        return learnerProfileFact.getPersonid();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public LearnerProfile save(final LearnerProfile learnerProfileFact) {
+        return CommonSvc.super.save(learnerProfileFact);
+    }
+
+    public Object consolidate() {
+        return null;
+    }
 
 }

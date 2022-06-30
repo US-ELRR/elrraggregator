@@ -16,27 +16,53 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MessageConsolidatorService {
 
-	@Autowired
-	HRService hrService;
-	@Autowired
-	ECCService eccService;
+    /**
+     *
+     */
+    @Autowired
+    private HRService hrService;
 
-	@Autowired
-	CASSService cassService;
-	@Autowired
-	ConsolidatorService consolidatorService;
+    /**
+    *
+    */
+    @Autowired
+    private ECCService eccService;
 
-	public void process(LearnerChange learnerChange) {
+    /**
+     *
+     */
+    @Autowired
+    private CASSService cassService;
 
-		ContactInformation contact = hrService.getContactInformation(learnerChange);
-		List<Course> courses = eccService.getCourses(learnerChange);
-		List<CourseCompetency> competencies = cassService.getCompetencies(learnerChange, courses);
-		consolidateAndUpdate(contact, competencies);
-	}
+    /**
+     *
+     */
+    @Autowired
+    private ConsolidatorService consolidatorService;
 
-	private void consolidateAndUpdate(ContactInformation contact, List<CourseCompetency> competencies) {
-		consolidatorService.consolidate(contact, competencies);
+    /**
+     *
+     * @param learnerChange
+     */
+    public void process(final LearnerChange learnerChange) {
 
-	}
+        ContactInformation contact = hrService
+                .getContactInformation(learnerChange);
+        List<Course> courses = eccService.getCourses(learnerChange);
+        List<CourseCompetency> competencies = cassService
+                .getCompetencies(learnerChange, courses);
+        consolidateAndUpdate(contact, competencies);
+    }
+
+    /**
+     *
+     * @param contact
+     * @param competencies
+     */
+    private void consolidateAndUpdate(final ContactInformation contact,
+            final List<CourseCompetency> competencies) {
+        consolidatorService.consolidate(contact, competencies);
+
+    }
 
 }

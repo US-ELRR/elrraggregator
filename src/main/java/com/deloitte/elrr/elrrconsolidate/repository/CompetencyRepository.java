@@ -9,7 +9,13 @@ import com.deloitte.elrr.elrrconsolidate.entity.Competency;
 @Repository
 public interface CompetencyRepository extends JpaRepository<Competency, Long> {
 
-	@Query("SELECT c FROM Competency c WHERE LOWER(c.competencyframeworktitle) = LOWER(:competencyframeworktitle)")
-	public Competency findByCompetencyName(final String competencyframeworktitle);
+    /**
+     * @param competencyframeworktitle
+     * @return Competency competency
+     */
+
+    @Query("SELECT c FROM Competency c WHERE LOWER(c.competencyframeworktitle)"
+            + " = LOWER(:competencyframeworktitle)")
+    Competency findByCompetencyName(String competencyframeworktitle);
 
 }

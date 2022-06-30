@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.elrrconsolidate.entity.Competency;
 import com.deloitte.elrr.elrrconsolidate.repository.CompetencyRepository;
 
-
 /**
  * @author mnelakurti
  *
@@ -17,30 +16,51 @@ import com.deloitte.elrr.elrrconsolidate.repository.CompetencyRepository;
 
 @Service
 public class CompetencySvc implements CommonSvc<Competency, Long> {
-	
-	private final CompetencyRepository competencyRepository;
 
-	public CompetencySvc(final CompetencyRepository competencyRepository) {
-		this.competencyRepository = competencyRepository;
-	}
+    /**
+     *
+     */
+    private final CompetencyRepository competencyRepository;
 
-	public Competency findByCompetencyName(String name) {
-		return competencyRepository.findByCompetencyName(name);
-	}
-	
-	@Override
-	public CrudRepository<Competency, Long> getRepository() {
-		return this.competencyRepository;
-	}
+    /**
+     *
+     * @param newcompetencyRepository
+     */
+    public CompetencySvc(final CompetencyRepository newcompetencyRepository) {
+        this.competencyRepository = newcompetencyRepository;
+    }
 
-	@Override
-	public Long getId(Competency competency) {
-		return competency.getCompetencyid();
-	}
+    /**
+     *
+     * @param name
+     * @return Competency
+     */
+    public Competency findByCompetencyName(final String name) {
+        return competencyRepository.findByCompetencyName(name);
+    }
 
-	@Override
-	public Competency save(Competency competency) {
-		return CommonSvc.super.save(competency);
-	}
+    /**
+     *
+     */
+    @Override
+    public CrudRepository<Competency, Long> getRepository() {
+        return this.competencyRepository;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Long getId(final Competency competency) {
+        return competency.getCompetencyid();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Competency save(final Competency competency) {
+        return CommonSvc.super.save(competency);
+    }
 
 }

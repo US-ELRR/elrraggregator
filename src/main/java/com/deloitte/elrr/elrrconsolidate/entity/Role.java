@@ -1,6 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,27 +13,39 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="Role")
+@Table(name = "Role")
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Getter 
+@Getter
 @Setter
 public class Role extends Auditable<String> {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "roleid")
- 	private long roleid;
-	@Column(name = "rolename")
- 	private String roleName;
-	@Column(name = "recordstatus")
-	private String recordstatus;
-	
-	 
-	@Override
-	public String toString() {
-		return "";
-	}
-	
+
+    /**
+    *
+    */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "roleid")
+    private long roleid;
+
+    /**
+    *
+    */
+    @Column(name = "rolename")
+    private String roleName;
+
+    /**
+    *
+    */
+    @Column(name = "recordstatus")
+    private String recordstatus;
+
+    /**
+    *
+    */
+    @Override
+    public String toString() {
+        return "";
+    }
 
 }

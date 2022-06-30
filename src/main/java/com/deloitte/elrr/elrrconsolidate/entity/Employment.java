@@ -15,34 +15,79 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="EMPLOYMENT")
+@Table(name = "EMPLOYMENT")
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Getter 
+@Getter
 @Setter
 public class Employment extends Auditable<String> {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long employmentid;
-	@Column(name = "employername")
-	private String employerName;
-	@Column(name = "employerdepartment")
-	private String employerdepartment;
-	@Column(name = "hiredate")
-	private Date  hiredate;
-	@Column(name = "employmentstartdate")
-	private String employmentstartdate;
-	@Column(name = "employmentenddate")
-	private Date employmentenddate;
-	@Column(name = "joblevel")
-	private String joblevel;
-	@Column(name = "occupation")
-	private String occupation;
-	@Column(name = "employed")
-	private String employed;
-	@Column(name = "primarycareercategory")
-	private String primarycareercategory;
-	@Column(name = "recordstatus")
-	private String recordstatus;
-	
+
+    /**
+     *
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long employmentid;
+
+    /**
+     *
+     */
+    @Column(name = "employername")
+    private String employerName;
+
+    /**
+     *
+     */
+    @Column(name = "employerdepartment")
+    private String employerdepartment;
+
+    /**
+     *
+     */
+    @Column(name = "hiredate")
+    private Date hiredate;
+
+    /**
+     *
+     */
+    @Column(name = "employmentstartdate")
+    private String employmentstartdate;
+
+    /**
+     *
+     */
+    @Column(name = "employmentenddate")
+    private Date employmentenddate;
+
+
+    /**
+     *
+     */
+    @Column(name = "joblevel")
+    private String joblevel;
+
+    /**
+     *
+     */
+    @Column(name = "occupation")
+    private String occupation;
+
+    /**
+     *
+     */
+    @Column(name = "employed")
+    private String employed;
+
+    /**
+     *
+     */
+    @Column(name = "primarycareercategory")
+    private String primarycareercategory;
+
+    /**
+     *
+     */
+    @Column(name = "recordstatus")
+    private String recordstatus;
+
 }

@@ -21,24 +21,50 @@ import lombok.Setter;
 @Setter
 public class RoleRelations extends Auditable<String> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "rolerelationsid")
-	private long rolerelationsid;
-	@Column(name = "parentroleid")
-	private long parentRoleid;
-	@Column(name = "parentpersonid")
-	private long parentPersonid;
-	@Column(name = "childroleid")
-	private long childRoleid;
-	@Column(name = "childpersonid")
-	private long childPersonid;
-	@Column(name = "recordstatus")
-	private String recordstatus;
+    /**
+    *
+    */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "rolerelationsid")
+    private long rolerelationsid;
 
-	@Override
-	public String toString() {
-		return "id " + rolerelationsid;
-	}
+    /**
+    *
+    */
+    @Column(name = "parentroleid")
+    private long parentRoleid;
+
+    /**
+    *
+    */
+    @Column(name = "parentpersonid")
+    private long parentPersonid;
+
+    /**
+    *
+    */
+    @Column(name = "childroleid")
+    private long childRoleid;
+
+    /**
+    *
+    */
+    @Column(name = "childpersonid")
+    private long childPersonid;
+
+    /**
+    *
+    */
+    @Column(name = "recordstatus")
+    private String recordstatus;
+
+    /**
+    *
+    */
+    @Override
+    public String toString() {
+        return "id " + rolerelationsid;
+    }
 
 }

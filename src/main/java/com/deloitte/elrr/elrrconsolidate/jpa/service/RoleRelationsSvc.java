@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.deloitte.elrr.elrrconsolidate.jpa.service;
 
@@ -16,25 +16,43 @@ import com.deloitte.elrr.elrrconsolidate.repository.RoleRelationsRepository;
 
 @Service
 public class RoleRelationsSvc implements CommonSvc<RoleRelations, Long> {
-	private final RoleRelationsRepository roleRelationsRepository;
 
-	public RoleRelationsSvc(final RoleRelationsRepository roleRelationsRepository) {
-		this.roleRelationsRepository = roleRelationsRepository;
-	}
+    /**
+     *
+     */
+    private final RoleRelationsRepository roleRelationsRepository;
 
-	@Override
-	public CrudRepository<RoleRelations, Long> getRepository() {
-		return this.roleRelationsRepository;
-	}
+    /**
+     *
+     * @param newroleRelationsRepository
+     */
+    public RoleRelationsSvc(final RoleRelationsRepository
+            newroleRelationsRepository) {
+        this.roleRelationsRepository = newroleRelationsRepository;
+    }
 
-	@Override
-	public Long getId(RoleRelations role) {
-		return role.getRolerelationsid();
-	}
+    /**
+     *
+     */
+    @Override
+    public CrudRepository<RoleRelations, Long> getRepository() {
+        return this.roleRelationsRepository;
+    }
 
-	@Override
-	public RoleRelations save(RoleRelations role) {
-		return CommonSvc.super.save(role);
-	}
+    /**
+     *
+     */
+    @Override
+    public Long getId(final RoleRelations role) {
+        return role.getRolerelationsid();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public RoleRelations save(final RoleRelations role) {
+        return CommonSvc.super.save(role);
+    }
 
 }
