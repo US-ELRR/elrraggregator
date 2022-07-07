@@ -1,0 +1,33 @@
+name: Docker-CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [opened, synchronize, reopened]
+jobs:  
+  build:
+    # requires dependency from step above
+    name: Build and push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Docker login
+      env:
+       DOCKER_USER: ${{ secrets.DOCKER_USER }}
+       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+       echo "Authenticate to Docker"
+       docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: Docker build
+      run: |
+       echo "Start docker build"
+       docker build . -t openlxp/elrr-aggregator
+    - name: Push Image
+      run: |
+       echo "Push new image to the Dockerhub repository"
+       docker push openlxp/elrr-aggregator
