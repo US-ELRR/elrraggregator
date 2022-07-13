@@ -9,4 +9,4 @@ COPY . /app
 #COPY target/dependency/META-INF /app/META-INF
 #COPY target/dependency/BOOT-INF/classes /app
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","-Dspring.profiles.active=${ENV}","-Dspring.profiles.active=local","com.deloitte.elrr.ElrrDatasyncApplication"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","-Dspring.profiles.active=${ENV}","-Dspring.profiles.active=local","com.deloitte.elrr.ElrrAggregatorApplication"]
