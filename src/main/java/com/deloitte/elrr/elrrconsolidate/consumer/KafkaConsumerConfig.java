@@ -28,7 +28,22 @@ public class KafkaConsumerConfig {
      */
     @Value("${sasl.jaas.config}")
     private String jaasConfig;
-
+	
+	/**
+     *
+     */
+    @Value("${security.protocol}")
+    private String securityprotocol;
+	/**
+     *
+     */
+    @Value("${sasl.mechanism}")
+    private String saslmechanism;	
+	/**
+     *
+     */
+    @Value("${kafka.groupId}")
+    private String kafkagroupId;	
     /**
      *
      * @return ConsumerFactory consumerFactory
@@ -37,14 +52,14 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "GROUP_ID");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkagroupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
-        props.put("security.protocol", "SASL_PLAINTEXT");
-        props.put("sasl.mechanism", "PLAIN");
-        props.put("sasl.jaas.config", jaasConfig);
+        props.put("security.protocol", securityprotocol);
+        props.put("sasl.mechanism", saslmechanism);
+		props.put("sasl.jaas.config", jaasConfig);
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
