@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.5.1</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.deloitte.elrr</groupId>
+	<artifactId>elrraggregator</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>elrraggregator</name>
+	<description>ELRR Consolidate project</description>
+	<properties>
+		<java.version>11</java.version>
+		<jacoco.version>0.8.6</jacoco.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate.validator</groupId>
+					<artifactId>hibernate-validator</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat.embed</groupId>
+					<artifactId>tomcat-embed-el</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+      		<groupId>org.springframework.kafka</groupId>
+      		<artifactId>spring-kafka</artifactId>
+    	</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-boot-starter</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20200518</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency> 
+			<groupId>com.h2database</groupId> 
+			<artifactId>h2</artifactId> 
+			<scope>runtime</scope> 
+		</dependency> 
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.github.ulisesbocchio</groupId>
+		    <artifactId>jasypt-spring-boot-starter</artifactId>
+		    <version>3.0.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.23.1-GA</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.modelmapper</groupId>
+		    <artifactId>modelmapper</artifactId>
+		    <version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-joda</artifactId>
+		</dependency>
+
+		<dependency>
+    <groupId>com.vladmihalcea</groupId>
+    <artifactId>hibernate-types-55</artifactId>
+    <version>2.12.0</version>
+</dependency>
+
+      <!--dependency>
+                      
+         <groupId>org.springframework.boot</groupId>
+                      
+         <artifactId>spring-boot-starter-quartz</artifactId>
+                  
+      </dependency>
+                
+      <dependency>
+                      
+         <groupId>org.quartz-scheduler</groupId>
+                      
+         <artifactId>quartz</artifactId>
+                  
+      </dependency-->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>gov.adlnet</groupId>
+			<artifactId>jxapi</artifactId>
+			<version>2.0.1</version>
+		</dependency>	
+		 <!-- Below dependancies are for Neo4j Driver and connector -->
+		<!-- https://mvnrepository.com/artifact/org.neo4j.driver/neo4j-java-driver-spring-boot-starter -->
+		<dependency>
+			<groupId>org.neo4j.driver</groupId>
+			<artifactId>neo4j-java-driver-spring-boot-starter</artifactId>
+			<version>4.3.6.0</version>
+		</dependency>
+
+	</dependencies>
+	
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>		
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<configuration>
+					<destFile>jacoco-unit.exec</destFile>
+					<dataFile>jacoco-unit.exec</dataFile>
+					<output>file</output>
+					<append>false</append>
+					<excludes>
+						<exclude>**/service/*</exclude>
+						<exclude>**/model/*</exclude>
+						<exclude>**/dto/*</exclude>
+						<exclude>**/jpa/**/*</exclude>
+						<exclude>**/entity/*</exclude>
+						<exclude>**/exception/*</exclude>
+						<exclude>**/util/*</exclude>
+						<exclude>**/test/**/*</exclude>
+						<exclude>**/elrr/*.class</exclude>
+						<exclude>**/elrr/*.java</exclude>
+					</excludes>
+
+				</configuration>
+
+			</plugin>
+		    <plugin>
+			   <groupId>com.github.ulisesbocchio</groupId>
+			   <artifactId>jasypt-maven-plugin</artifactId>
+			   <version>3.0.4</version>
+		    </plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		
+		<profile>
+			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<activatedProperties>local</activatedProperties>
+			</properties>
+		</profile>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<activatedProperties>dev</activatedProperties>
+			</properties>
+		</profile>
+		
+		<profile>
+			<id>qa</id>
+			<properties>
+				<activatedProperties>qa</activatedProperties>
+			</properties>
+		</profile>
+	</profiles>
+
+</project>
