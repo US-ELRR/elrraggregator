@@ -1,4 +1,4 @@
-FROM registry1.dso.mil/ironbank/redhat/openjdk/openjdk17:1.17
+FROM openjdk:17-oracle
 
 WORKDIR /app
 
