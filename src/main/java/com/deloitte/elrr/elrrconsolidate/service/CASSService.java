@@ -55,8 +55,8 @@ public class CASSService {
                 log.info("competency not found");
             } else {
                 log.info("competency found " + competency.getCompetencyid());
+                competencies.add(competency);
             }
-            competencies.add(competency);
         }
 
         return competencies;
@@ -79,18 +79,20 @@ public class CASSService {
         for (Course course : courses) {
             CourseCompetency courseCompetency = new CourseCompetency();
             courseCompetency.setCourseId(course.getCourseid());
-            if (first) {
-                courseCompetency
-                        .setCompetencyId(competencies.get(0).getCompetencyid());
-                first = false;
-            } else {
-                courseCompetency
-                        .setCompetencyId(competencies.get(1).getCompetencyid());
-                first = true;
+            if (competencies != null && competencies.size() > 0) {
+                if (first) {
+                    courseCompetency.setCompetencyId(
+                            competencies.get(0).getCompetencyid());
+                    first = false;
+                } else {
+                    courseCompetency.setCompetencyId(
+                            competencies.get(1).getCompetencyid());
+                    first = true;
+                }
+                courseCompetencies.add(courseCompetency);
             }
             courseCompetency.setStatus(
                     getStatus(course.getCourseidentifier(), learnerChange));
-            courseCompetencies.add(courseCompetency);
 
         }
         return courseCompetencies;

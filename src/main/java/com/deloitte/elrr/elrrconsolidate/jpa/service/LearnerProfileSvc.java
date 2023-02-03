@@ -26,8 +26,8 @@ public class LearnerProfileSvc implements CommonSvc<LearnerProfile, Long> {
      *
      * @param newlearnerProfileRepository
      */
-    public LearnerProfileSvc(final LearnerProfileRepository
-            newlearnerProfileRepository) {
+    public LearnerProfileSvc(
+            final LearnerProfileRepository newlearnerProfileRepository) {
         this.learnerProfileRepository = newlearnerProfileRepository;
     }
 
@@ -39,8 +39,8 @@ public class LearnerProfileSvc implements CommonSvc<LearnerProfile, Long> {
      */
     public LearnerProfile getLearnerProfileByPersonIdCourseId(
             final long personId, final long courseId) {
-        return learnerProfileRepository.
-                getLearnerProfileByPersonIdCourseId(personId, courseId);
+        return learnerProfileRepository
+                .getLearnerProfileByPersonIdCourseId(personId, courseId);
     }
 
     /**
@@ -67,6 +67,10 @@ public class LearnerProfileSvc implements CommonSvc<LearnerProfile, Long> {
         return CommonSvc.super.save(learnerProfileFact);
     }
 
+    /**
+     *
+     * @return Object
+     */
     public Object consolidate() {
         return null;
     }

@@ -10,10 +10,7 @@ import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
 import com.deloitte.elrr.elrrconsolidate.entity.ContactInformation;
 import com.deloitte.elrr.elrrconsolidate.entity.Course;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class MessageConsolidatorService {
 
     /**
