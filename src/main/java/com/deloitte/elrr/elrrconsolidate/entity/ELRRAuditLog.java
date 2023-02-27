@@ -1,14 +1,13 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
 
@@ -16,10 +15,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.Convert;
 
 @Entity
 @Table(name = "ELRRAUDITLOG")
-@TypeDef(name = "json", typeClass = JsonType.class)
+@Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -41,7 +41,7 @@ public class ELRRAuditLog extends Auditable<String> {
     /**
     *
     */
-    @Type(type = "json")
+    @Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
