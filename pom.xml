@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.2</version>
+		<version>3.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.deloitte.elrr</groupId>
@@ -128,7 +128,12 @@
 					<artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>					  
-		</dependency>		
+		</dependency>	
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
+			<version>3.0.3</version>
+		</dependency>	
 	</dependencies>
 	<build>
 		<resources>
