@@ -25,12 +25,6 @@ public class KafkaConsumerConfig {
 
     /**
      *
-     */
-    @Value("${sasl.jaas.config}")
-    private String jaasConfig;
-
-    /**
-     *
      * @return ConsumerFactory consumerFactory
      */
     @Bean
@@ -42,10 +36,6 @@ public class KafkaConsumerConfig {
                 StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
-        props.put("security.protocol", "SASL_PLAINTEXT");
-        props.put("sasl.mechanism", "PLAIN");
-        props.put("sasl.jaas.config", jaasConfig);
-
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
