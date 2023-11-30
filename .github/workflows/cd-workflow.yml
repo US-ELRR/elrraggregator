@@ -10,7 +10,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:  
-  build:
+  build-push:
     # requires dependency from step above
     name: Build and push Docker Image
     runs-on: ubuntu-latest
