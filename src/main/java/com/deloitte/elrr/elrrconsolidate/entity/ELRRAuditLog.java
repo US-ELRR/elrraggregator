@@ -19,7 +19,7 @@ import jakarta.persistence.Convert;
 
 @Entity
 @Table(name = "ELRRAUDITLOG")
-@Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
+// @Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -41,7 +41,7 @@ public class ELRRAuditLog extends Auditable<String> {
     /**
     *
     */
-    @Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
+    // @Convert(converter = com.vladmihalcea.hibernate.type.json.JsonType.class)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
