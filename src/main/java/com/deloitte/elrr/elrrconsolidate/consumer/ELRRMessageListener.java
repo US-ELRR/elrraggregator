@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import com.deloitte.elrr.elrrconsolidate.InputSanatizer;
 import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
 import com.deloitte.elrr.elrrconsolidate.dto.MessageVO;
 import com.deloitte.elrr.elrrconsolidate.entity.ELRRAuditLog;
@@ -36,9 +37,14 @@ public class ELRRMessageListener {
      */
     @KafkaListener(topics = "${kafka.topic}", groupId = "${kafka.groupId}")
     public void listen(final String message) {
-        log.info("Received Messasge in group - group-id: " + message);
-        LearnerChange learnerChange = getLearnerChange(message);
-        messageService.process(learnerChange);
+        if (InputSanatizer.isValidInput(message)) {
+            log.info("Received Messasge in group - group-id: " + message);
+            LearnerChange learnerChange = getLearnerChange(message);
+            messageService.process(learnerChange);
+        } else {
+            log.warn("Invalid message did not pass whitelist check - "
+                + message);
+        }
     }
 
     /**
