@@ -29,6 +29,7 @@ public class KafkaConsumerConfig {
      */
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
+        log.info("Start building Kafka Consumer factory");
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "GROUP_ID");
