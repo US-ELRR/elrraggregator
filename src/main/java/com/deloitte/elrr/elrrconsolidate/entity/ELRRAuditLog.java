@@ -42,7 +42,7 @@ public class ELRRAuditLog extends Auditable<String> {
     /**
     *
     */
-    // @Convert(converter = JsonType.class)
+    @Convert(converter = JsonType.class)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
