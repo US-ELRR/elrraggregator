@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 
 import lombok.AllArgsConstructor;
@@ -43,6 +45,7 @@ public class ELRRAuditLog extends Auditable<String> {
     *
     */
     @Convert(converter = JsonType.class)
+    @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
