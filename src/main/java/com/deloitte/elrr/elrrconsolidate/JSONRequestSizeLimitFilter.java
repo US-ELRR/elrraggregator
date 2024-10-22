@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,12 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
-    private static final long MAX_SIZE_LIMIT = 2000000;
+    
+    @Value("${json.max.size.limit}")
+    private static long maxSizeLimit;
+
+    private static final long MAX_SIZE_LIMIT = maxSizeLimit;
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain)
