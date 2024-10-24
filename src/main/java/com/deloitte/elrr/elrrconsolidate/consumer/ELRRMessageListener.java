@@ -35,7 +35,7 @@ public class ELRRMessageListener {
      *
      * @param message
      */
-    @KafkaListener(topics = "${kafka.topic}", groupId = "${kafka.groupId}")
+    @KafkaListener(topics = "${kafka.topic}")
     public void listen(final String message) {
         if (InputSanatizer.isValidInput(message)) {
             log.info("Received Messasge in group - group-id: " + message);
