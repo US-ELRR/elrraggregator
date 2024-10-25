@@ -4,10 +4,12 @@ ELRR service which aggregates learner profiles
 Setup elrrdatasync first.
 
 # Dependencies:
--Java JDK 17
+- Java JDK 17
 - git
 - Maven 3
 - Docker Desktop
+
+# Tools
 - DBeaver
 - Postman
 
