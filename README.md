@@ -1,17 +1,22 @@
 # elrraggregator     
 ELRR service which aggregates learner profiles 
 
-Setup elrrdatasync first [README](../elrrdatasync/README.md)
+There are database and kafka dependencies, but there's a repo with a docker-compose that resolves them locally.
+[.yaml](https://github.com/US-ELRR/elrrdatasync/tree/dev-pom-update-local-fixes-and-docs-1/dev-resources/docker-compose)
 
-# Dependencies:
-- Java JDK 17
-- git
-- Maven 3
-- Docker Desktop
+Setup elrrdatasync first [README](https://github.com/US-ELRR/elrrdatasync/blob/dev-pom-update-local-fixes-and-docs-1/README.md)
+
+- Java JDK 1.8 [JDK](https://www.oracle.com/java/technologies/downloads/)
+- git [Git](https://git-scm.com/downloads)
+- Maven 3 [Maven](https://maven.apache.org/)
+- Docker Desktop [Docker](https://www.docker.com/products/docker-desktop/)
+- PostgreSQL [PostgreSQL](https://www.postgresql.org/download/)
 
 # Tools
-- DBeaver
-- Eclipse or other IDE
+- SQL client or Terminal
+- Postman [Postman](https://www.postman.com/downloads/)
+- Eclipse or other IDE [Eclipse](https://www.eclipse.org/downloads/packages/)
+
 
 # Build the application
 - mvn clean install
