@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-												  
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.6</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.2.5</version>
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.deloitte.elrr</groupId>
 	<artifactId>elrraggregator</artifactId>
@@ -28,7 +29,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-rest</artifactId>			  
+			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -38,11 +39,11 @@
 					<groupId>org.yaml</groupId>
 					<artifactId>snakeyaml</artifactId>
 				</exclusion>
-			</exclusions>			
+			</exclusions>
 		</dependency>
 		<dependency>
-      		<groupId>org.springframework.kafka</groupId>
-      		<artifactId>spring-kafka</artifactId>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.kafka</groupId>
@@ -53,7 +54,7 @@
 					<artifactId>json-smart</artifactId>
 				</exclusion>
 			</exclusions>
-    	</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -89,26 +90,11 @@
 					<groupId>jakarta.activation</groupId>
 					<artifactId>jakarta.activation-api</artifactId>
 				</exclusion>
-			</exclusions>					  
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
-		</dependency>
-		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-core</artifactId>
-    		<version>6.1.5</version>
-		</dependency>
-		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-web</artifactId>
-    		<version>6.1.5</version>
-		</dependency>
-		<dependency>
-    		<groupId>org.apache.tomcat.embed</groupId>
-    		<artifactId>tomcat-embed-core</artifactId>
-    		<version>11.0.0-M18</version>
 		</dependency>
 		<dependency>
 			<groupId>fr.spacefox</groupId>
@@ -119,43 +105,44 @@
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.7</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20240303</version>
+			<version>20231013</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>					  
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>	
-		</dependency>
-		<dependency>
-    		<groupId>com.jayway.jsonpath</groupId>
-    		<artifactId>json-path</artifactId>
-    		<version>2.9.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<scope>runtime</scope>
 			<version>2.4.0-b180725.0427</version>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.3</version>				
+			<version>42.5.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.ulisesbocchio</groupId>
-		    <artifactId>jasypt-spring-boot-starter</artifactId>
-		    <version>3.0.4</version>						  
+			<groupId>com.github.ulisesbocchio</groupId>
+			<artifactId>jasypt-spring-boot-starter</artifactId>
+			<version>3.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
@@ -174,11 +161,6 @@
 			<artifactId>jackson-datatype-joda</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>com.fasterxml.jackson.core</groupId>
-    		<artifactId>jackson-databind</artifactId>
-    		<version>2.17.0</version>
-		</dependency>
-		<dependency>
 			<groupId>io.hypersistence</groupId>
 			<artifactId>hypersistence-utils-hibernate-60</artifactId>
 			<version>3.2.0</version>
@@ -194,7 +176,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>							   	  
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.9.0</version>
@@ -211,17 +193,6 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.9.0</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-    		<groupId>ch.qos.logback</groupId>
-    		<artifactId>logback-core</artifactId>
-    		<version>1.5.4</version>
-		</dependency>
-		<dependency>
-    		<groupId>ch.qos.logback</groupId>
-    		<artifactId>logback-classic</artifactId>
-    		<version>1.5.4</version>
-    		<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>gov.adlnet</groupId>
@@ -253,7 +224,7 @@
 					<groupId>org.codehaus.plexus</groupId>
 					<artifactId>plexus-container-default</artifactId>
 				</exclusion>
-			</exclusions>					  
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
@@ -271,7 +242,7 @@
 			<artifactId>spring-boot-starter-logging</artifactId>
 			<version>3.0.3</version>
 		</dependency>
-				<dependency>
+		<dependency>
 			<groupId>org.apache.maven.shared</groupId>
 			<artifactId>maven-shared-utils</artifactId>
 			<version>3.3.3</version>
@@ -299,11 +270,6 @@
 			<version>2.11.0</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.apache.maven</groupId>
-    		<artifactId>maven-artifact</artifactId>
-    		<version>3.9.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>2.0</version>
@@ -317,6 +283,31 @@
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.16.0</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-json</artifactId>
+			<version>5.8.22</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.4.14</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.4.12</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-core</artifactId>
+			<version>5.8.25</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -341,51 +332,55 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>      
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-			 
-                      <goals><goal>prepare-agent</goal></goals>
-			  
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-			 
-                        <goals><goal>report</goal></goals>
-			  
-                   </execution>
-               </executions>
-               <configuration>
-	               <rules>
-					     <rule>
-					     <element>BUNDLE</element>
-					     <limits>
-					     <limit>
-					     <counter>COMPLEXITY</counter>
-					     <value>COVEREDRATIO</value>
-					     <minimum>0.20</minimum>
-					     </limit>
-					     </limits>
-					     </rule>
-				     </rules>
-			  </configuration>   
-          </plugin>
-		  <plugin>
-			 <groupId>com.github.ulisesbocchio</groupId>
-			 <artifactId>jasypt-maven-plugin</artifactId>
-			 <version>3.0.4</version>
-		  </plugin>          
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+
+						<goals>
+							<goal>report</goal>
+						</goals>
+
+					</execution>
+				</executions>
+				<configuration>
+					<rules>
+						<rule>
+							<element>BUNDLE</element>
+							<limits>
+								<limit>
+									<counter>COMPLEXITY</counter>
+									<value>COVEREDRATIO</value>
+									<minimum>0.20</minimum>
+								</limit>
+							</limits>
+						</rule>
+					</rules>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.ulisesbocchio</groupId>
+				<artifactId>jasypt-maven-plugin</artifactId>
+				<version>3.0.4</version>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -403,7 +398,7 @@
 			<properties>
 				<activatedProperties>dev</activatedProperties>
 			</properties>
-		</profile>		
+		</profile>
 		<profile>
 			<id>qa</id>
 			<properties>
@@ -426,4 +421,3 @@
 		</pluginRepository>
 	</pluginRepositories>
 </project>
-

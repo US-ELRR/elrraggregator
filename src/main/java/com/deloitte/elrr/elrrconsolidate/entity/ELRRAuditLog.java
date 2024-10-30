@@ -5,7 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.Type;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 
@@ -28,7 +31,9 @@ public class ELRRAuditLog extends Auditable<String> {
     *
     */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elrrauditlog_seq")
+    @SequenceGenerator(name = "elrrauditlog_seq", sequenceName = "elrrauditlog_seq")
+    @Column(name = "ELRRAUDITLOGID")
     private long auditlogid;
 
     /**
@@ -40,6 +45,7 @@ public class ELRRAuditLog extends Auditable<String> {
     *
     */
     // @Convert(converter = JsonType.class)
+    @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     private String payload;
 
