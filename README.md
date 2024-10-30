@@ -1,7 +1,7 @@
 # elrraggregator     
 ELRR service which aggregates learner profiles 
 
-There are database and kafka dependencies, but there's a [repo with a docker-compose](https://github.com/US-ELRR/elrrdatasync/) that resolves them locally.
+There are database and kafka dependencies, but there's a [repo with a docker-compose](https://github.com/US-ELRR/elrrdockercompose/) that resolves them locally.
 
 [Setup elrrdatasync first](https://github.com/US-ELRR/elrrdatasync/)
 
