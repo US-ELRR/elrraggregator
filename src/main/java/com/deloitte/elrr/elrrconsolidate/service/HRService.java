@@ -9,6 +9,7 @@ import com.deloitte.elrr.elrrconsolidate.entity.Person;
 import com.deloitte.elrr.elrrconsolidate.jpa.service.ContactInformationSvc;
 import com.deloitte.elrr.elrrconsolidate.jpa.service.PersonSvc;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -61,9 +62,16 @@ public class HRService {
         log.info("creating new person");
         Person person = new Person();
         person.setName(learnerChange.getName());
+        log.info("==> name = " + learnerChange.getName()); // PHL
         String[] tokens = learnerChange.getName().split(" ");
         person.setFirstname(tokens[0]);
-        person.setLastname(tokens[1]);
+        // If there is a last name              // PHL
+        if (tokens.length > 1) {                // PHL
+            person.setLastname(tokens[1]);      // PHL
+        // If there is NOT a last name          // PHL
+        } else {                                // PHL
+            person.setLastname("");             // PHL
+        }                                       // PHL
         personService.save(person);
         return person;
     }
