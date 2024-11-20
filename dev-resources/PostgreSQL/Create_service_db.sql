@@ -112,6 +112,8 @@ CREATE TABLE IF NOT EXISTS elrr.elrrauditlog (
 	lastmodified timestamp NULL
 );
 
+ALTER SEQUENCE elrr.elrrauditlog_elrrauditlogid_seq RENAME TO elrrauditlog_seq;
+
 
 
 CREATE TABLE IF NOT EXISTS elrr.employment (
