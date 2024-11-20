@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS elrr.elrrauditlog (
 	lastmodified timestamp NULL
 );
 
+-- Be sure to change sequence name
 ALTER SEQUENCE elrr.elrrauditlog_elrrauditlogid_seq RENAME TO elrrauditlog_seq;
 
 

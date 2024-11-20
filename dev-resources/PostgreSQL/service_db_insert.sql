@@ -4,17 +4,35 @@ SET search_path = elrr;
 
 
 -- Truncate tables
-TRUNCATE TABLE configuration cascade;
-TRUNCATE TABLE competency cascade;
-TRUNCATE TABLE course cascade;
-TRUNCATE TABLE employment cascade;
-TRUNCATE TABLE person cascade;
-TRUNCATE TABLE contactinformation cascade;
-TRUNCATE TABLE learnerprofile cascade;
-TRUNCATE TABLE organization cascade;
-TRUNCATE TABLE role cascade;
-TRUNCATE TABLE rolerelations cascade;
-TRUNCATE TABLE elrrauditlog cascade; 
+TRUNCATE TABLE elrr.configuration cascade;
+TRUNCATE TABLE elrr.competency cascade;
+TRUNCATE TABLE elrr.course cascade;
+TRUNCATE TABLE elrr.employment cascade;
+TRUNCATE TABLE elrr.person cascade;
+TRUNCATE TABLE elrr.contactinformation cascade;
+TRUNCATE TABLE elrr.learnerprofile cascade;
+TRUNCATE TABLE elrr.organization cascade;
+TRUNCATE TABLE elrr.role cascade;
+TRUNCATE TABLE elrr.rolerelations cascade;
+TRUNCATE TABLE elrr.elrrauditlog cascade; 
+COMMIT;
+
+
+
+-- Restart sequences
+ALTER SEQUENCE elrr.accreditation_accreditationid_seq RESTART;
+ALTER SEQUENCE elrr.competency_competencyid_seq RESTART;
+ALTER SEQUENCE elrr.configuration_configurationid_seq RESTART;
+ALTER SEQUENCE elrr.contactinformation_contactinformationid_seq RESTART;
+ALTER SEQUENCE elrr.course_courseid_seq RESTART;
+ALTER SEQUENCE elrr.courseaccreditation_courseaccreditationid_seq RESTART;
+ALTER SEQUENCE elrr.elrrauditlog_seq RESTART;
+ALTER SEQUENCE elrr.employment_employmentid_seq RESTART;
+ALTER SEQUENCE elrr.learnerprofile_learnerprofileid_seq RESTART;
+ALTER SEQUENCE elrr.organization_organizationid_seq RESTART;
+ALTER SEQUENCE elrr.person_personid_seq RESTART;
+ALTER SEQUENCE elrr.role_roleid_seq RESTART;
+ALTER SEQUENCE elrr.rolerelations_rolerelationsid_seq RESTART;
 COMMIT;
 
 
