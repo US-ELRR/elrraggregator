@@ -62,16 +62,17 @@ public class HRService {
         log.info("creating new person");
         Person person = new Person();
         person.setName(learnerChange.getName());
-        log.info("==> name = " + learnerChange.getName()); // PHL
         String[] tokens = learnerChange.getName().split(" ");
         person.setFirstname(tokens[0]);
+        
         // If there is a last name              // PHL
         if (tokens.length > 1) {                // PHL
             person.setLastname(tokens[1]);      // PHL
         // If there is NOT a last name          // PHL
         } else {                                // PHL
-            person.setLastname("");             // PHL
+            person.setLastname(null);           // PHL
         }                                       // PHL
+        
         personService.save(person);
         return person;
     }

@@ -1,8 +1,6 @@
 -- Navigate to ELRR schema
 SET search_path = elrr;
 
-
-
 -- Truncate tables
 TRUNCATE TABLE elrr.configuration cascade;
 TRUNCATE TABLE elrr.competency cascade;
@@ -17,9 +15,7 @@ TRUNCATE TABLE elrr.rolerelations cascade;
 TRUNCATE TABLE elrr.elrrauditlog cascade; 
 COMMIT;
 
-
-
--- RESET sequences
+-- Reset sequences
 ALTER SEQUENCE elrr.accreditation_seq RESTART;
 ALTER SEQUENCE elrr.competency_seq RESTART;
 ALTER SEQUENCE elrr.contactinformation_seq RESTART;
@@ -32,11 +28,10 @@ ALTER SEQUENCE elrr.organization_seq RESTART;
 ALTER SEQUENCE elrr.person_seq RESTART;
 ALTER SEQUENCE elrr.configuration_seq RESTART;
 
-
-
 -- Insert data into tables  
 INSERT INTO elrr.configuration
-  (configurationid, configurationname, configurationvalue, frequency, starttime, primarycontact, primaryemail, primaryorgname, primaryphone, secondarycontact, secondaryemail, secondaryorgname, secondaryphone, recordstatus, updatedby, inserteddate, lastmodified)
+  (configurationid, configurationname, configurationvalue, frequency, starttime, primarycontact, primaryemail, primaryorgname, primaryphone, secondarycontact, 
+  secondaryemail, secondaryorgname, secondaryphone, recordstatus, updatedby, inserteddate, lastmodified)
 VALUES
   (1,'Deloitte LRS','https://deloitte-prototype-noisy.lrs.io/xapi','2 Weeks','0:00 Sunday EST', 
    'John Johnson','SysAdmin@USAF.mil','USAF','1-800-330-1212','David Lyod','david.lyod@gmail.com','USAF','1-800-212-3456','ACTIVE',NULL,'2021-06-29',NULL),
@@ -48,9 +43,13 @@ COMMIT;
 SELECT setval('elrr.configuration_seq', 3, true);
 
 
+
 INSERT INTO elrr.competency
-  (competencyid, competencydefinitionidentifier, competencydefinitionidentifierurl, competencytaxonomyid, competencydefinitionvalidstartdate, competencydefinitionvalideenddate, competencydefinitionparentidentifier, competencydefinitionparenturl, competencydescriptionparentcode, 
-   competencydefinitioncode, competencydefinitiontype, competencydefinitiontypeurl,       competencydefinitionstatement, competencyframeworktitle, competencyframeworkversion, competencyframeworkidentifier, competencyframeworkdescription, competencyframeworksubject, competencyframeworkvalidstartdate, competencyframeworkvalidenddate, recordstatus, updatedby,       inserteddate, lastmodified)
+  (competencyid, competencydefinitionidentifier, competencydefinitionidentifierurl, competencytaxonomyid, competencydefinitionvalidstartdate, competencydefinitionvalideenddate, 
+  competencydefinitionparentidentifier, competencydefinitionparenturl, competencydescriptionparentcode, 
+   competencydefinitioncode, competencydefinitiontype, competencydefinitiontypeurl, competencydefinitionstatement, competencyframeworktitle, 
+   competencyframeworkversion, competencyframeworkidentifier, competencyframeworkdescription, competencyframeworksubject, competencyframeworkvalidstartdate, 
+   competencyframeworkvalidenddate, recordstatus, updatedby, inserteddate, lastmodified)
 VALUES
   (100, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
    'Skill and Roles: Business Skills and Acumen', NULL, NULL, NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
@@ -62,7 +61,8 @@ COMMIT;
 
 
 INSERT INTO elrr.course
-  (courseid, coursetitle, coursesubjectmatter, coursesubjectabbreviation, courseidentifier, courselevel, coursenumber, courseinstructionmethod, coursestartdate, courseenddate, courseenrollmentdate, courseacademicgrade, courseprovidername, departmentname, coursegradescalecode, coursemetadatarepository, courselrsendpoint, coursedescription, recordstatus, updatedby, inserteddate, lastmodified)
+  (courseid, coursetitle, coursesubjectmatter, coursesubjectabbreviation, courseidentifier, courselevel, coursenumber, courseinstructionmethod, coursestartdate, courseenddate, courseenrollmentdate, courseacademicgrade, courseprovidername, departmentname, 
+  coursegradescalecode, coursemetadatarepository, courselrsendpoint, coursedescription, recordstatus, updatedby, inserteddate, lastmodified)
 VALUES
   (100, 'Fundamentals of Systems Acquisition Management', NULL, NULL, 'ACQ 101', NULL, '101', 'Web', '2020-12-21', '2021-01-15', '2020-12-01', NULL, 'DAU', 'Defense Acquisition University', NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
   (101, 'Mentoring the Acquisition Workforce', NULL, NULL, 'CLC 067', NULL, '67', 'Web', '2021-01-15', '2021-01-25', '2021-01-03', NULL, 'DAU', 'Defense Acquisition University', NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
@@ -169,7 +169,8 @@ SELECT setval('elrr.learnerprofile_seq', 24, true);
 
 
 INSERT INTO elrr.organization
-(organizationid, organizationname, organizationidentifier, organizationidentificationcode, organizationidentificationsystem, industrytypeidentifier, organizationfein, organizationdescription, parentorganization, recordstatus, updatedby, inserteddate, lastmodified)
+(organizationid, organizationname, organizationidentifier, organizationidentificationcode, organizationidentificationsystem, 
+industrytypeidentifier, organizationfein, organizationdescription, parentorganization, recordstatus, updatedby, inserteddate, lastmodified)
 VALUES
   (100, 'NAVY', 'D0DAF', 'G0V4', NULL, NULL, '1234573', 'NAVY', 'NAVY', 'ACTIVE', NULL, '2021-06-28', NULL),
   (101, 'AETC1', 'D0DAF', 'G0V4', NULL, NULL, '1234572', 'DoD AIR FORCE', 'AIR FORCE', 'ACTIVE', NULL, '2021-06-28', NULL),

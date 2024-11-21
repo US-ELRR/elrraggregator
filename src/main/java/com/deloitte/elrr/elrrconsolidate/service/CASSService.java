@@ -1,5 +1,13 @@
 package com.deloitte.elrr.elrrconsolidate.service;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,9 +136,24 @@ public class CASSService {
      */
     private String findCourseIdentifier(final String courseId) {
         int lastIndex = courseId.lastIndexOf("/");
-        String courseIdentier = courseId.substring(lastIndex + 1);
-        courseIdentier = courseIdentier.replace("%20", " ");
-        return courseIdentier;
+        String courseIdentifier = courseId.substring(lastIndex + 1);
+        
+        // PHL
+        // If course identifier is a URL
+        if (isValidURL(courseIdentifier)) {
+            
+            // Replace URL encoding
+            try {
+                courseIdentifier = java.net.URLDecoder.decode(courseIdentifier, StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                log.error("Unable to decode course identifier URL =" + courseIdentifier);
+            }
+            
+        }
+        
+        //courseIdentifier = courseIdentifier.replace("%20", " ")   // PHL
+        log.info("==. courseIdentifier=" + courseIdentifier);       // PHL
+        return courseIdentifier;
     }
 
     /**
@@ -147,4 +170,19 @@ public class CASSService {
         return competencies;
     }
 
+    /**
+     * PHL
+     * Is valid URL
+     * @param urlString
+     * @return
+     */
+    private static boolean isValidURL(String urlString) {
+        try {
+            URL url = new URI(urlString).toURL();
+            return true;
+        } catch (URISyntaxException | MalformedURLException e) {
+            return false;
+        }
+    }
+    
 }
