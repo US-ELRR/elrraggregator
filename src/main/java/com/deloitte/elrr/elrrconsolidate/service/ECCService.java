@@ -32,11 +32,12 @@ public class ECCService {
         log.info("Inside ECCService");
         List<Course> list = new ArrayList<>();
         for (UserCourse userCourse : learnerChange.getCourses()) {
-            String courseIdentifier = findCourseIdentifier(
-                    userCourse.getCourseId());
+            //String courseIdentifier = findCourseIdentifier(userCourse.getCourseId());
+            String courseIdentifier = userCourse.getCourseId();  // PHL
+            log.info("==> ECCService.getCources() course id = " + courseId); // PHL
+            log.info("==> ECCService.getCources() course identifier = " + courseIdentifier); // PHL
             log.info("courseIdentifier " + courseIdentifier);
-            Course course = courseService
-                    .getCourseByCourseidentifier(courseIdentifier);
+            Course course = courseService.getCourseByCourseidentifier(courseIdentifier);
             log.info("course " + course);
             if (course == null) {
                 log.info("course is null");
@@ -68,11 +69,11 @@ public class ECCService {
      * @param courseId
      * @return String courseIdentier
      */
-    private String findCourseIdentifier(final String courseId) {
+    /* private String findCourseIdentifier(final String courseId) {
         int lastIndex = courseId.lastIndexOf("/");
-        String courseIdentier = courseId.substring(lastIndex + 1);
-        courseIdentier = courseIdentier.replace("%20", " ");
-        return courseIdentier;
-    }
+        String courseIdentifier = courseId.substring(lastIndex + 1);
+        // courseIdentifier = courseIdentifier.replace("%20", " "); // PHL
+        return courseIdentifier;
+    } */
 
 }

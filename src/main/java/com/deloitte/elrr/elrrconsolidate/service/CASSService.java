@@ -2,12 +2,6 @@ package com.deloitte.elrr.elrrconsolidate.service;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,8 +110,10 @@ public class CASSService {
             final LearnerChange learnerChange) {
         String status = "Resumed";
         for (UserCourse course : learnerChange.getCourses()) {
-            if (courseidentifier.equalsIgnoreCase(
-                    findCourseIdentifier(course.getCourseId()))) {
+            log.info("==> CASService.getStatus() course identifier = " + courseidentifier); // PHL
+            log.info("==> CASService.getStatus() course id = " + course.getCourseId()); // PHL
+            // if (courseidentifier.equalsIgnoreCase(findCourseIdentifier(course.getCourseId()))) {   // PHL    
+            if (courseidentifier.equalsIgnoreCase(course.getCourseId())) {  // PHL
                 log.info("sending status of " + course.getUserCourseStatus());
                 // http://adlnet.gov/expapi/verbs/completed
                 int begin = course.getUserCourseStatus().lastIndexOf("/");
@@ -134,27 +130,12 @@ public class CASSService {
      * @param courseId
      * @return String courseIdentier
      */
-    private String findCourseIdentifier(final String courseId) {
+    /* private String findCourseIdentifier(final String courseId) {
         int lastIndex = courseId.lastIndexOf("/");
         String courseIdentifier = courseId.substring(lastIndex + 1);
-        
-        // PHL
-        // If course identifier is a URL
-        if (isValidURL(courseIdentifier)) {
-            
-            // Replace URL encoding
-            try {
-                courseIdentifier = java.net.URLDecoder.decode(courseIdentifier, StandardCharsets.UTF_8.name());
-            } catch (UnsupportedEncodingException e) {
-                log.error("Unable to decode course identifier URL =" + courseIdentifier);
-            }
-            
-        }
-        
-        //courseIdentifier = courseIdentifier.replace("%20", " ")   // PHL
-        log.info("==. courseIdentifier=" + courseIdentifier);       // PHL
+        // courseIdentifier = courseIdentifier.replace("%20", " "); // PHL
         return courseIdentifier;
-    }
+    } */
 
     /**
      * Expecting this external service will provide all the information that
@@ -168,21 +149,6 @@ public class CASSService {
         competencies.add("Skill and Roles: Business Skills and Acumen");
         competencies.add("Contract Principles: General Contracting Concepts");
         return competencies;
-    }
-
-    /**
-     * PHL
-     * Is valid URL
-     * @param urlString
-     * @return
-     */
-    private static boolean isValidURL(String urlString) {
-        try {
-            URL url = new URI(urlString).toURL();
-            return true;
-        } catch (URISyntaxException | MalformedURLException e) {
-            return false;
-        }
     }
     
 }
