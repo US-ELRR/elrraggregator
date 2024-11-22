@@ -34,7 +34,6 @@ public class ECCService {
         for (UserCourse userCourse : learnerChange.getCourses()) {
             //String courseIdentifier = findCourseIdentifier(userCourse.getCourseId());
             String courseIdentifier = userCourse.getCourseId();  // PHL
-            log.info("==> ECCService.getCources() course id = " + courseId); // PHL
             log.info("==> ECCService.getCources() course identifier = " + courseIdentifier); // PHL
             log.info("courseIdentifier " + courseIdentifier);
             Course course = courseService.getCourseByCourseidentifier(courseIdentifier);

@@ -70,7 +70,7 @@ public class HRService {
             person.setLastname(tokens[1]);      // PHL
         // If there is NOT a last name          // PHL
         } else {                                // PHL
-            person.setLastname(null);           // PHL
+            person.setLastname("");             // PHL
         }                                       // PHL
         
         personService.save(person);
