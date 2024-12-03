@@ -110,9 +110,6 @@ public class CASSService {
             final LearnerChange learnerChange) {
         String status = "Resumed";
         for (UserCourse course : learnerChange.getCourses()) {
-            log.info("==> CASService.getStatus() course identifier = " + courseidentifier); // PHL
-            log.info("==> CASService.getStatus() course id = " + course.getCourseId()); // PHL
-            // if (courseidentifier.equalsIgnoreCase(findCourseIdentifier(course.getCourseId()))) {   // PHL    
             if (courseidentifier.equalsIgnoreCase(course.getCourseId())) {  // PHL
                 log.info("sending status of " + course.getUserCourseStatus());
                 // http://adlnet.gov/expapi/verbs/completed
@@ -124,18 +121,6 @@ public class CASSService {
         log.info("sending default status " + status);
         return status;
     }
-
-    /**
-     *
-     * @param courseId
-     * @return String courseIdentier
-     */
-    /* private String findCourseIdentifier(final String courseId) {
-        int lastIndex = courseId.lastIndexOf("/");
-        String courseIdentifier = courseId.substring(lastIndex + 1);
-        // courseIdentifier = courseIdentifier.replace("%20", " "); // PHL
-        return courseIdentifier;
-    } */
 
     /**
      * Expecting this external service will provide all the information that

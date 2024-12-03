@@ -34,7 +34,6 @@ public class ECCService {
         for (UserCourse userCourse : learnerChange.getCourses()) {
             //String courseIdentifier = findCourseIdentifier(userCourse.getCourseId());
             String courseIdentifier = userCourse.getCourseId();  // PHL
-            log.info("==> ECCService.getCources() course identifier = " + courseIdentifier); // PHL
             log.info("courseIdentifier " + courseIdentifier);
             Course course = courseService.getCourseByCourseidentifier(courseIdentifier);
             log.info("course " + course);
@@ -58,21 +57,5 @@ public class ECCService {
         log.info("invoking externalService for Course");
         return null;
     }
-
-    /*
-     * gets the course Identifier
-     */
-
-    /**
-     *
-     * @param courseId
-     * @return String courseIdentier
-     */
-    /* private String findCourseIdentifier(final String courseId) {
-        int lastIndex = courseId.lastIndexOf("/");
-        String courseIdentifier = courseId.substring(lastIndex + 1);
-        // courseIdentifier = courseIdentifier.replace("%20", " "); // PHL
-        return courseIdentifier;
-    } */
 
 }

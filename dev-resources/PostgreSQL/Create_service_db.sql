@@ -1,6 +1,6 @@
-CREATE DATABASE [IF NOT EXISTS] service_db;
+-- CREATE DATABASE service_db;
 
-CREATE SCHEMA [IF NOT EXISTS] elrr;
+CREATE SCHEMA IF NOT EXISTS elrr;
 
 -- Navigate to elrr schema 
 SET search_path TO elrr;

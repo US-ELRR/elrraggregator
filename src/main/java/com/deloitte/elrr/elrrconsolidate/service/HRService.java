@@ -73,6 +73,8 @@ public class HRService {
             person.setLastname("");             // PHL
         }                                       // PHL
         
+        person.setRecordstatus("ACTIVE");       // PHL
+        
         personService.save(person);
         return person;
     }

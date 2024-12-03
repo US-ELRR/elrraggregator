@@ -27,6 +27,9 @@ ALTER SEQUENCE elrr.learnerprofile_seq RESTART;
 ALTER SEQUENCE elrr.organization_seq RESTART;
 ALTER SEQUENCE elrr.person_seq RESTART;
 ALTER SEQUENCE elrr.configuration_seq RESTART;
+COMMIT;
+
+
 
 -- Insert data into tables  
 INSERT INTO elrr.configuration
@@ -40,7 +43,8 @@ VALUES
   (3,'Rustici LRS','https://rustici-dev.lrs.io/xapi','2 Weeks','0:00 Sunday EST',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'ACTIVE',NULL,'2021-06-29',NULL); 
 COMMIT;
 
-SELECT setval('elrr.configuration_seq', 3, true);
+SELECT setval('elrr.configuration_seq', max(configurationid)) FROM elrr.configuration;
+COMMIT;
 
 
 
@@ -78,7 +82,8 @@ VALUES
   (111, 'GIAC Security Essentials Certification', NULL, NULL, 'https://w3id.org/xapi/credential/GIAC%20Security%20Essentials%20Certification%20%28GSEC%29', NULL, '35', 'Web', '2021-03-03', '2021-03-20', '2021-02-27', NULL, 'AETC', 'Air Education and Training Command', NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL);
 COMMIT;
 
-SELECT setval('elrr.course_seq', 111, true);
+SELECT setval('elrr.course_seq', max(courseid)) FROM elrr.course;
+COMMIT;
 
 
 
@@ -95,7 +100,8 @@ VALUES
   (106, 'USAF', 'DoD Air Force Acquisitions', '2019-05-07', '2019-05-25', NULL, '', '', 'Y', NULL, 'ACTIVE', NULL, '2021-06-29', NULL);
 COMMIT;
 
-SELECT setval('elrr.employment_seq', 106, true);
+SELECT setval('elrr.employment_seq', max(employmentid)) FROM elrr.employment;
+COMMIT;
 
 
 
@@ -118,7 +124,8 @@ VALUES
   (113, 'John Henry Joseph', 'John', 'Henry', 'Joseph', 'Mr.', NULL, NULL, NULL, NULL, NULL, '3599900000', NULL, '2000-12-31', 'M', 'Spanish', 'Y', 'ACTIVE', NULL, '2021-06-28', NULL);
 COMMIT;
 
-SELECT setval('elrr.person_seq', 113, true);
+SELECT setval('elrr.person_seq', max(personid)) FROM elrr.person;
+COMMIT;
 
 
 
@@ -131,7 +138,8 @@ VALUES
   (106, 106, 'Email', '+1 403-443-5541', 'Y', 'Business', 'glassliz@gmail.com', 'Business', 'Email', 'ACTIVE', NULL, '2021-06-29', NULL);
 COMMIT;
 
-SELECT setval('elrr.contactinformation_seq', 106, true);
+SELECT setval('elrr.contactinformation_seq', max(contactinformationid)) FROM elrr.contactinformation;
+COMMIT;
 
 
 
@@ -164,7 +172,8 @@ VALUES
   (24, 113, NULL, NULL, 100, NULL, NULL, NULL, 110, NULL, NULL, NULL, 100, NULL, 1, 'Completed', 'ACTIVE', NULL, '2021-06-28', NULL);
 COMMIT;
 
-SELECT setval('elrr.learnerprofile_seq', 24, true);
+SELECT setval('elrr.learnerprofile_seq', max(learnerprofileid)) FROM elrr.learnerprofile;
+COMMIT;
 
 
 
@@ -183,7 +192,8 @@ VALUES
   (108, 'AETC', 'D0DAF', 'G0V4', NULL, NULL, '1234563', 'DoD AIR FORCE', 'AIR FORCE', 'ACTIVE', NULL,  '2021-06-28', NULL);
 COMMIT;
 
-SELECT setval('elrr.organization_seq', 108, true);
+SELECT setval('elrr.organization_seq', max(organizationid)) FROM elrr.organization;
+COMMIT;
 
 
 INSERT INTO elrr.ROLE (roleid, rolename, recordstatus, updatedby, inserteddate, lastmodified)
@@ -193,7 +203,8 @@ VALUES
   (3, 'LEARNER', 'ACTIVE', NULL, NULL, '2021-06-28');
 COMMIT;
 
-SELECT setval('elrr.role_seq', 3, true);
+SELECT setval('elrr.role_seq', max(roleid)) FROM elrr.role;
+COMMIT;
 
 
 
@@ -208,4 +219,5 @@ VALUES
   (6, 2, 105, 3, 100, 'ACTIVE', NULL, '2021-06-28', NULL);
 COMMIT;
 
-SELECT setval('elrr.rolerelations_seq', 6, true);
+SELECT setval('elrr.rolerelations_seq', max(rolerelationsid)) FROM elrr.rolerelations;
+COMMIT;
