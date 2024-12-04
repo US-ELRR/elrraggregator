@@ -57,7 +57,6 @@ public class ConsolidatorService {
                                 getStatus());
 
                         profile.setEmploymentid(EMPLOYEE_ID);
-                        profile.setRecordstatus("ACTIVE");  // PHL
                         learnerProfileService.save(profile);
                     } else {
                         log.info("update courseCompetency.getCompetencyId() "
