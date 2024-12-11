@@ -9,7 +9,6 @@ import com.deloitte.elrr.elrrconsolidate.entity.Person;
 import com.deloitte.elrr.elrrconsolidate.jpa.service.ContactInformationSvc;
 import com.deloitte.elrr.elrrconsolidate.jpa.service.PersonSvc;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Service

@@ -25,6 +25,8 @@ VALUES
    'Smith Smithson', 'SysSupport@USN.mil','Navy','1-800-321-0212',NULL,NULL,NULL,NULL,'ACTIVE',NULL,'2021-06-29',NULL),
   (3,'Rustici LRS','https://rustici-dev.lrs.io/xapi','2 Weeks','0:00 Sunday EST',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'ACTIVE',NULL,'2021-06-29',NULL); 
 
+  SELECT setval('"elrr"."configuration_seq"'::regclass, (SELECT MAX("configurationid") FROM "elrr"."configuration"));
+
 
 
 INSERT INTO elrr.competency
@@ -40,6 +42,8 @@ VALUES
    'Contract Principles: General Contracting Concepts', NULL, NULL, NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
   (102, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'SERVICE3', NULL, NULL, NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL);
  
+SELECT setval('"elrr"."competency_seq"'::regclass, (SELECT MAX("competencyid") FROM "elrr"."competency"));
+
 
 
 INSERT INTO elrr.course
@@ -60,6 +64,8 @@ VALUES
   (111, 'GIAC Security Essentials Certification', NULL, NULL, 'https://w3id.org/xapi/credential/GIAC%20Security%20Essentials%20Certification%20%28GSEC%29', NULL, '35', 'Web', '2021-03-03', '2021-03-20', '2021-02-27', NULL, 'AETC', 'Air Education and Training Command', NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
   (112, 'course name', NULL, NULL, '5', NULL, '36', 'Web', '2021-03-03', '2021-03-20', '2021-02-27', NULL, 'AETC', 'Air Education and Training Command', NULL, NULL, NULL, NULL, 'ACTIVE', NULL, '2021-06-29', NULL);
 
+SELECT setval('"elrr"."course_seq"'::regclass, (SELECT MAX("courseid") FROM "elrr"."course"));
+
 
 
 INSERT INTO elrr.employment
@@ -73,6 +79,8 @@ VALUES
   (104, 'USAF', 'DoD Air Force Acquisitions', '2012-06-30', '2012-07-05', NULL, '', 'Manager of Team Acquisitions', 'Y', NULL,'ACTIVE', NULL, '2021-06-29', NULL),
   (105, 'USAF', 'DoD Air Force Acquisitions', '2012-06-30', '2010-07-07', NULL, '', '', 'Y', NULL, 'ACTIVE', NULL, '2021-06-29', NULL),
   (106, 'USAF', 'DoD Air Force Acquisitions', '2019-05-07', '2019-05-25', NULL, '', '', 'Y', NULL, 'ACTIVE', NULL, '2021-06-29', NULL);
+
+SELECT setval('"elrr"."employment_seq"'::regclass, (SELECT MAX("employmentid") FROM "elrr"."employment"));
 
 
 
@@ -94,6 +102,8 @@ VALUES
   (112, 'James Gregory Robert', 'James', 'Gregory', 'Robert', 'Mr.', NULL, NULL, NULL, NULL, NULL, '3599900000', NULL, '2000-08-21', 'M', 'Spanish', 'Y', 'ACTIVE', NULL, '2021-06-28', NULL),
   (113, 'John Henry Joseph', 'John', 'Henry', 'Joseph', 'Mr.', NULL, NULL, NULL, NULL, NULL, '3599900000', NULL, '2000-12-31', 'M', 'Spanish', 'Y', 'ACTIVE', NULL, '2021-06-28', NULL);
 
+  SELECT setval('"elrr"."person_seq"'::regclass, (SELECT MAX("personid") FROM "elrr"."person"));
+
 
 
 INSERT INTO elrr.contactinformation
@@ -103,6 +113,8 @@ VALUES
   (101, 101, 'Email', '1-935-456-4578', 'Y', 'Private', 'Alexandrina@gmail.com', 'Personal', 'Email', 'ACTIVE', NULL, '2021-06-29', NULL),
   (104, 104, 'Email', '1-935-456-4578', 'Y', 'Private', 'alice.smith@us.af.mil', 'Personal', 'Email', 'ACTIVE', NULL, '2021-06-29', NULL),
   (106, 106, 'Email', '+1 403-443-5541', 'Y', 'Business', 'glassliz@gmail.com', 'Business', 'Email', 'ACTIVE', NULL, '2021-06-29', NULL);
+
+SELECT setval('"elrr"."contactinformation_seq"'::regclass, (SELECT MAX("contactinformationid") FROM "elrr"."contactinformation"));
 
 
 
@@ -134,6 +146,8 @@ VALUES
   (23, 112, NULL, NULL, 100, NULL, NULL, NULL, 110, NULL, NULL, NULL, 100, NULL, 1, 'Completed', 'ACTIVE', NULL, '2021-06-28', NULL),
   (24, 113, NULL, NULL, 100, NULL, NULL, NULL, 110, NULL, NULL, NULL, 100, NULL, 1, 'Completed', 'ACTIVE', NULL, '2021-06-28', NULL);
 
+SELECT setval('"elrr"."learnerprofile_seq"'::regclass, (SELECT MAX("learnerprofileid") FROM "elrr"."learnerprofile"));
+
 
 
 INSERT INTO elrr.organization
@@ -150,6 +164,8 @@ VALUES
   (107, 'AETC', 'D0DAF', 'G0V4', NULL, NULL, '1234565', 'DoD AIR FORCE', 'AIR FORCE', 'ACTIVE', NULL,  '2021-06-28', NULL),
   (108, 'AETC', 'D0DAF', 'G0V4', NULL, NULL, '1234563', 'DoD AIR FORCE', 'AIR FORCE', 'ACTIVE', NULL,  '2021-06-28', NULL);
 
+  SELECT setval('"elrr"."organization_seq"'::regclass, (SELECT MAX("organizationid") FROM "elrr"."organization"));
+
   
 
 INSERT INTO elrr.ROLE (roleid, rolename, recordstatus, updatedby, inserteddate, lastmodified)
@@ -157,6 +173,8 @@ VALUES
   (1, 'TRAINING_MANAGER', 'ACTIVE', NULL, '2021-06-28', NULL),
   (2, 'CAREER_MANAGER', 'ACTIVE', NULL, '2021-06-28', NULL),
   (3, 'LEARNER', 'ACTIVE', NULL, NULL, '2021-06-28');
+
+SELECT setval('"elrr"."role_seq"'::regclass, (SELECT MAX("roleid") FROM "elrr"."role"));
 
 
 
@@ -169,3 +187,5 @@ VALUES
   (4, 1, 106, 3, 104, 'ACTIVE', NULL, '2021-06-28', NULL),
   (5, 2, 105, 3, 104, 'ACTIVE', NULL, '2021-06-28', NULL),
   (6, 2, 105, 3, 100, 'ACTIVE', NULL, '2021-06-28', NULL);
+  
+  SELECT setval('"elrr"."rolerelations_seq"'::regclass, (SELECT MAX("rolerelationsid") FROM "elrr"."rolerelations"));

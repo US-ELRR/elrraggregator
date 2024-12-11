@@ -1,7 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
