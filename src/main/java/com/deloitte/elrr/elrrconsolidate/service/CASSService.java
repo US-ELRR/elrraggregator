@@ -1,5 +1,6 @@
 package com.deloitte.elrr.elrrconsolidate.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CASSService {
 
-    /**
-     *
-     */
     @Autowired
     private CompetencySvc competencySvc;
 
@@ -104,11 +102,10 @@ public class CASSService {
      * @param learnerChange
      * @return String status
      */
-    private String getStatus(final String courseidentifier,
-            final LearnerChange learnerChange) {
+    private String getStatus(final String courseidentifier, final LearnerChange learnerChange) {
         String status = "Resumed";
         for (UserCourse course : learnerChange.getCourses()) {
-            if (courseidentifier.equalsIgnoreCase(course.getCourseId())) {  // PHL
+            if (courseidentifier.equalsIgnoreCase(findCourseIdentifier(course.getCourseId()))) {
                 log.info("sending status of " + course.getUserCourseStatus());
                 // http://adlnet.gov/expapi/verbs/completed
                 int begin = course.getUserCourseStatus().lastIndexOf("/");
@@ -120,6 +117,22 @@ public class CASSService {
         return status;
     }
 
+    /**
+     *
+     * @param courseId
+     * @return String courseIdentier
+    */
+    private String findCourseIdentifier(final String courseId) {
+       // Remove https://w3id.org/xapi/credential/ 
+       int lastIndex = courseId.lastIndexOf("/");
+       String courseIdentifier = courseId.substring(lastIndex + 1);
+       
+       // Decode URL encoding
+       courseIdentifier = java.net.URLDecoder.decode(courseIdentifier, StandardCharsets.UTF_8);
+           
+       return courseIdentifier;
+    }
+   
     /**
      * Expecting this external service will provide all the information that
      * will be required to create a competency in the database if not found.

@@ -1,5 +1,6 @@
 package com.deloitte.elrr.elrrconsolidate.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +33,7 @@ public class ECCService {
         log.info("Inside ECCService");
         List<Course> list = new ArrayList<>();
         for (UserCourse userCourse : learnerChange.getCourses()) {
-            //String courseIdentifier = findCourseIdentifier(userCourse.getCourseId());
-            String courseIdentifier = userCourse.getCourseId();  // PHL
+            String courseIdentifier = findCourseIdentifier(userCourse.getCourseId());
             log.info("courseIdentifier " + courseIdentifier);
             Course course = courseService.getCourseByCourseidentifier(courseIdentifier);
             log.info("course " + course);
@@ -47,6 +47,22 @@ public class ECCService {
         return list;
     }
 
+    /**
+     *
+     * @param courseId
+     * @return String courseIdentier
+    */
+   private String findCourseIdentifier(final String courseId) {
+      // Remove https://w3id.org/xapi/credential/ 
+      int lastIndex = courseId.lastIndexOf("/");
+      String courseIdentifier = courseId.substring(lastIndex + 1);
+      
+      // Decode URL encoding
+      courseIdentifier = java.net.URLDecoder.decode(courseIdentifier, StandardCharsets.UTF_8);
+      
+      return courseIdentifier;
+   }
+   
     /**
      * Invokes external ECCService to get course details if course does not find
      * in the database.
