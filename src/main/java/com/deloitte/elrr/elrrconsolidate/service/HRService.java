@@ -64,14 +64,24 @@ public class HRService {
         String[] tokens = learnerChange.getName().split(" ");
         person.setFirstname(tokens[0]);
         
-        // If there is a last name              // PHL
-        if (tokens.length > 1) {                // PHL
-            person.setLastname(tokens[1]);      // PHL
-        // If there is NOT a last name          // PHL
-        } else {                                // PHL
-            person.setLastname("");             // PHL
-        }                                       // PHL
+        // PHL
+        // If first name only
+        if (tokens.length == 1) {
+            person.setMiddlename(""); 
+            person.setLastname(""); 
+        }
+
+        // If first and last name
+        if (tokens.length == 2) {
+            person.setMiddlename("");
+            person.setLastname(tokens[1]);
+        }
         
+        // If first, middle and last name
+        if (tokens.length == 3) {
+            person.setMiddlename(tokens[1]);
+            person.setLastname(tokens[2]);
+        }
         personService.save(person);
         return person;
     }
