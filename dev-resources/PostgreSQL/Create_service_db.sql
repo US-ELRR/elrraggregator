@@ -95,7 +95,7 @@ CREATE SEQUENCE IF NOT EXISTS elrr.competency_seq
     CACHE 1
     NO CYCLE;
     
-ALTER SEQUENCE elrr.competency_seq OWNED BY elrr.competency.competencyid
+ALTER SEQUENCE elrr.competency_seq OWNED BY elrr.competency.competencyid;
  
 
 
