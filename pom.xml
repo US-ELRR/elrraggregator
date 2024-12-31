@@ -309,6 +309,11 @@
 			<artifactId>hutool-core</artifactId>
 			<version>5.8.25</version>
 		</dependency>
+		<dependency>
+            <groupId>com.yetanalytics</groupId>
+            <artifactId>xapi-tools</artifactId>
+            <version>0.0.1</version>
+        </dependency>
 	</dependencies>
 	<build>
 		<resources>
