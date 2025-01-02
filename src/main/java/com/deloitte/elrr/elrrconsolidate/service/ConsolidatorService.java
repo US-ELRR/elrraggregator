@@ -73,8 +73,8 @@ public class ConsolidatorService {
                 }
             }
         } catch (Exception e) {
-            log.error("Exception courseCompetency.getCompetencyId() "
-                    + e.getMessage(), e);
+            log.error("Exception courseCompetency.getCompetencyId() " + e.getMessage(), e);
+            e.getStackTrace();
         }
     }
 }

@@ -23,7 +23,7 @@ CREATE SEQUENCE IF NOT EXISTS elrr.accreditation_seq
     CACHE 1
     NO CYCLE;
    
-ALTER SEQUENCE elrr.accreditation_seq OWNED BY elrr.accreditation.accreditationid
+ALTER SEQUENCE elrr.accreditation_seq OWNED BY elrr.accreditation.accreditationid;
     
 
     
