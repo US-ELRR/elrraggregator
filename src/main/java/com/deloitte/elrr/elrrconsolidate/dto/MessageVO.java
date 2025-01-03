@@ -15,5 +15,5 @@ import lombok.Setter;
 @Setter
 public class MessageVO {
     private AuditRecord auditRecord;
-    private Statement statement;  // PHL
+    private Statement statement;
 }

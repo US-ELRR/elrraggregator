@@ -42,7 +42,6 @@ public class ELRRMessageListener {
   public void listen(final String message) {
     if (InputSanatizer.isValidInput(message)) {
       log.info("Received Messasge in group - group-id: " + message);
-      // PHL
       LearnerChange learnerChange = getLearnerChange(message);
       if (learnerChange != null) {
         messageService.process(learnerChange);
@@ -53,7 +52,6 @@ public class ELRRMessageListener {
   }
 
   /**
-   * PHL
    *
    * @param statement
    * @return LearnerChange
@@ -65,7 +63,7 @@ public class ELRRMessageListener {
 
     try {
       MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
-      insertAuditLog(messageVo, payload);
+      insertAuditLog(messageVo);
       Statement statement = messageVo.getStatement();
 
       // Parse xAPI Statement
@@ -139,12 +137,11 @@ public class ELRRMessageListener {
 
   /**
    * @param messageVo
-   * @param payload
+   * 
    */
-  private void insertAuditLog(final MessageVO messageVo, final String payload) {
+  private void insertAuditLog(final MessageVO messageVo) {
     ELRRAuditLog auditLog = new ELRRAuditLog();
     auditLog.setSyncid(messageVo.getAuditRecord().getAuditId());
-    auditLog.setPayload(payload);
     elrrAuditLogService.save(auditLog);
   }
 }

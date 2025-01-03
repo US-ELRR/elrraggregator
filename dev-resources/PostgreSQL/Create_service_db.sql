@@ -27,7 +27,7 @@ ALTER SEQUENCE elrr.accreditation_seq OWNED BY elrr.accreditation.accreditationi
     
 
     
-CREATE TABLE IF NOT EXISTS elrr.CONFIGURATION (
+CREATE TABLE IF NOT EXISTS elrr.configuration (
     configurationid int8 NOT NULL,
     configurationname varchar(255) NOT NULL,
     configurationvalue varchar(255) NULL,
@@ -59,7 +59,7 @@ CREATE SEQUENCE IF NOT EXISTS elrr.configuration_seq
 ALTER SEQUENCE elrr.configuration_seq OWNED BY elrr.configuration.configurationid;
 
 
-CREATE TABLE IF NOT EXISTS elrr.COMPETENCY (
+CREATE TABLE IF NOT EXISTS elrr.competency (
     competencyid int8 NOT NULL,
     competencydefinitionidentifier varchar(100) NULL,
     competencydefinitionidentifierurl text NULL,
@@ -99,7 +99,7 @@ ALTER SEQUENCE elrr.competency_seq OWNED BY elrr.competency.competencyid;
  
 
 
-CREATE TABLE IF NOT EXISTS elrr.COURSE (
+CREATE TABLE IF NOT EXISTS elrr.course (
     courseid int8 NOT NULL,
     coursetitle varchar(300) NOT NULL,
     coursesubjectmatter varchar(100) NULL,
@@ -158,9 +158,8 @@ ALTER SEQUENCE elrr.courseaccreditation_seq OWNED BY elrr.courseaccreditation.co
 
     
     
-CREATE TABLE IF NOT EXISTS elrr.ELRRAUDITLOG (
+CREATE TABLE IF NOT EXISTS elrr.elrrauditlog (
     elrrauditlogid int8 NOT NULL,
-    payload jsonb NULL,
     syncid int8 NOT NULL,
     recordstatus varchar(10) NULL, 
     updatedby varchar(20) NULL,
@@ -181,7 +180,7 @@ ALTER SEQUENCE elrr.elrrauditlog_seq OWNED BY elrr.elrrauditlog.elrrauditlogid;
 
 
 
-CREATE TABLE IF NOT EXISTS elrr.EMPLOYMENT (
+CREATE TABLE IF NOT EXISTS elrr.employment (
     employmentid int8 NOT NULL,
     employername varchar(100) NOT NULL,
     employerdepartment varchar(100) NULL,
@@ -211,7 +210,7 @@ ALTER SEQUENCE elrr.employment_seq OWNED BY elrr.employment.employmentid;
     
     
     
-CREATE TABLE IF NOT EXISTS elrr.PERSON (
+CREATE TABLE IF NOT EXISTS elrr.person (
     personid int8 NOT NULL,
     name varchar(250) NOT NULL,
     firstname varchar(50) NOT NULL,
@@ -249,7 +248,7 @@ ALTER SEQUENCE elrr.person_seq OWNED BY elrr.person.personid;
         
 
 
-CREATE TABLE IF NOT EXISTS elrr.CONTACTINFORMATION (
+CREATE TABLE IF NOT EXISTS elrr.contactinformation (
     contactinformationid int8 NOT NULL,
     personid int4 NOT NULL,
     contactinformation varchar(20) NOT NULL,
@@ -280,7 +279,7 @@ ALTER SEQUENCE elrr.contactinformation_seq OWNED BY elrr.contactinformation.cont
 
 
 -- Re-visit relationships
-CREATE TABLE IF NOT EXISTS elrr.LEARNERPROFILE (
+CREATE TABLE IF NOT EXISTS elrr.learnerprofile (
     learnerprofileid int8 NOT NULL,
     personid int8 NOT NULL,
     learneraddressid int8 NULL,
@@ -317,7 +316,7 @@ ALTER SEQUENCE elrr.learnerprofile_seq OWNED BY elrr.learnerprofile.learnerprofi
 
 
 
-CREATE TABLE IF NOT EXISTS elrr.ORGANIZATION (
+CREATE TABLE IF NOT EXISTS elrr.organization (
     organizationid int8 NOT NULL,
     organizationname varchar(100) NOT NULL,
     organizationidentifier varchar(100) NULL,
@@ -345,7 +344,7 @@ CREATE SEQUENCE IF NOT EXISTS elrr.organization_seq
 ALTER SEQUENCE elrr.organization_seq OWNED BY elrr.organization.organizationid;    
 
 
-CREATE TABLE IF NOT EXISTS elrr.ROLE (
+CREATE TABLE IF NOT EXISTS elrr.role (
     roleid int4 NOT NULL,
     rolename varchar(20) NULL,
     recordstatus varchar(10) NULL,

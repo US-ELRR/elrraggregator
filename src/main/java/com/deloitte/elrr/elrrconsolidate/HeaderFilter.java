@@ -1,7 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate;
 
-//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -19,35 +17,26 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class HeaderFilter implements Filter {
-    
-    @Value("${http.header}")
-    private String httpHeader;
 
-    @Override
-    public
-    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+  @Value("${http.header}")
+  private boolean httpHeader;
 
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
 
-        if (httpHeader != null 
-                && !httpHeader.trim().isEmpty()) {
-            
-            if (httpHeader.equalsIgnoreCase("off")) {
-                chain.doFilter(request, response);
-            } else {
-                if("https".equalsIgnoreCase(httpServletRequest.getHeader("X-Forwarded-Proto"))) {
-                    chain.doFilter(request, response);
-                } else {
-                    log.error("Not a HTTPS request.");
-                    ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Not a HTTPS request.");
-                }
-            }
-            
-        } else {
-            
-            chain.doFilter(request, response);
-            
-        }        
-           
+    HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+
+    if (httpHeader = false) {
+      chain.doFilter(request, response);
+    } else {
+      if ("https".equalsIgnoreCase(httpServletRequest.getHeader("X-Forwarded-Proto"))) {
+        chain.doFilter(request, response);
+      } else {
+        log.error("Not a HTTPS request.");
+        ((HttpServletResponse) response)
+            .sendError(HttpServletResponse.SC_BAD_REQUEST, "Not a HTTPS request.");
+      }
     }
+  }
 }

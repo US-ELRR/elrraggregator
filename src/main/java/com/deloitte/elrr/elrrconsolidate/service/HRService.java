@@ -15,88 +15,84 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HRService {
 
-    /**
-     *
-     */
-    @Autowired
-    private PersonSvc personService;
+  /** */
+  @Autowired private PersonSvc personService;
 
-    /**
-     *
-     */
-    @Autowired
-    private ContactInformationSvc contactInformationService;
+  /** */
+  @Autowired private ContactInformationSvc contactInformationService;
 
-    /**
-     *
-     * @param learnerChange
-     * @return ContactInformation contactInformation
-     */
-    public ContactInformation getContactInformation(
-            final LearnerChange learnerChange) {
+  /**
+   * @param learnerChange
+   * @return ContactInformation contactInformation
+   */
+  public ContactInformation getContactInformation(final LearnerChange learnerChange) {
 
-        String key = getKey(learnerChange.getContactEmailAddress());
-        ContactInformation contact = contactInformationService
-                .getContactInformationByElectronicmailaddress(key);
+    String key = getKey(learnerChange.getContactEmailAddress());
+    ContactInformation contact =
+        contactInformationService.getContactInformationByElectronicmailaddress(key);
 
-        if (contact == null) {
-            log.info("contact information not found and creating a new one");
-            contact = invokeExternalService(key);
-            Person person = createPerson(learnerChange);
-            contact.setPersonid(person.getPersonid());
-            contact.setElectronicmailaddresstype("Personal");
-            contact.setTelephonetype("Private");
-            contact.setEmergencycontact("Email");
-            contact.setIsprimaryindicator("Y");
-            contactInformationService.save(contact);
-        } else {
-            log.info("contact information and person found "
-                    + contact.getContactinformationid() + "personId "
-                    + contact.getPersonid());
-        }
-        return contact;
+    if (contact == null) {
+      log.info("contact information not found and creating a new one");
+      contact = invokeExternalService(key);
+      Person person = createPerson(learnerChange);
+      contact.setPersonid(person.getPersonid());
+      contact.setElectronicmailaddresstype("Personal");
+      contact.setTelephonetype("Private");
+      contact.setEmergencycontact("Email");
+      contact.setIsprimaryindicator("Y");
+      contactInformationService.save(contact);
+    } else {
+      log.info(
+          "contact information and person found "
+              + contact.getContactinformationid()
+              + "personId "
+              + contact.getPersonid());
+    }
+    return contact;
+  }
+
+  /**
+   * @param learnerChange
+   * @return
+   */
+  private Person createPerson(final LearnerChange learnerChange) {
+    log.info("creating new person");
+    Person person = new Person();
+    person.setName(learnerChange.getName());
+    String[] tokens = learnerChange.getName().split(" ");
+    person.setFirstname(tokens[0]);
+
+    // If first name only
+    if (tokens.length == 1) {
+      person.setMiddlename("");
+      person.setLastname("");
     }
 
-    private Person createPerson(final LearnerChange learnerChange) {
-        log.info("creating new person");
-        Person person = new Person();
-        person.setName(learnerChange.getName());
-        String[] tokens = learnerChange.getName().split(" ");
-        person.setFirstname(tokens[0]);
-        
-        // PHL
-        // If first name only
-        if (tokens.length == 1) {
-            person.setMiddlename(""); 
-            person.setLastname(""); 
-        }
-
-        // If first and last name
-        if (tokens.length == 2) {
-            person.setMiddlename("");
-            person.setLastname(tokens[1]);
-        }
-        
-        // If first, middle and last name
-        if (tokens.length == 3) {
-            person.setMiddlename(tokens[1]);
-            person.setLastname(tokens[2]);
-        }
-        personService.save(person);
-        return person;
+    // If first and last name
+    if (tokens.length == 2) {
+      person.setMiddlename("");
+      person.setLastname(tokens[1]);
     }
 
-    private ContactInformation invokeExternalService(final String key) {
-        log.info("invoking externalService to get Contact info");
-        ContactInformation contact = new ContactInformation();
-        contact.setElectronicmailaddress(key);
-        contact.setContactInformationData("Email");
-        contact.setTelephonenumber("800-922-0222");
-        return contact;
+    // If first, middle and last name
+    if (tokens.length == 3) {
+      person.setMiddlename(tokens[1]);
+      person.setLastname(tokens[2]);
     }
+    personService.save(person);
+    return person;
+  }
 
-    private String getKey(final String contactEmailAddress) {
-        return contactEmailAddress.replace("mailto:", "");
-    }
+  private ContactInformation invokeExternalService(final String key) {
+    log.info("invoking externalService to get Contact info");
+    ContactInformation contact = new ContactInformation();
+    contact.setElectronicmailaddress(key);
+    contact.setContactInformationData("Email");
+    contact.setTelephonenumber("800-922-0222");
+    return contact;
+  }
 
+  private String getKey(final String contactEmailAddress) {
+    return contactEmailAddress.replace("mailto:", "");
+  }
 }
