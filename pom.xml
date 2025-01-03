@@ -304,11 +304,11 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.4.12</version>
 		</dependency>
-		<dependency>
-			<groupId>cn.hutool</groupId>
-			<artifactId>hutool-core</artifactId>
-			<version>5.8.25</version>
-		</dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>5.8.25</version>
+        </dependency>
 		<dependency>
             <groupId>com.yetanalytics</groupId>
             <artifactId>xapi-tools</artifactId>

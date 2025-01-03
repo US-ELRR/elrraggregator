@@ -20,7 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CASSService {
 
-  @Autowired private CompetencySvc competencySvc;
+  @Autowired 
+  private CompetencySvc competencySvc;
 
   /**
    * @param learnerChange
