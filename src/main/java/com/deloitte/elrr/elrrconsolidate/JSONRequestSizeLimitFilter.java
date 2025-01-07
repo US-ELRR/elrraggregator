@@ -23,8 +23,8 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
 
   private static final long MAX_SIZE_LIMIT = maxSizeLimit;
 
-  @Value("${mediaType.json}")
-  private boolean mediaTypeJson;
+  @Value("${check.media.type.json}")
+  private boolean checkMediaTypeJson;
 
   @Override
   protected void doFilterInternal(
@@ -40,7 +40,7 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
 
   private boolean isApplicationJson(HttpServletRequest httpRequest) {
 
-    if (mediaTypeJson = false) {
+    if (checkMediaTypeJson == false) {
       return true;
     } else {
       return (MediaType.APPLICATION_JSON.isCompatibleWith(

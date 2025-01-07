@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HeaderFilter implements Filter {
 
-  @Value("${http.header}")
-  private boolean httpHeader;
+  @Value("${check.http.header}")
+  private boolean checkHttpHeader;
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -27,7 +27,7 @@ public class HeaderFilter implements Filter {
 
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-    if (httpHeader = false) {
+    if (checkHttpHeader == false) {
       chain.doFilter(request, response);
     } else {
       if ("https".equalsIgnoreCase(httpServletRequest.getHeader("X-Forwarded-Proto"))) {
