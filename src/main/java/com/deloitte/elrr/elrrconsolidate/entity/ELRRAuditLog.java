@@ -1,7 +1,5 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
-import org.hibernate.annotations.Type;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
