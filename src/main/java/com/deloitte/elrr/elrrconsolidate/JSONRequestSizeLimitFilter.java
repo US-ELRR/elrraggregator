@@ -19,9 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
 
   @Value("${json.max.size.limit}")
-  private static long maxSizeLimit;
-
-  private static final long MAX_SIZE_LIMIT = maxSizeLimit;
+  private long MAX_SIZE_LIMIT;
 
   @Value("${check.media.type.json}")
   private boolean checkMediaTypeJson;
