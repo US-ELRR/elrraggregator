@@ -28,22 +28,7 @@ jobs:
        echo "maven build - Clean install"
        mvn clean install -Dmaven.test.skip=true
        mkdir -p target/dependency && (cd target/dependency; jar -xf ../elrraggregator-0.0.1-SNAPSHOT.jar)
-    - name: Docker login
-      env:
-       DOCKER_USER: ${{ secrets.DOCKER_USER }}
-       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: |
-       echo "Authenticate to Docker"
-       docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: Docker build
-      run: |
-       echo "Start docker build"
-       #docker build . -t openlxp/elrr-external-services
-       docker build --build-arg JAR_FILE="./target/elrraggregator-0.0.1-SNAPSHOT.jar" --file Dockerfile -t openlxp/elrr-aggregator .       
-    - name: Push Image
-      run: |
-       echo "Push new image to the Dockerhub repository"
-       docker push openlxp/elrr-aggregator
+
     # Push image to Amazon ECR
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -60,7 +45,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
-        IMAGE_TAG: elrraggregator
+        IMAGE_TAG: latest
       run: |
         echo "Starting docker build"
         docker build --build-arg JAR_FILE="./target/elrraggregator-0.0.1-SNAPSHOT.jar" --file Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
