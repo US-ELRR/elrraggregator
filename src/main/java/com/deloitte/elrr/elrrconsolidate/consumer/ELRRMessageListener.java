@@ -52,7 +52,6 @@ public class ELRRMessageListener {
   }
 
   /**
-   *
    * @param statement
    * @return LearnerChange
    */
@@ -128,7 +127,7 @@ public class ELRRMessageListener {
       learnerChange.setCourses(userCourses);
 
     } catch (JsonProcessingException e) {
-      log.info("exception while inserting ");
+      log.info("Exception while inserting LearnerChange.");
       e.printStackTrace();
     }
 
@@ -137,7 +136,6 @@ public class ELRRMessageListener {
 
   /**
    * @param messageVo
-   * 
    */
   private void insertAuditLog(final MessageVO messageVo) {
     ELRRAuditLog auditLog = new ELRRAuditLog();

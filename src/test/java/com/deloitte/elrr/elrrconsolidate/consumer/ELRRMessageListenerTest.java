@@ -1,24 +1,18 @@
-/**
- *
- */
 package com.deloitte.elrr.elrrconsolidate.consumer;
 
 import org.junit.jupiter.api.Test;
 
 /**
  * @author mnelakurti
- *
  */
 class ELRRMessageListenerTest {
 
-    /**
-     * Test method for
-     * {@link com.deloitte.elrr.elrrconsolidate.consumer.
-     * ELRRMessageListener#listen(java.lang.String)}.
-     */
-    @Test
-    void testListen() {
-        // fail("Not yet implemented"); // TODO
-    }
-
+  /**
+   * Test method for {@link com.deloitte.elrr.elrrconsolidate.consumer.
+   * ELRRMessageListener#listen(java.lang.String)}.
+   */
+  @Test
+  void testListen() {
+    // fail("Not yet implemented"); // TODO
+  }
 }
