@@ -15,10 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HRService {
 
-  /** */
   @Autowired private PersonSvc personService;
 
-  /** */
   @Autowired private ContactInformationSvc contactInformationService;
 
   /**

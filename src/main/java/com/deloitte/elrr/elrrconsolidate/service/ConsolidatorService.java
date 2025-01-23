@@ -17,10 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConsolidatorService {
 
-  /** */
   @Autowired private LearnerProfileSvc learnerProfileService;
 
-  /** */
   private static final Long EMPLOYEE_ID = 100L;
 
   /**
