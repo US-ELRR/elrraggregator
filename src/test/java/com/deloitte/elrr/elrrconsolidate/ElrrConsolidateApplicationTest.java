@@ -23,7 +23,7 @@ class ElrrConsolidateApplicationTest {
 
     /**
      * Test method for
-     * {@link com.deloitte.elrr.elrrconsolidate.ElrrConsolidateApplication
+     * {@link com.deloitte.elrr.ElrrConsolidateApplication
      * #main(java.lang.String[])}.
      */
     @Test

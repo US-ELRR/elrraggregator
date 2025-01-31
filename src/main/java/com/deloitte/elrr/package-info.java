@@ -10,4 +10,4 @@
  *This package info file for package com.deloitte.elrr
  *
  */
-package com.deloitte.elrr.elrrconsolidate;
+package com.deloitte.elrr;

@@ -1,4 +1,4 @@
-package com.deloitte.elrr.elrrconsolidate;
+package com.deloitte.elrr;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

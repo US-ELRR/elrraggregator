@@ -6,8 +6,6 @@
 
 /**
  * @author mnelakurti
- *
- *This package info file for package com.deloitte.elrr
- *
+ *     <p>This package info file for package com.deloitte.elrr
  */
 package com.deloitte.elrr.elrrconsolidate.consumer;

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.deloitte.elrr.elrrconsolidate.InputSanatizer;
+import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
 import com.deloitte.elrr.elrrconsolidate.dto.MessageVO;
 import com.deloitte.elrr.elrrconsolidate.dto.UserCourse;
