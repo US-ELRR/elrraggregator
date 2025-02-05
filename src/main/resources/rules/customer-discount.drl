@@ -1,15 +1,26 @@
 import com.deloitte.elrr.drools.OrderRequest;
 import com.deloitte.elrr.drools.CustomerType;
+import function com.deloitte.elrr.drools.RulesFiredHelper.helper;
+
 global com.deloitte.elrr.drools.OrderDiscount orderDiscount;
  
 dialect "mvel"
- 
+
+rule "Age validation"
+    when
+        OrderRequest(age < 1 || age > 100)
+    then
+        System.out.println("==========Invalid age=============");
+        helper(drools);
+ end
+
 rule "Age based discount"
     when
-        OrderRequest(age < 20 || age > 50)
+        OrderRequest(age >= 1 && < 20 || age > 50 && <= 100)
     then
         System.out.println("==========Adding 10% discount for Kids/ senior customer=============");
         orderDiscount.setDiscount(orderDiscount.getDiscount() + 10);
+        helper(drools);
 end
  
 rule "Customer type based discount - Loyal customer"
@@ -18,6 +29,7 @@ rule "Customer type based discount - Loyal customer"
     then
         System.out.println("==========Adding 5% discount for LOYAL customer=============");
         orderDiscount.setDiscount(orderDiscount.getDiscount() + 5);
+        helper(drools);
 end
      
 rule "Customer type based discount - others"
@@ -26,6 +38,7 @@ rule "Customer type based discount - others"
     then
         System.out.println("==========Adding 3% discount for NEW or DISSATISFIED customer=============");
         orderDiscount.setDiscount(orderDiscount.getDiscount() + 3);
+        helper(drools);
 end
  
 rule "Amount based discount"
@@ -34,4 +47,5 @@ rule "Amount based discount"
     then
         System.out.println("==========Adding 5% discount for amount more than 1000$=============");
         orderDiscount.setDiscount(orderDiscount.getDiscount() + 5);
+        helper(drools);
 end
