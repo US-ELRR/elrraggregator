@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.InputSanatizer;
+import com.deloitte.elrr.drools.LearnerChangeService;
 import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
 import com.deloitte.elrr.elrrconsolidate.dto.MessageVO;
 import com.deloitte.elrr.elrrconsolidate.dto.UserCourse;
@@ -35,6 +36,8 @@ public class ELRRMessageListener {
 
   @Autowired private MessageConsolidatorService messageService;
 
+  @Autowired private LearnerChangeService learnerChangeService;
+
   /**
    * @param message
    */
@@ -42,7 +45,9 @@ public class ELRRMessageListener {
   public void listen(final String message) {
     if (InputSanatizer.isValidInput(message)) {
       log.info("Received Messasge in group - group-id: " + message);
-      LearnerChange learnerChange = getLearnerChange(message);
+      // LearnerChange learnerChange = getLearnerChange(message);
+      // Use Drools rule
+      LearnerChange learnerChange = getLearnerChangeFromRule(message);
       if (learnerChange != null) {
         messageService.process(learnerChange);
       }
@@ -125,6 +130,30 @@ public class ELRRMessageListener {
       course.setUserCourseStatus(verbDisplay);
       userCourses.add(course);
       learnerChange.setCourses(userCourses);
+
+    } catch (JsonProcessingException e) {
+      log.info("Exception while inserting LearnerChange.");
+      e.printStackTrace();
+    }
+
+    return learnerChange;
+  }
+
+  /**
+   * @param statement
+   * @return LearnerChange
+   */
+  private LearnerChange getLearnerChangeFromRule(final String payload) {
+    ObjectMapper mapper = Mapper.getMapper();
+    log.info("payload received " + payload);
+    LearnerChange learnerChange = new LearnerChange();
+
+    try {
+
+      MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
+      insertAuditLog(messageVo);
+      Statement statement = messageVo.getStatement();
+      learnerChange = learnerChangeService.getLearnerChange(statement);
 
     } catch (JsonProcessingException e) {
       log.info("Exception while inserting LearnerChange.");
