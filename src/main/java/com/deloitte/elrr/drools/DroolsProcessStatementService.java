@@ -5,24 +5,24 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
+import com.deloitte.elrr.entity.LearningRecord;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class LearnerChangeService {
+public class DroolsProcessStatementService {
 
-  @Autowired private KieContainer kieContainer;
+  @Autowired private static KieContainer kieContainer;
 
-  public LearnerChange getLearnerChange(Statement statement) {
+  public static LearningRecord processStatement(Statement statement) {
 
-    LearnerChange learnerChange = new LearnerChange();
+    LearningRecord learningRecord = new LearningRecord();
     try {
 
       KieSession kieSession = kieContainer.newKieSession();
-      kieSession.setGlobal("learnerChange", learnerChange);
+      kieSession.setGlobal("learningRecord", learningRecord);
       kieSession.setGlobal("statement", statement);
       kieSession.insert(statement);
       kieSession.fireAllRules();
@@ -32,6 +32,6 @@ public class LearnerChangeService {
       log.info("Exception while creating KieSession.");
       e.printStackTrace();
     }
-    return learnerChange;
+    return learningRecord;
   }
 }

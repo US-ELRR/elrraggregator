@@ -6,32 +6,22 @@ import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.elrrconsolidate.entity.ELRRAuditLog;
 import com.deloitte.elrr.elrrconsolidate.repository.ELRRAuditLogRepository;
+import com.deloitte.elrr.jpa.svc.CommonSvc;
 
 @Service
 public class ELRRAuditLogService implements CommonSvc<ELRRAuditLog, Long> {
 
-    /**
-     *
-     */
-    @Autowired
-    private ELRRAuditLogRepository elrrAuditLogRepository;
+  @Autowired private ELRRAuditLogRepository elrrAuditLogRepository;
 
-    /**
-     *
-     */
-    @Override
-    public Long getId(final ELRRAuditLog entity) {
+  @Override
+  public Long getId(final ELRRAuditLog entity) {
 
-        return null;
-    }
+    return null;
+  }
 
-    /**
-     *
-     */
-    @Override
-    public CrudRepository<ELRRAuditLog, Long> getRepository() {
+  @Override
+  public CrudRepository<ELRRAuditLog, Long> getRepository() {
 
-        return elrrAuditLogRepository;
-    }
-
+    return elrrAuditLogRepository;
+  }
 }

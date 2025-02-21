@@ -330,6 +330,11 @@
             <artifactId>drools-mvel</artifactId>
             <version>${drools.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.deloitte</groupId>
+            <artifactId>elrrserviceentities</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
    </dependencies>
     <build>
         <resources>

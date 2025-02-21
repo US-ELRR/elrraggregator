@@ -3,11 +3,10 @@ package com.deloitte.elrr.elrrconsolidate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.deloitte.elrr.elrrconsolidate.dto.LearnerChange;
-import com.deloitte.elrr.elrrconsolidate.entity.ContactInformation;
-import com.deloitte.elrr.elrrconsolidate.entity.Person;
-import com.deloitte.elrr.elrrconsolidate.jpa.service.ContactInformationSvc;
-import com.deloitte.elrr.elrrconsolidate.jpa.service.PersonSvc;
+import com.deloitte.elrr.entity.Email;
+import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.jpa.svc.EmailSvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,80 +16,50 @@ public class HRService {
 
   @Autowired private PersonSvc personService;
 
-  @Autowired private ContactInformationSvc contactInformationService;
+  @Autowired private EmailSvc emailService;
 
   /**
-   * @param learnerChange
-   * @return ContactInformation contactInformation
-   */
-  public ContactInformation getContactInformation(final LearnerChange learnerChange) {
-
-    String key = getKey(learnerChange.getContactEmailAddress());
-    ContactInformation contact =
-        contactInformationService.getContactInformationByElectronicmailaddress(key);
-
-    if (contact == null) {
-      log.info("contact information not found and creating a new one");
-      contact = invokeExternalService(key);
-      Person person = createPerson(learnerChange);
-      contact.setPersonid(person.getPersonid());
-      contact.setElectronicmailaddresstype("Personal");
-      contact.setTelephonetype("Private");
-      contact.setEmergencycontact("Email");
-      contact.setIsprimaryindicator("Y");
-      contactInformationService.save(contact);
-    } else {
-      log.info(
-          "contact information and person found "
-              + contact.getContactinformationid()
-              + "personId "
-              + contact.getPersonid());
-    }
-    return contact;
-  }
-
-  /**
-   * @param learnerChange
+   * @param actorName
+   * @param actorEmail
    * @return
    */
-  private Person createPerson(final LearnerChange learnerChange) {
+  public Person createPerson(final String actorName, final String actorEmail) {
+
+    // Create new Email
+    log.info("creating new email");
+    Email email = new Email();
+    email.setEmailAddress(actorEmail);
+    email.setEmailAddressType("primary");
+    emailService.save(email);
+
+    // Create new Person
     log.info("creating new person");
     Person person = new Person();
-    person.setName(learnerChange.getName());
-    String[] tokens = learnerChange.getName().split(" ");
-    person.setFirstname(tokens[0]);
+
+    String[] tokens = actorName.split(" ");
+
+    person.setFirstName(tokens[0]);
 
     // If first name only
     if (tokens.length == 1) {
-      person.setMiddlename("");
-      person.setLastname("");
+      person.setMiddleName("");
+      person.setLastName("");
     }
 
     // If first and last name
     if (tokens.length == 2) {
-      person.setMiddlename("");
-      person.setLastname(tokens[1]);
+      person.setMiddleName("");
+      person.setLastName(tokens[1]);
     }
 
     // If first, middle and last name
     if (tokens.length == 3) {
-      person.setMiddlename(tokens[1]);
-      person.setLastname(tokens[2]);
+      person.setMiddleName(tokens[1]);
+      person.setLastName(tokens[2]);
     }
+
+    person.getEmailAddresses().add(email);
     personService.save(person);
     return person;
-  }
-
-  private ContactInformation invokeExternalService(final String key) {
-    log.info("invoking externalService to get Contact info");
-    ContactInformation contact = new ContactInformation();
-    contact.setElectronicmailaddress(key);
-    contact.setContactInformationData("Email");
-    contact.setTelephonenumber("800-922-0222");
-    return contact;
-  }
-
-  private String getKey(final String contactEmailAddress) {
-    return contactEmailAddress.replace("mailto:", "");
   }
 }

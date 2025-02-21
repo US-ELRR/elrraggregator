@@ -15,12 +15,12 @@ import com.yetanalytics.xapi.model.LangMap;
 
 import function com.deloitte.elrr.drools.RulesFiredHelper.helper;
 
-global com.deloitte.elrr.elrrconsolidate.dto.LearnerChange learnerChange;
+global com.deloitte.elrr.entity.LearningRecord.java learningRecord;
 global com.yetanalytics.xapi.model.Statement statement;
  
 dialect "java"
 
-rule "Create_learnerChange_from_statement"
+rule "Create_LearningRecord_from_statement"
    when
        Statement (id != "")
    then

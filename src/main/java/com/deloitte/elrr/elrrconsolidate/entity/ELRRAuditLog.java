@@ -1,5 +1,7 @@
 package com.deloitte.elrr.elrrconsolidate.entity;
 
+import com.deloitte.elrr.entity.Auditable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
