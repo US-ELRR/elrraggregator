@@ -1,7 +1,6 @@
 package com.deloitte.elrr.elrrconsolidate.consumer;
 
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -10,14 +9,15 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.elrrconsolidate.dto.MessageVO;
-import com.deloitte.elrr.elrrconsolidate.entity.ELRRAuditLog;
-import com.deloitte.elrr.elrrconsolidate.jpa.service.ELRRAuditLogService;
 import com.deloitte.elrr.elrrconsolidate.service.ECCService;
-import com.deloitte.elrr.elrrconsolidate.service.HRService;
+import com.deloitte.elrr.entity.ELRRAuditLog;
+import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.jpa.svc.ELRRAuditLogService;
+import com.deloitte.elrr.jpa.svc.EmailSvc;
 import com.deloitte.elrr.jpa.svc.IdentitySvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
@@ -25,6 +25,7 @@ import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.AbstractActor;
+import com.yetanalytics.xapi.model.Account;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
@@ -39,9 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-  @Autowired private HRService hrService;
+  @Autowired private EmailSvc emailService;
 
-  @Autowired private IdentitySvc identitySvc;
+  @Autowired private IdentitySvc identityService;
 
   @Autowired private PersonSvc personService;
 
@@ -82,6 +83,7 @@ public class ELRRMessageListener {
     LearningRecord learningRecord = null;
     LearningResource learningResource = null;
     Person person = null;
+    Email email = null;
 
     try {
 
@@ -89,38 +91,14 @@ public class ELRRMessageListener {
       insertAuditLog(messageVo);
       Statement statement = messageVo.getStatement();
 
-      String actorName = "";
-      String actorEmail = "";
-      String homePage = "";
-      String name = "";
-      String openId = "";
-      String mboxSha1Sum = "";
-
       // Parse xAPI Statement
 
       // Actor
       AbstractActor actor = (AbstractActor) statement.getActor();
       ObjectType actorType = actor.getObjectType();
 
-      // If Agent
-      if (actorType == actorType.AGENT) {
-
-        actorName = actor.getName();
-        actorEmail = actor.getMbox();
-
-        // If Activity
-      } else if (actorType == actorType.ACTIVITY) {
-
-        // If Group
-      } else if (actorType == actorType.GROUP) {
-
-        // If Statement
-      } else if (actorType == actorType.STATEMENT_REF) {
-
-        // If Sub Statement
-      } else if (actorType == actorType.SUB_STATEMENT) {
-
-      }
+      // Account
+      Account account = actor.getAccount();
 
       // Verb
       String verbDisplay = "";
@@ -168,44 +146,75 @@ public class ELRRMessageListener {
           activityDescription = activityDefenition.getDescription().get(langCode);
         }
 
-        // Authority
-        AbstractActor authority = statement.getAuthority();
-        openId = authority.getOpenid();
-        ObjectType authorityType = authority.getObjectType();
+        // Does person exist
+        String ifi =
+            Identity.createIfi(
+                actor.getMbox_sha1sum(),
+                actor.getMbox(),
+                actor.getOpenid(),
+                (account != null) ? account.getHomePage() : null,
+                (account != null) ? account.getName() : null);
 
-        // If Agent
-        if (authorityType == authorityType.AGENT) {
+        Identity identity = identityService.getByIfi(ifi);
 
-          homePage = authority.getAccount().getHomePage();
-          name = authority.getAccount().getName();
+        // If person already exists
+        if (identity != null) {
 
-          // If Activity
-        } else if (authorityType == authorityType.ACTIVITY) {
-
-          // If Group
-        } else if (authorityType == authorityType.GROUP) {
-
-          // If Statement
-        } else if (authorityType == authorityType.STATEMENT_REF) {
-
-          // If Sub Statement
-        } else if (authorityType == authorityType.SUB_STATEMENT) {
-
-        }
-
-        // Use xAPI Statement values
-
-        // Get person
-        String ifi = Identity.createIfi(mboxSha1Sum, actorEmail, openId, homePage, name);
-
-        // If person not found, create person
-        if (ifi == null) {
-          person = hrService.createPerson(actorName, actorEmail);
-        } else {
           person = identity.getPerson();
-        }
 
-        UUID personId = person.getId();
+        } else {
+
+          log.info("creating new identity");
+          identity = new Identity();
+          identity.setMboxSha1Sum(actor.getMbox_sha1sum());
+          identity.setMbox(actor.getMbox());
+          identity.setOpenid(actor.getOpenid());
+          identity.setPerson(person);
+
+          if (account != null) {
+            identity.setHomePage(account.getHomePage());
+            identity.setName(account.getName());
+          }
+
+          identityService.save(identity);
+
+          log.info("creating new person");
+          person = new Person();
+
+          if (actor.getMbox() != null & actor.getMbox().length() > 0) {
+
+            log.info("creating new email");
+            email = new Email();
+            email.setEmailAddress(actor.getMbox());
+            email.setEmailAddressType("primary");
+            emailService.save(email);
+          }
+
+          String[] tokens = actor.getName().split(" ");
+
+          person.setFirstName(tokens[0]);
+
+          // If first name only
+          if (tokens.length == 1) {
+            person.setMiddleName("");
+            person.setLastName("");
+          }
+
+          // If first and last name
+          if (tokens.length == 2) {
+            person.setMiddleName("");
+            person.setLastName(tokens[1]);
+          }
+
+          // If first, middle and last name
+          if (tokens.length == 3) {
+            person.setMiddleName(tokens[1]);
+            person.setLastName(tokens[2]);
+          }
+
+          person.getEmailAddresses().add(email);
+          personService.save(person);
+        }
 
         // Get learningResource
         learningResource = eccService.getLearningResource(id);
@@ -220,7 +229,7 @@ public class ELRRMessageListener {
         }
 
         // Get LearningRecord
-        learningRecord = learningRecordService.getLearningRecord();
+        // learningRecord = learningRecordService.getLearningRecord();
 
         // If learningRecord doesn't exist
         if (learningRecord == null) {
