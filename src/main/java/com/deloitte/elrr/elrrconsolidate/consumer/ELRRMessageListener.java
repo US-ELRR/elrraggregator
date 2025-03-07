@@ -86,21 +86,22 @@ public class ELRRMessageListener {
       MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
       Statement statement = messageVo.getStatement();
 
+      // Get importStartDate year
       Timestamp importStartDate = messageVo.getImportStartDate();
       Calendar calendar = Calendar.getInstance();
       calendar.setTime(importStartDate);
       int importStartYear = calendar.get(Calendar.YEAR);
-
       log.info("==> importStartYear = " + importStartYear);
 
       // If not initial run
-      if (importStartYear > 2000) {
+      if (importStartYear != 2000) {
 
         Timestamp importEndDate = messageVo.getImportEndDate();
+        log.info("==> importEndDate = " + importEndDate);
+
+        // Convert lrsStoredDate from ZonedDateTime to Timestamp
         ZonedDateTime lrsStoredDate = statement.getStored();
         Timestamp storedDate = Timestamp.valueOf(lrsStoredDate.toLocalDateTime());
-
-        log.info("==> importEndDate = " + importEndDate);
         log.info("==> storedDate = " + storedDate);
 
         // lrsStoredDate must be > importEndDate
@@ -129,7 +130,6 @@ public class ELRRMessageListener {
 
       // Object type
       ObjectType objType = statement.getObjectType();
-      log.info("=====> objType = " + objType.ACTIVITY);
 
       Activity activity = (Activity) statement.getObject();
 
@@ -241,7 +241,7 @@ public class ELRRMessageListener {
       // Get learningResource
       learningResource = learningResourceService.findByIri(id);
 
-      // If learningResource doesn't exist
+      // If LearningResource doesn't exist
       if (learningResource == null) {
         log.info("creating new learning resource");
         learningResource = new LearningResource();
@@ -252,18 +252,42 @@ public class ELRRMessageListener {
         learningResourceService.save(learningResource);
       }
 
-      log.info("creating new learning record");
-      learningRecord = new LearningRecord();
+      // Get LearningRecord
+      learningRecord =
+          learningRecordService.findByPersonIdAndLearninResourceId(
+              person.getId(), learningResource.getId());
 
-      if (verbDisplay.equalsIgnoreCase("achieved")) {
-        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+      // If LearningRecord doesn't exist
+      if (learningRecord == null) {
+
+        log.info("creating new learning record");
+        learningRecord = new LearningRecord();
+
+        if (verbDisplay.equalsIgnoreCase("achieved")) {
+          learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+        } else {
+          learningRecord.setRecordStatus(LearningStatus.FAILED);
+        }
+
+        learningRecord.setLearningResource(learningResource);
+        learningRecord.setPerson(person);
+        learningRecordService.save(learningRecord);
+
+        // If learningRecord already exists
       } else {
-        learningRecord.setRecordStatus(LearningStatus.FAILED);
-      }
 
-      learningRecord.setLearningResource(learningResource);
-      learningRecord.setPerson(person);
-      learningRecordService.save(learningRecord);
+        log.info("update learning record");
+
+        if (verbDisplay.equalsIgnoreCase("achieved")) {
+          learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+        } else {
+          learningRecord.setRecordStatus(LearningStatus.FAILED);
+        }
+
+        learningRecord.setLearningResource(learningResource);
+        learningRecord.setPerson(person);
+        learningRecordService.update(learningRecord);
+      }
 
     } catch (JsonProcessingException e) {
       log.info("Exception while processing message.");
