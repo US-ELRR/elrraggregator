@@ -59,6 +59,7 @@ public class ELRRMessageListener {
    */
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
+
     if (InputSanatizer.isValidInput(message)) {
       log.info("Received Messasge in group - group-id: " + message);
       processMessage(message);
@@ -73,6 +74,7 @@ public class ELRRMessageListener {
    * @param statement
    */
   private void processMessage(final String payload) {
+
     ObjectMapper mapper = Mapper.getMapper();
     log.info("payload received " + payload);
 
@@ -129,164 +131,178 @@ public class ELRRMessageListener {
       }
 
       // Object type
-      ObjectType objType = statement.getObjectType();
+      String objType = statement.getObject().getObjectType().name();
+      log.info("======> object type = " + objType);
 
-      Activity activity = (Activity) statement.getObject();
+      // If activity
+      if (objType.equalsIgnoreCase("ACTIVITY")) {
 
-      // Id
-      String id = "";
-      id = activity.getId();
+        Activity activity = (Activity) statement.getObject();
 
-      // Activity name
-      String activityName = "";
-      String nameLangCode = "";
+        // Id
+        String id = "";
+        id = activity.getId();
 
-      ActivityDefinition activityDefenition = activity.getDefinition();
-      LangMap nameLangMap = activityDefenition.getName();
+        // Activity name
+        String activityName = "";
+        String nameLangCode = "";
 
-      if (nameLangMap != null) {
-        Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
-        nameLangCode = nameLangCodes.iterator().next();
-        activityName = activityDefenition.getName().get(nameLangCode);
-      }
+        ActivityDefinition activityDefenition = activity.getDefinition();
+        LangMap nameLangMap = activityDefenition.getName();
 
-      // Activity Description
-      String activityDescription = "";
-      String langCode = "";
-
-      LangMap descLangMap = activityDefenition.getDescription();
-
-      if (descLangMap != null) {
-        Set<String> descLangCodes = descLangMap.getLanguageCodes();
-        langCode = descLangCodes.iterator().next();
-        activityDescription = activityDefenition.getDescription().get(langCode);
-      }
-
-      // Does person exist
-      String ifi =
-          Identity.createIfi(
-              actor.getMbox_sha1sum(),
-              actor.getMbox(),
-              actor.getOpenid(),
-              (account != null) ? account.getHomePage() : null,
-              (account != null) ? account.getName() : null);
-
-      Identity identity = identityService.getByIfi(ifi);
-
-      // If person already exists
-      if (identity != null) {
-
-        log.info("person exists");
-        person = identity.getPerson();
-
-      } else {
-
-        if (actor.getMbox() != null & actor.getMbox().length() > 0) {
-
-          log.info("creating new email");
-          email = new Email();
-          email.setEmailAddress(actor.getMbox());
-          email.setEmailAddressType("primary");
-          emailService.save(email);
+        if (nameLangMap != null) {
+          Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+          nameLangCode = nameLangCodes.iterator().next();
+          activityName = activityDefenition.getName().get(nameLangCode);
         }
 
-        log.info("creating new person");
-        person = new Person();
+        // Activity Description
+        String activityDescription = "";
+        String langCode = "";
 
-        person.setName(actor.getName());
+        LangMap descLangMap = activityDefenition.getDescription();
 
-        String[] tokens = actor.getName().split(" ");
-
-        person.setFirstName(tokens[0]);
-
-        // If first name only
-        if (tokens.length == 1) {
-          person.setMiddleName("");
-          person.setLastName("");
+        if (descLangMap != null) {
+          Set<String> descLangCodes = descLangMap.getLanguageCodes();
+          langCode = descLangCodes.iterator().next();
+          activityDescription = activityDefenition.getDescription().get(langCode);
         }
 
-        // If first and last name
-        if (tokens.length == 2) {
-          person.setMiddleName("");
-          person.setLastName(tokens[1]);
-        }
+        // Does person exist
+        String ifi =
+            Identity.createIfi(
+                actor.getMbox_sha1sum(),
+                actor.getMbox(),
+                actor.getOpenid(),
+                (account != null) ? account.getHomePage() : null,
+                (account != null) ? account.getName() : null);
 
-        // If first, middle and last name
-        if (tokens.length == 3) {
-          person.setMiddleName(tokens[1]);
-          person.setLastName(tokens[2]);
-        }
+        Identity identity = identityService.getByIfi(ifi);
 
-        // Populate person_email
-        person.setEmailAddresses(new HashSet<Email>());
-        person.getEmailAddresses().add(email);
+        // If person already exists
+        if (identity != null) {
 
-        personService.save(person);
+          log.info("person exists");
+          person = identity.getPerson();
 
-        log.info("creating new identity");
-        identity = new Identity();
-        identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-        identity.setMbox(actor.getMbox());
-        identity.setOpenid(actor.getOpenid());
-        identity.setPerson(person);
-
-        if (account != null) {
-          identity.setHomePage(account.getHomePage());
-          identity.setName(account.getName());
-        }
-
-        identityService.save(identity);
-      }
-
-      // Get learningResource
-      learningResource = learningResourceService.findByIri(id);
-
-      // If LearningResource doesn't exist
-      if (learningResource == null) {
-        log.info("creating new learning resource");
-        learningResource = new LearningResource();
-        learningResource.setIri(id);
-        learningResource.setDescription(activityDescription);
-        learningResource.setNumber(activityName);
-        learningResource.setTitle(activityDescription);
-        learningResourceService.save(learningResource);
-      }
-
-      // Get LearningRecord
-      learningRecord =
-          learningRecordService.findByPersonIdAndLearninResourceId(
-              person.getId(), learningResource.getId());
-
-      // If LearningRecord doesn't exist
-      if (learningRecord == null) {
-
-        log.info("creating new learning record");
-        learningRecord = new LearningRecord();
-
-        if (verbDisplay.equalsIgnoreCase("achieved")) {
-          learningRecord.setRecordStatus(LearningStatus.COMPLETED);
         } else {
-          learningRecord.setRecordStatus(LearningStatus.FAILED);
+
+          if (actor.getMbox() != null & actor.getMbox().length() > 0) {
+
+            log.info("creating new email");
+            email = new Email();
+            email.setEmailAddress(actor.getMbox());
+            email.setEmailAddressType("primary");
+            emailService.save(email);
+          }
+
+          log.info("creating new person");
+          person = new Person();
+
+          person.setName(actor.getName());
+
+          String[] tokens = actor.getName().split(" ");
+
+          person.setFirstName(tokens[0]);
+
+          // If first name only
+          if (tokens.length == 1) {
+            person.setMiddleName("");
+            person.setLastName("");
+          }
+
+          // If first and last name
+          if (tokens.length == 2) {
+            person.setMiddleName("");
+            person.setLastName(tokens[1]);
+          }
+
+          // If first, middle and last name
+          if (tokens.length == 3) {
+            person.setMiddleName(tokens[1]);
+            person.setLastName(tokens[2]);
+          }
+
+          // Populate person_email
+          person.setEmailAddresses(new HashSet<Email>());
+          person.getEmailAddresses().add(email);
+
+          personService.save(person);
+
+          log.info("creating new identity");
+          identity = new Identity();
+          identity.setMboxSha1Sum(actor.getMbox_sha1sum());
+          identity.setMbox(actor.getMbox());
+          identity.setOpenid(actor.getOpenid());
+          identity.setPerson(person);
+
+          if (account != null) {
+            identity.setHomePage(account.getHomePage());
+            identity.setName(account.getName());
+          }
+
+          identityService.save(identity);
         }
 
-        learningRecord.setLearningResource(learningResource);
-        learningRecord.setPerson(person);
-        learningRecordService.save(learningRecord);
+        // Get learningResource
+        learningResource = learningResourceService.findByIri(id);
 
-        // If learningRecord already exists
-      } else {
+        // If LearningResource doesn't exist
+        if (learningResource == null) {
+          log.info("creating new learning resource");
+          learningResource = new LearningResource();
+          learningResource.setIri(id);
+          learningResource.setDescription(activityDescription);
+          learningResource.setNumber(activityName);
+          learningResource.setTitle(activityDescription);
+          learningResourceService.save(learningResource);
+        }
 
-        log.info("update learning record");
+        // Get LearningRecord
+        learningRecord =
+            learningRecordService.findByPersonIdAndLearninResourceId(
+                person.getId(), learningResource.getId());
 
-        if (verbDisplay.equalsIgnoreCase("achieved")) {
-          learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+        // If LearningRecord doesn't exist
+        if (learningRecord == null) {
+
+          log.info("creating new learning record");
+          learningRecord = new LearningRecord();
+
+          if (verbDisplay.equalsIgnoreCase("achieved")) {
+            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+          } else {
+            learningRecord.setRecordStatus(LearningStatus.FAILED);
+          }
+
+          learningRecord.setLearningResource(learningResource);
+          learningRecord.setPerson(person);
+          learningRecordService.save(learningRecord);
+
+          // If learningRecord already exists
         } else {
-          learningRecord.setRecordStatus(LearningStatus.FAILED);
+
+          log.info("update learning record");
+
+          if (verbDisplay.equalsIgnoreCase("achieved")) {
+            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+          } else {
+            learningRecord.setRecordStatus(LearningStatus.FAILED);
+          }
+
+          learningRecord.setLearningResource(learningResource);
+          learningRecord.setPerson(person);
+          learningRecordService.update(learningRecord);
         }
 
-        learningRecord.setLearningResource(learningResource);
-        learningRecord.setPerson(person);
-        learningRecordService.update(learningRecord);
+      } else if (objType.equalsIgnoreCase("AGENT")) {
+
+      } else if (objType.equalsIgnoreCase("GROUP")) {
+
+      } else if (objType.equalsIgnoreCase("STATEMENT_REF")) {
+
+      } else if (objType.equalsIgnoreCase("SUB_STATEMENT")) {
+
       }
 
     } catch (JsonProcessingException e) {
