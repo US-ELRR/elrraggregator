@@ -1,5 +1,7 @@
 package com.deloitte.elrr.elrrconsolidate.dto;
 
+import java.sql.Timestamp;
+
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MessageVO {
-    private AuditRecord auditRecord;
-    private Statement statement;
+  private Statement statement;
+  private Timestamp importStartDate;
+  private Timestamp importEndDate;
 }

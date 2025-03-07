@@ -12,6 +12,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+
 import lombok.extern.slf4j.Slf4j;
 
 @EnableKafka
@@ -19,41 +20,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaConsumerConfig {
 
-    /**
-     *
-     */
-    @Value("${brokerUrl}")
-    private String brokerUrl;
+  @Value("${brokerUrl}")
+  private String brokerUrl;
 
-    /**
-     *
-     * @return ConsumerFactory consumerFactory
-     */
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
-        log.info("Start building Kafka Consumer factory");
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
+  /**
+   * @return ConsumerFactory consumerFactory
+   */
+  @Bean
+  public ConsumerFactory<String, String> consumerFactory() {
+    log.info("Start building Kafka Consumer factory");
+    Map<String, Object> props = new HashMap<>();
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group");
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    return new DefaultKafkaConsumerFactory<>(props);
+  }
 
-    /**
-     *
-     * @return ConcurrentKafkaListenerContainerFactory
-     *         concurrentKafkaListenerContainerFactory
-     */
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String,
-            String> kafkaListenerContainerFactory() {
+  /**
+   * @return ConcurrentKafkaListenerContainerFactory concurrentKafkaListenerContainerFactory
+   */
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, String> factory
-        = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        return factory;
-    }
+    ConcurrentKafkaListenerContainerFactory<String, String> factory =
+        new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory());
+    return factory;
+  }
 }
