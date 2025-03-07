@@ -54,6 +54,8 @@ public class ELRRMessageListener {
 
   @Autowired private DroolsProcessStatementService droolsProcessStatementService;
 
+  private static String updatedBy = "ELRR";
+
   /**
    * @param message
    */
@@ -193,6 +195,7 @@ public class ELRRMessageListener {
             email = new Email();
             email.setEmailAddress(actor.getMbox());
             email.setEmailAddressType("primary");
+            email.setUpdatedBy(updatedBy);
             emailService.save(email);
           }
 
@@ -227,6 +230,8 @@ public class ELRRMessageListener {
           person.setEmailAddresses(new HashSet<Email>());
           person.getEmailAddresses().add(email);
 
+          person.setUpdatedBy(updatedBy);
+
           personService.save(person);
 
           log.info("creating new identity");
@@ -241,6 +246,7 @@ public class ELRRMessageListener {
             identity.setName(account.getName());
           }
 
+          identity.setUpdatedBy(updatedBy);
           identityService.save(identity);
         }
 
@@ -255,6 +261,7 @@ public class ELRRMessageListener {
           learningResource.setDescription(activityDescription);
           learningResource.setNumber(activityName);
           learningResource.setTitle(activityDescription);
+          learningResource.setUpdatedBy(updatedBy);
           learningResourceService.save(learningResource);
         }
 
@@ -277,6 +284,7 @@ public class ELRRMessageListener {
 
           learningRecord.setLearningResource(learningResource);
           learningRecord.setPerson(person);
+          learningRecord.setUpdatedBy(updatedBy);
           learningRecordService.save(learningRecord);
 
           // If learningRecord already exists
@@ -292,6 +300,7 @@ public class ELRRMessageListener {
 
           learningRecord.setLearningResource(learningResource);
           learningRecord.setPerson(person);
+          learningRecord.setUpdatedBy(updatedBy);
           learningRecordService.update(learningRecord);
         }
 
