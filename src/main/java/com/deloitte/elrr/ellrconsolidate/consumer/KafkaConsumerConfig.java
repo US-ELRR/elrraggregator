@@ -1,4 +1,4 @@
-package com.deloitte.elrr.elrrconsolidate.consumer;
+package com.deloitte.elrr.ellrconsolidate.consumer;
 
 import java.util.HashMap;
 import java.util.Map;

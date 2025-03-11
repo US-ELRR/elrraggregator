@@ -1,8 +1,5 @@
-package com.deloitte.elrr.elrrconsolidate.consumer;
+package com.deloitte.elrr.ellrconsolidate.consumer;
 
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -90,30 +87,6 @@ public class ELRRMessageListener {
       MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
       Statement statement = messageVo.getStatement();
 
-      // Get importStartDate year
-      Timestamp importStartDate = messageVo.getImportStartDate();
-      Calendar calendar = Calendar.getInstance();
-      calendar.setTime(importStartDate);
-      int importStartYear = calendar.get(Calendar.YEAR);
-      log.info("==> importStartYear = " + importStartYear);
-
-      // If not initial run
-      if (importStartYear != 2000) {
-
-        Timestamp importEndDate = messageVo.getImportEndDate();
-        log.info("==> importEndDate = " + importEndDate);
-
-        // Convert lrsStoredDate from ZonedDateTime to Timestamp
-        ZonedDateTime lrsStoredDate = statement.getStored();
-        Timestamp storedDate = Timestamp.valueOf(lrsStoredDate.toLocalDateTime());
-        log.info("==> storedDate = " + storedDate);
-
-        // lrsStoredDate must be > importEndDate
-        if (storedDate.before(importEndDate) || storedDate.equals(importEndDate)) {
-          return;
-        }
-      }
-
       // Parse xAPI Statement
 
       // Actor
@@ -141,35 +114,6 @@ public class ELRRMessageListener {
 
         Activity activity = (Activity) statement.getObject();
 
-        // Id
-        String id = "";
-        id = activity.getId();
-
-        // Activity name
-        String activityName = "";
-        String nameLangCode = "";
-
-        ActivityDefinition activityDefenition = activity.getDefinition();
-        LangMap nameLangMap = activityDefenition.getName();
-
-        if (nameLangMap != null) {
-          Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
-          nameLangCode = nameLangCodes.iterator().next();
-          activityName = activityDefenition.getName().get(nameLangCode);
-        }
-
-        // Activity Description
-        String activityDescription = "";
-        String langCode = "";
-
-        LangMap descLangMap = activityDefenition.getDescription();
-
-        if (descLangMap != null) {
-          Set<String> descLangCodes = descLangMap.getLanguageCodes();
-          langCode = descLangCodes.iterator().next();
-          activityDescription = activityDefenition.getDescription().get(langCode);
-        }
-
         // Does person exist
         String ifi =
             Identity.createIfi(
@@ -187,82 +131,24 @@ public class ELRRMessageListener {
           log.info("person exists");
           person = identity.getPerson();
 
+          // If person does not exist
         } else {
 
-          if (actor.getMbox() != null & actor.getMbox().length() > 0) {
-
-            log.info("creating new email");
-            email = new Email();
-            email.setEmailAddress(actor.getMbox());
-            email.setEmailAddressType("primary");
-            email.setUpdatedBy(updatedBy);
-            emailService.save(email);
+          // If email
+          if (actor.getMbox() != null && actor.getMbox().length() > 0) {
+            email = createEmail(actor);
           }
 
-          log.info("creating new person");
-          person = new Person();
-
-          person.setName(actor.getName());
-
-          String[] tokens = actor.getName().split(" ");
-
-          person.setFirstName(tokens[0]);
-
-          // If first name only
-          if (tokens.length == 1) {
-            person.setMiddleName("");
-            person.setLastName("");
-          }
-
-          // If first and last name
-          if (tokens.length == 2) {
-            person.setMiddleName("");
-            person.setLastName(tokens[1]);
-          }
-
-          // If first, middle and last name
-          if (tokens.length == 3) {
-            person.setMiddleName(tokens[1]);
-            person.setLastName(tokens[2]);
-          }
-
-          // Populate person_email
-          person.setEmailAddresses(new HashSet<Email>());
-          person.getEmailAddresses().add(email);
-
-          person.setUpdatedBy(updatedBy);
-
-          personService.save(person);
-
-          log.info("creating new identity");
-          identity = new Identity();
-          identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-          identity.setMbox(actor.getMbox());
-          identity.setOpenid(actor.getOpenid());
-          identity.setPerson(person);
-
-          if (account != null) {
-            identity.setHomePage(account.getHomePage());
-            identity.setName(account.getName());
-          }
-
-          identity.setUpdatedBy(updatedBy);
-          identityService.save(identity);
+          person = createPerson(actor, email);
+          identity = createIdentity(person, actor, account);
         }
 
         // Get learningResource
-        learningResource = learningResourceService.findByIri(id);
+        learningResource = learningResourceService.findByIri(activity.getId());
 
         // If LearningResource doesn't exist
         if (learningResource == null) {
-          log.info("creating new learning resource");
-          learningResource = new LearningResource();
-          learningResource.setIri(id);
-          learningResource.setDescription(activityDescription);
-          learningResource.setNumber(activityName);
-          learningResource.setTitle(activityDescription);
-          learningResource.setUpdatedBy(updatedBy);
-          learningResourceService.save(learningResource);
+          learningResource = createLearningResource(activity);
         }
 
         // Get LearningRecord
@@ -272,36 +158,11 @@ public class ELRRMessageListener {
 
         // If LearningRecord doesn't exist
         if (learningRecord == null) {
-
-          log.info("creating new learning record");
-          learningRecord = new LearningRecord();
-
-          if (verbDisplay.equalsIgnoreCase("achieved")) {
-            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-          } else {
-            learningRecord.setRecordStatus(LearningStatus.FAILED);
-          }
-
-          learningRecord.setLearningResource(learningResource);
-          learningRecord.setPerson(person);
-          learningRecord.setUpdatedBy(updatedBy);
-          learningRecordService.save(learningRecord);
+          learningRecord = createLearningRecord(person, learningResource);
 
           // If learningRecord already exists
         } else {
-
-          log.info("update learning record");
-
-          if (verbDisplay.equalsIgnoreCase("achieved")) {
-            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-          } else {
-            learningRecord.setRecordStatus(LearningStatus.FAILED);
-          }
-
-          learningRecord.setLearningResource(learningResource);
-          learningRecord.setPerson(person);
-          learningRecord.setUpdatedBy(updatedBy);
-          learningRecordService.update(learningRecord);
+          learningRecord = updateLearningRecord(person, learningRecord, learningResource);
         }
 
       } else if (objType.equalsIgnoreCase("AGENT")) {
@@ -342,4 +203,119 @@ public class ELRRMessageListener {
 
     return learningRecord;
   }*/
+
+  /**
+   * @param actor
+   * @return Email
+   */
+  private Email createEmail(AbstractActor actor) {
+
+    log.info("Creating new email.");
+    Email email = new Email();
+    email.setEmailAddress(actor.getMbox());
+    email.setEmailAddressType("primary");
+    email.setUpdatedBy(updatedBy);
+    emailService.save(email);
+    return email;
+  }
+
+  /**
+   * @param actor
+   * @param email
+   * @return Person
+   */
+  private Person createPerson(AbstractActor actor, Email email) {
+    log.info("Creating new person.");
+    Person person = new Person();
+    person.setName(actor.getName());
+    person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
+    person.getEmailAddresses().add(email);
+    person.setUpdatedBy(updatedBy);
+    personService.save(person);
+    return person;
+  }
+
+  /**
+   * @param person
+   * @param actor
+   * @param account
+   * @return Identity
+   */
+  private Identity createIdentity(Person person, AbstractActor actor, Account account) {
+    log.info("Creating new identity.");
+    Identity identity = new Identity();
+    identity.setMboxSha1Sum(actor.getMbox_sha1sum());
+    identity.setMbox(actor.getMbox());
+    identity.setOpenid(actor.getOpenid());
+    identity.setPerson(person);
+
+    if (account != null) {
+      identity.setHomePage(account.getHomePage());
+      identity.setName(account.getName());
+    }
+
+    identity.setUpdatedBy(updatedBy);
+    identityService.save(identity);
+    return identity;
+  }
+
+  private LearningResource createLearningResource(Activity activity) {
+    log.info("Creating new learning resource.");
+
+    // Activity name
+    String activityName = "";
+    String nameLangCode = "";
+
+    ActivityDefinition activityDefenition = activity.getDefinition();
+    LangMap nameLangMap = activityDefenition.getName();
+
+    if (nameLangMap != null) {
+      Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+      nameLangCode = nameLangCodes.iterator().next();
+      activityName = activityDefenition.getName().get(nameLangCode);
+    }
+
+    // Activity Description
+    String activityDescription = "";
+    String langCode = "";
+
+    LangMap descLangMap = activityDefenition.getDescription();
+
+    if (descLangMap != null) {
+      Set<String> descLangCodes = descLangMap.getLanguageCodes();
+      langCode = descLangCodes.iterator().next();
+      activityDescription = activityDefenition.getDescription().get(langCode);
+    }
+
+    LearningResource learningResource = new LearningResource();
+    learningResource.setIri(activity.getId());
+    learningResource.setDescription(activityDescription);
+    learningResource.setNumber(activityName);
+    learningResource.setTitle(activityDescription);
+    learningResource.setUpdatedBy(updatedBy);
+    learningResourceService.save(learningResource);
+    return learningResource;
+  }
+
+  private LearningRecord createLearningRecord(Person person, LearningResource learningResource) {
+    log.info("Creating new learning record.");
+    LearningRecord learningRecord = new LearningRecord();
+    learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+    learningRecord.setLearningResource(learningResource);
+    learningRecord.setPerson(person);
+    learningRecord.setUpdatedBy(updatedBy);
+    learningRecordService.save(learningRecord);
+    return learningRecord;
+  }
+
+  private LearningRecord updateLearningRecord(
+      Person person, LearningRecord learningRecord, LearningResource learningResource) {
+    log.info("Update learning record.");
+    learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+    learningRecord.setLearningResource(learningResource);
+    learningRecord.setPerson(person);
+    learningRecord.setUpdatedBy(updatedBy);
+    learningRecordService.update(learningRecord);
+    return learningRecord;
+  }
 }

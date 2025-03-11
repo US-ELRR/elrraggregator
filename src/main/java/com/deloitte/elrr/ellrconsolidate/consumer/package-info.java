@@ -8,4 +8,4 @@
  * @author mnelakurti
  *     <p>This package info file for package com.deloitte.elrr
  */
-package com.deloitte.elrr.elrrconsolidate.consumer;
+package com.deloitte.elrr.ellrconsolidate.consumer;
