@@ -1,4 +1,4 @@
-package com.deloitte.elrr.drools;
+package com.deloitte.elrr.aggregator.drools;
 
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;

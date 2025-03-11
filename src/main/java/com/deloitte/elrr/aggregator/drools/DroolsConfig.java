@@ -1,4 +1,4 @@
-package com.deloitte.elrr.drools;
+package com.deloitte.elrr.aggregator.drools;
 
 /*@Configuration
 public class DroolsConfig {

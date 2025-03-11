@@ -1,4 +1,4 @@
-package com.deloitte.elrr.ellrconsolidate.consumer;
+package com.deloitte.elrr.aggregator.consumer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,8 +8,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.InputSanatizer;
-import com.deloitte.elrr.drools.DroolsProcessStatementService;
-import com.deloitte.elrr.elrrconsolidate.dto.MessageVO;
+import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
+import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.LearningRecord;
@@ -29,8 +29,8 @@ import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.ObjectType;
+import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Statement;
-import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +63,7 @@ public class ELRRMessageListener {
       log.info("Received Messasge in group - group-id: " + message);
       processMessage(message);
       // Use Drools rule
-      // LearnerChange learnerChange = processMessageFromRule(message);
+      // processMessageFromRule(message);
     } else {
       log.warn("Invalid message did not pass whitelist check - " + message);
     }
@@ -96,13 +96,13 @@ public class ELRRMessageListener {
       // Account
       Account account = actor.getAccount();
 
-      // Verb
-      String verbDisplay = "";
-
-      Verb verb = statement.getVerb();
-
-      if (verb != null) {
-        verbDisplay = verb.getDisplay().get("en-us");
+      // Result
+      boolean completed = true;
+      boolean success = true;
+      Result result = statement.getResult();
+      if (result != null) {
+        completed = result.getCompletion();
+        success = result.getSuccess();
       }
 
       // Object type
@@ -158,7 +158,7 @@ public class ELRRMessageListener {
 
         // If LearningRecord doesn't exist
         if (learningRecord == null) {
-          learningRecord = createLearningRecord(person, learningResource);
+          learningRecord = createLearningRecord(person, learningResource, success, completed);
 
           // If learningRecord already exists
         } else {
@@ -183,9 +183,8 @@ public class ELRRMessageListener {
 
   /**
    * @param statement
-   * @return LearningRecord
    */
-  /*private LearningRecord processMessageFromRule(final String payload) {
+  /*private void processMessageFromRule(final String payload) {
     ObjectMapper mapper = Mapper.getMapper();
     log.info("payload received " + payload);
     LearningRecord learningRecord = new LearningRecord();
@@ -197,11 +196,9 @@ public class ELRRMessageListener {
       learningRecord = DroolsProcessStatementService.processStatement(statement);
 
     } catch (JsonProcessingException e) {
-      log.info("Exception while inserting LearnerChange.");
+      log.info("Exception while processing rule.");
       e.printStackTrace();
     }
-
-    return learningRecord;
   }*/
 
   /**
@@ -297,10 +294,20 @@ public class ELRRMessageListener {
     return learningResource;
   }
 
-  private LearningRecord createLearningRecord(Person person, LearningResource learningResource) {
+  private LearningRecord createLearningRecord(
+      Person person, LearningResource learningResource, boolean success, boolean completed) {
     log.info("Creating new learning record.");
     LearningRecord learningRecord = new LearningRecord();
-    learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+
+    // status
+    if (success && completed) {
+      learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+    } else if (success && !completed) {
+      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+    } else {
+      learningRecord.setRecordStatus(LearningStatus.FAILED);
+    }
+
     learningRecord.setLearningResource(learningResource);
     learningRecord.setPerson(person);
     learningRecord.setUpdatedBy(updatedBy);

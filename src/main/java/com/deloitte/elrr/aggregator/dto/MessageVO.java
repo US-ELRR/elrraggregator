@@ -1,4 +1,4 @@
-package com.deloitte.elrr.elrrconsolidate.dto;
+package com.deloitte.elrr.aggregator.dto;
 
 import com.yetanalytics.xapi.model.Statement;
 
