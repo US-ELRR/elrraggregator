@@ -28,7 +28,6 @@ import com.yetanalytics.xapi.model.Account;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
-import com.yetanalytics.xapi.model.ObjectType;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
@@ -87,83 +86,21 @@ public class ELRRMessageListener {
       MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
       Statement statement = messageVo.getStatement();
 
-      // Parse xAPI Statement
-
-      // Actor
-      AbstractActor actor = (AbstractActor) statement.getActor();
-      ObjectType actorType = actor.getObjectType();
-
-      // Account
-      Account account = actor.getAccount();
-
-      // Result
-      boolean completed = true;
-      boolean success = true;
-      Result result = statement.getResult();
-      if (result != null) {
-        completed = result.getCompletion();
-        success = result.getSuccess();
-      }
-
       // Object type
       String objType = statement.getObject().getObjectType().name();
       log.info("======> object type = " + objType);
 
-      // If activity
+      // Rule # 1 = If activity
       if (objType.equalsIgnoreCase("ACTIVITY")) {
 
-        Activity activity = (Activity) statement.getObject();
+        // Process person (identity and email)
+        person = processPerson(statement);
 
-        // Does person exist
-        String ifi =
-            Identity.createIfi(
-                actor.getMbox_sha1sum(),
-                actor.getMbox(),
-                actor.getOpenid(),
-                (account != null) ? account.getHomePage() : null,
-                (account != null) ? account.getName() : null);
+        // Process LearningResource
+        learningResource = processLearningResource(statement);
 
-        Identity identity = identityService.getByIfi(ifi);
-
-        // If person already exists
-        if (identity != null) {
-
-          log.info("person exists");
-          person = identity.getPerson();
-
-          // If person does not exist
-        } else {
-
-          // If email
-          if (actor.getMbox() != null && actor.getMbox().length() > 0) {
-            email = createEmail(actor);
-          }
-
-          person = createPerson(actor, email);
-          identity = createIdentity(person, actor, account);
-        }
-
-        // Get learningResource
-        learningResource = learningResourceService.findByIri(activity.getId());
-
-        // If LearningResource doesn't exist
-        if (learningResource == null) {
-          learningResource = createLearningResource(activity);
-        }
-
-        // Get LearningRecord
-        learningRecord =
-            learningRecordService.findByPersonIdAndLearninResourceId(
-                person.getId(), learningResource.getId());
-
-        // If LearningRecord doesn't exist
-        if (learningRecord == null) {
-          learningRecord = createLearningRecord(person, learningResource, success, completed);
-
-          // If learningRecord already exists
-        } else {
-          learningRecord = updateLearningRecord(person, learningRecord, learningResource);
-        }
+        // Process LearningRecord
+        learningRecord = processLearningRecord(statement);
 
       } else if (objType.equalsIgnoreCase("AGENT")) {
 
@@ -202,18 +139,75 @@ public class ELRRMessageListener {
   }*/
 
   /**
-   * @param actor
-   * @return Email
+   * @param statement
+   * @return Person
    */
-  private Email createEmail(AbstractActor actor) {
+  private Person processPerson(Statement statement) {
 
-    log.info("Creating new email.");
-    Email email = new Email();
-    email.setEmailAddress(actor.getMbox());
-    email.setEmailAddressType("primary");
-    email.setUpdatedBy(updatedBy);
-    emailService.save(email);
-    return email;
+    Person person = null;
+
+    // Get person
+    person = getPerson(statement);
+
+    // If person doesn't exist
+    if (person == null) {
+      person = createNewPerson(statement);
+    }
+
+    return person;
+  }
+
+  /**
+   * @param statement
+   * @return Person
+   */
+  private Person getPerson(Statement statement) {
+
+    Person person = null;
+
+    AbstractActor actor = (AbstractActor) statement.getActor();
+    Account account = actor.getAccount();
+
+    // Does person exist
+    String ifi =
+        Identity.createIfi(
+            actor.getMbox_sha1sum(),
+            actor.getMbox(),
+            actor.getOpenid(),
+            (account != null) ? account.getHomePage() : null,
+            (account != null) ? account.getName() : null);
+
+    Identity identity = identityService.getByIfi(ifi);
+
+    // If person already exists
+    if (identity != null) {
+
+      log.info("person exists");
+      person = identity.getPerson();
+    }
+    return person;
+  }
+
+  /**
+   * @param statement
+   * @return Person
+   */
+  private Person createNewPerson(Statement statement) {
+
+    Email email = null;
+
+    AbstractActor actor = (AbstractActor) statement.getActor();
+    Account account = actor.getAccount();
+
+    // If email
+    if (actor.getMbox() != null && actor.getMbox().length() > 0) {
+      email = createEmail(actor);
+    }
+
+    Person person = createPerson(actor, email);
+    Identity identity = createIdentity(person, actor, account);
+
+    return person;
   }
 
   /**
@@ -257,6 +251,42 @@ public class ELRRMessageListener {
   }
 
   /**
+   * @param actor
+   * @return Email
+   */
+  private Email createEmail(AbstractActor actor) {
+
+    log.info("Creating new email.");
+    Email email = new Email();
+    email.setEmailAddress(actor.getMbox());
+    email.setEmailAddressType("primary");
+    email.setUpdatedBy(updatedBy);
+    emailService.save(email);
+    return email;
+  }
+
+  /**
+   * @param statement
+   * @return LearningResource
+   */
+  private LearningResource processLearningResource(Statement statement) {
+
+    LearningResource learningResource = null;
+
+    Activity activity = (Activity) statement.getObject();
+
+    // Get learningResource
+    learningResource = learningResourceService.findByIri(activity.getId());
+
+    // If LearningResource doesn't exist
+    if (learningResource == null) {
+      learningResource = createLearningResource(activity);
+    }
+
+    return learningResource;
+  }
+
+  /**
    * @param activity
    * @return LearningResource
    */
@@ -296,6 +326,49 @@ public class ELRRMessageListener {
     learningResource.setUpdatedBy(updatedBy);
     learningResourceService.save(learningResource);
     return learningResource;
+  }
+
+  /**
+   * @param statement
+   * @return LearningRccord
+   */
+  private LearningRecord processLearningRecord(Statement statement) {
+
+    LearningRecord learningRecord = null;
+    LearningResource learningResource = null;
+
+    Activity activity = (Activity) statement.getObject();
+
+    // Result
+    boolean completed = true;
+    boolean success = true;
+    Result result = statement.getResult();
+    if (result != null) {
+      completed = result.getCompletion();
+      success = result.getSuccess();
+    }
+
+    // Get person
+    Person person = getPerson(statement);
+
+    // Get learningResource
+    learningResource = learningResourceService.findByIri(activity.getId());
+
+    // Get LearningRecord
+    learningRecord =
+        learningRecordService.findByPersonIdAndLearninResourceId(
+            person.getId(), learningResource.getId());
+
+    // If LearningRecord doesn't exist
+    if (learningRecord == null) {
+      learningRecord = createLearningRecord(person, learningResource, success, completed);
+
+      // If learningRecord already exists
+    } else {
+      learningRecord = updateLearningRecord(person, learningRecord, learningResource);
+    }
+
+    return learningRecord;
   }
 
   /**
