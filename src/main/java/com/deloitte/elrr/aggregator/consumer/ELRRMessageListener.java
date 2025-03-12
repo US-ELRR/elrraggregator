@@ -256,6 +256,10 @@ public class ELRRMessageListener {
     return identity;
   }
 
+  /**
+   * @param activity
+   * @return LearningResource
+   */
   private LearningResource createLearningResource(Activity activity) {
     log.info("Creating new learning resource.");
 
@@ -294,6 +298,13 @@ public class ELRRMessageListener {
     return learningResource;
   }
 
+  /**
+   * @param person
+   * @param learningResource
+   * @param success
+   * @param completed
+   * @return LearningRecord
+   */
   private LearningRecord createLearningRecord(
       Person person, LearningResource learningResource, boolean success, boolean completed) {
     log.info("Creating new learning record.");
@@ -315,6 +326,12 @@ public class ELRRMessageListener {
     return learningRecord;
   }
 
+  /**
+   * @param person
+   * @param learningRecord
+   * @param learningResource
+   * @return LearningRecord
+   */
   private LearningRecord updateLearningRecord(
       Person person, LearningRecord learningRecord, LearningResource learningResource) {
     log.info("Update learning record.");
