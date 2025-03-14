@@ -102,7 +102,7 @@ public class ELRRMessageListener {
       // Get Actor
       AbstractActor actor = getActor(statement);
 
-      // Get Account and Person
+      // Get Account
       // Rule #1 = If actor != null get account.
       if (actor != null) {
         account = getAccount(actor);
@@ -273,14 +273,13 @@ public class ELRRMessageListener {
 
     // Process Person, Identity and Email
     ArrayList<Object> personList = processPerson(actor, account);
-    person = (Person) personList.get(0);
 
     // Process LearningResource
     LearningResource learningResource = processLearningResource(activity);
 
     // Process LearningRecord
     LearningRecord learningRecord =
-        processLearningRecord(activity, person, result, learningResource);
+        processLearningRecord(activity, (Person) personList.get(0), result, learningResource);
 
     ArrayList<Object> activityList = new ArrayList<Object>(6);
     activityList.add(activity);
