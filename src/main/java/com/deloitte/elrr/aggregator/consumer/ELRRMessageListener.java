@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,12 +25,15 @@ import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.AbstractActor;
+import com.yetanalytics.xapi.model.AbstractObject;
 import com.yetanalytics.xapi.model.Account;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
+import com.yetanalytics.xapi.model.ObjectType;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Statement;
+import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -58,58 +62,91 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    if (InputSanatizer.isValidInput(message)) {
-      log.info("Received Messasge in group - group-id: " + message);
-      processMessage(message);
-      // Use Drools rule
-      // processMessageFromRule(message);
-    } else {
-      log.warn("Invalid message did not pass whitelist check - " + message);
+    log.info("Received Messasge in group - group-id: " + message);
+
+    try {
+
+      if (InputSanatizer.isValidInput(message)) {
+        processMessage(message);
+        // Use Drools rule
+        // processMessageFromRule(message);
+      } else {
+        log.warn("Invalid message did not pass whitelist check - " + message);
+      }
+
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      e.getStackTrace();
     }
   }
 
   /**
    * @param statement
    */
-  private void processMessage(final String payload) {
+  private void processMessage(final String payload) throws JsonProcessingException {
 
     ObjectMapper mapper = Mapper.getMapper();
-    log.info("payload received " + payload);
+    log.info("Process kafka message.");
 
-    LearningRecord learningRecord = null;
-    LearningResource learningResource = null;
+    Activity activity = null;
     Person person = null;
-    Email email = null;
+    Account account = null;
+    ObjectType objType = null;
 
     try {
 
+      // Get Statement
       MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
       Statement statement = messageVo.getStatement();
 
-      // Object type
-      String objType = statement.getObject().getObjectType().name();
-      log.info("======> object type = " + objType);
+      // Get Actor
+      AbstractActor actor = getActor(statement);
 
-      // Rule # 1 = If activity
-      if (objType.equalsIgnoreCase("ACTIVITY")) {
+      // Get Account and Person
+      // Rule #1 = If actor != null get account.
+      if (actor != null) {
+        account = getAccount(actor);
+      }
 
-        // Process person (identity and email)
-        person = processPerson(statement);
+      // Get Verb
+      Verb verb = getVerb(statement);
 
-        // Process LearningResource
-        learningResource = processLearningResource(statement);
+      // Get Object
+      AbstractObject obj = getObject(statement);
 
-        // Process LearningRecord
-        learningRecord = processLearningRecord(statement);
+      // Get Result
+      Result result = getResult(statement);
 
-      } else if (objType.equalsIgnoreCase("AGENT")) {
+      // Rule #2 = If object != null get object type
+      if (obj != null) {
 
-      } else if (objType.equalsIgnoreCase("GROUP")) {
+        // Object type
+        objType = obj.getObjectType();
+        log.info("Object type = " + objType.name());
 
-      } else if (objType.equalsIgnoreCase("STATEMENT_REF")) {
+        // Rule # 3 = If object != null and object type = ACTIVITY process activity.
+        if (objType.compareTo(objType.ACTIVITY) == 0) {
 
-      } else if (objType.equalsIgnoreCase("SUB_STATEMENT")) {
+          // Process Activity
+          ArrayList<Object> activityList =
+              processActivity(actor, account, person, verb, obj, result);
 
+          activity = (Activity) activityList.get(0);
+          person = (Person) activityList.get(1);
+          Identity identity = (Identity) activityList.get(2);
+          Email email = (Email) activityList.get(3);
+          LearningResource learningResource = (LearningResource) activityList.get(4);
+          LearningRecord learningRecord = (LearningRecord) activityList.get(5);
+
+        } else if (objType.compareTo(objType.AGENT) == 0) {
+
+        } else if (objType.compareTo(objType.GROUP) == 0) {
+
+        } else if (objType.compareTo(objType.STATEMENT_REF) == 0) {
+
+        } else if (objType.compareTo(objType.SUB_STATEMENT) == 0) {
+
+        }
       }
 
     } catch (JsonProcessingException e) {
@@ -140,33 +177,30 @@ public class ELRRMessageListener {
 
   /**
    * @param statement
-   * @return Person
+   * @return AbstractActor
    */
-  private Person processPerson(Statement statement) {
-
-    Person person = null;
-
-    // Get person
-    person = getPerson(statement);
-
-    // If person doesn't exist
-    if (person == null) {
-      person = createNewPerson(statement);
-    }
-
-    return person;
+  private AbstractActor getActor(Statement statement) {
+    AbstractActor actor = (AbstractActor) statement.getActor();
+    return actor;
   }
 
   /**
    * @param statement
+   * @return Account
+   */
+  private Account getAccount(AbstractActor actor) {
+    Account account = actor.getAccount();
+    return account;
+  }
+
+  /**
+   * @param actor
+   * @param account
    * @return Person
    */
-  private Person getPerson(Statement statement) {
+  private Person getPerson(AbstractActor actor, Account account) {
 
     Person person = null;
-
-    AbstractActor actor = (AbstractActor) statement.getActor();
-    Account account = actor.getAccount();
 
     // Does person exist
     String ifi =
@@ -182,22 +216,112 @@ public class ELRRMessageListener {
     // If person already exists
     if (identity != null) {
 
-      log.info("person exists");
+      log.info("Person exists.");
       person = identity.getPerson();
     }
+
     return person;
   }
 
   /**
    * @param statement
-   * @return Person
+   * @return Verb
    */
-  private Person createNewPerson(Statement statement) {
+  private Verb getVerb(Statement statement) {
+    Verb verb = statement.getVerb();
+    return verb;
+  }
+
+  /**
+   * @param statement
+   * @return AbstractObject
+   */
+  private AbstractObject getObject(Statement statement) {
+    AbstractObject obj = statement.getObject();
+    return obj;
+  }
+
+  /**
+   * @param statement
+   * @return Result
+   */
+  private Result getResult(Statement statement) {
+    Result result = statement.getResult();
+    return result;
+  }
+
+  /**
+   * @param actor
+   * @param account
+   * @param person
+   * @param verb
+   * @param obj
+   * @param result
+   */
+  private ArrayList<Object> processActivity(
+      AbstractActor actor,
+      Account account,
+      Person person,
+      Verb verb,
+      AbstractObject obj,
+      Result result) {
+
+    log.info("Process activity.");
+
+    // Get activity
+    Activity activity = (Activity) obj;
+
+    // Process Person, Identity and Email
+    ArrayList<Object> personList = processPerson(actor, account);
+    person = (Person) personList.get(0);
+
+    // Process LearningResource
+    LearningResource learningResource = processLearningResource(activity);
+
+    // Process LearningRecord
+    LearningRecord learningRecord =
+        processLearningRecord(activity, person, result, learningResource);
+
+    ArrayList<Object> activityList = new ArrayList<Object>(6);
+    activityList.add(activity);
+    activityList.add((Person) personList.get(0));
+    activityList.add((Identity) personList.get(1));
+    activityList.add((Email) personList.get(2));
+    activityList.add(learningResource);
+    activityList.add(learningRecord);
+
+    return activityList;
+  }
+
+  /**
+   * @param statement
+   * @return ArrayList
+   */
+  private ArrayList<Object> processPerson(AbstractActor actor, Account account) {
+
+    Person person = null;
+    ArrayList<Object> personList = new ArrayList<Object>(3);
+
+    // Get person
+    person = getPerson(actor, account);
+
+    // If person doesn't exist
+    if (person == null) {
+      personList = createNewPerson(actor, account);
+    } else {
+      personList.add(person);
+    }
+
+    return personList;
+  }
+
+  /**
+   * @param statement
+   * @return ArrayList
+   */
+  private ArrayList<Object> createNewPerson(AbstractActor actor, Account account) {
 
     Email email = null;
-
-    AbstractActor actor = (AbstractActor) statement.getActor();
-    Account account = actor.getAccount();
 
     // If email
     if (actor.getMbox() != null && actor.getMbox().length() > 0) {
@@ -205,9 +329,15 @@ public class ELRRMessageListener {
     }
 
     Person person = createPerson(actor, email);
+
     Identity identity = createIdentity(person, actor, account);
 
-    return person;
+    ArrayList<Object> personList = new ArrayList<Object>(3);
+    personList.add(person);
+    personList.add(identity);
+    personList.add(email);
+
+    return personList;
   }
 
   /**
@@ -269,14 +399,10 @@ public class ELRRMessageListener {
    * @param statement
    * @return LearningResource
    */
-  private LearningResource processLearningResource(Statement statement) {
-
-    LearningResource learningResource = null;
-
-    Activity activity = (Activity) statement.getObject();
+  private LearningResource processLearningResource(Activity activity) {
 
     // Get learningResource
-    learningResource = learningResourceService.findByIri(activity.getId());
+    LearningResource learningResource = learningResourceService.findByIri(activity.getId());
 
     // If LearningResource doesn't exist
     if (learningResource == null) {
@@ -329,39 +455,23 @@ public class ELRRMessageListener {
   }
 
   /**
-   * @param statement
+   * @param Activity
+   * @param Person
+   * @param Result
+   * @param LearningResource
    * @return LearningRccord
    */
-  private LearningRecord processLearningRecord(Statement statement) {
-
-    LearningRecord learningRecord = null;
-    LearningResource learningResource = null;
-
-    Activity activity = (Activity) statement.getObject();
-
-    // Result
-    boolean completed = true;
-    boolean success = true;
-    Result result = statement.getResult();
-    if (result != null) {
-      completed = result.getCompletion();
-      success = result.getSuccess();
-    }
-
-    // Get person
-    Person person = getPerson(statement);
-
-    // Get learningResource
-    learningResource = learningResourceService.findByIri(activity.getId());
+  private LearningRecord processLearningRecord(
+      Activity activity, Person person, Result result, LearningResource learningResource) {
 
     // Get LearningRecord
-    learningRecord =
+    LearningRecord learningRecord =
         learningRecordService.findByPersonIdAndLearninResourceId(
             person.getId(), learningResource.getId());
 
     // If LearningRecord doesn't exist
     if (learningRecord == null) {
-      learningRecord = createLearningRecord(person, learningResource, success, completed);
+      learningRecord = createLearningRecord(person, learningResource, result);
 
       // If learningRecord already exists
     } else {
@@ -372,24 +482,35 @@ public class ELRRMessageListener {
   }
 
   /**
-   * @param person
+   * @param Person
    * @param learningResource
-   * @param success
-   * @param completed
+   * @param Result
    * @return LearningRecord
    */
   private LearningRecord createLearningRecord(
-      Person person, LearningResource learningResource, boolean success, boolean completed) {
+      Person person, LearningResource learningResource, Result result) {
+
     log.info("Creating new learning record.");
     LearningRecord learningRecord = new LearningRecord();
 
-    // status
-    if (success && completed) {
-      learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-    } else if (success && !completed) {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+    if (result != null) {
+
+      boolean success = result.getSuccess();
+      boolean completed = result.getCompletion();
+
+      // status
+      if (completed && success) {
+        learningRecord.setRecordStatus(LearningStatus.PASSED);
+      } else if (completed && !success) {
+        learningRecord.setRecordStatus(LearningStatus.FAILED);
+      } else if (completed) {
+        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+      } else {
+        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+      }
+
     } else {
-      learningRecord.setRecordStatus(LearningStatus.FAILED);
+      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
 
     learningRecord.setLearningResource(learningResource);
