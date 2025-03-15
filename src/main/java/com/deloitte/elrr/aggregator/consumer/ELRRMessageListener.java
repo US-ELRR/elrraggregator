@@ -65,16 +65,13 @@ public class ELRRMessageListener {
     log.info("Received Messasge in group - group-id: " + message);
 
     try {
-
       if (InputSanatizer.isValidInput(message)) {
         processMessage(message);
-        // Use Drools rule
         // processMessageFromRule(message);
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
-
-    } catch (Exception e) {
+    } catch (JsonProcessingException e) {
       log.error(e.getMessage());
       e.getStackTrace();
     }
@@ -130,13 +127,6 @@ public class ELRRMessageListener {
           // Process Activity
           ArrayList<Object> activityList =
               processActivity(actor, account, person, verb, obj, result);
-
-          activity = (Activity) activityList.get(0);
-          person = (Person) activityList.get(1);
-          Identity identity = (Identity) activityList.get(2);
-          Email email = (Email) activityList.get(3);
-          LearningResource learningResource = (LearningResource) activityList.get(4);
-          LearningRecord learningRecord = (LearningRecord) activityList.get(5);
 
         } else if (objType.compareTo(objType.AGENT) == 0) {
 
@@ -196,11 +186,13 @@ public class ELRRMessageListener {
   /**
    * @param actor
    * @param account
-   * @return Person
+   * @return ArrayList
    */
-  private Person getPerson(AbstractActor actor, Account account) {
+  private ArrayList<Object> getPerson(AbstractActor actor, Account account) {
 
     Person person = null;
+    Email email = null;
+    ArrayList<Object> personList = new ArrayList<Object>(2);
 
     // Does person exist
     String ifi =
@@ -215,12 +207,16 @@ public class ELRRMessageListener {
 
     // If person already exists
     if (identity != null) {
-
       log.info("Person exists.");
       person = identity.getPerson();
+      email = null;
     }
 
-    return person;
+    personList.add(person);
+    personList.add(identity);
+    personList.add(email);
+
+    return personList;
   }
 
   /**
@@ -273,19 +269,27 @@ public class ELRRMessageListener {
 
     // Process Person, Identity and Email
     ArrayList<Object> personList = processPerson(actor, account);
+    person = (Person) personList.get(0);
 
     // Process LearningResource
     LearningResource learningResource = processLearningResource(activity);
 
     // Process LearningRecord
     LearningRecord learningRecord =
-        processLearningRecord(activity, (Person) personList.get(0), result, learningResource);
+        processLearningRecord(activity, person, result, learningResource);
 
     ArrayList<Object> activityList = new ArrayList<Object>(6);
     activityList.add(activity);
     activityList.add((Person) personList.get(0));
     activityList.add((Identity) personList.get(1));
-    activityList.add((Email) personList.get(2));
+
+    // If Email
+    if (personList.get(2) != null) {
+      activityList.add((Email) personList.get(2));
+    } else {
+      activityList.add(null);
+    }
+
     activityList.add(learningResource);
     activityList.add(learningRecord);
 
@@ -299,16 +303,17 @@ public class ELRRMessageListener {
   private ArrayList<Object> processPerson(AbstractActor actor, Account account) {
 
     Person person = null;
+    Identity identity = null;
+    Email email = null;
     ArrayList<Object> personList = new ArrayList<Object>(3);
 
     // Get person
-    person = getPerson(actor, account);
+    personList = getPerson(actor, account);
+    person = (Person) personList.get(0);
 
     // If person doesn't exist
     if (person == null) {
       personList = createNewPerson(actor, account);
-    } else {
-      personList.add(person);
     }
 
     return personList;
