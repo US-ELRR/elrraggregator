@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.consumer;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -127,19 +126,25 @@ public class ELRRMessageListener {
         // Rule # 3 = If object != null and object type = ACTIVITY process activity.
         if (objType.compareTo(objType.ACTIVITY) == 0) {
 
-          // Process Activity
-          ArrayList<Object> activityList = processActivity(actor, account, verb, obj, result);
+          log.info("Process activity.");
 
-          // Parse activityList
-          Person person = (Person) activityList.get(0);
-          Identity identity = (Identity) activityList.get(1);
+          // Get activity
+          Activity activity = (Activity) obj;
 
-          if (activityList.get(2) != null) {
-            email = (Email) activityList.get(2);
+          // Get person
+          Person person = getPerson(actor, account);
+
+          // If person doesn't exist
+          if (person == null) {
+            person = createNewPerson(actor, account);
           }
 
-          LearningResource learningResource = (LearningResource) activityList.get(3);
-          LearningRecord learningRecord = (LearningRecord) activityList.get(1);
+          // Process LearningResource
+          LearningResource learningResource = processLearningResource(activity);
+
+          // Process LearningRecord
+          LearningRecord learningRecord =
+              processLearningRecord(activity, person, result, learningResource);
 
         } else if (objType.compareTo(objType.AGENT) == 0) {
 
@@ -216,14 +221,11 @@ public class ELRRMessageListener {
 
   /**
    * @param actor
-   * @param account
-   * @return ArrayList
+   * @param Person
    */
-  private ArrayList<Object> getPerson(AbstractActor actor, Account account) {
+  private Person getPerson(AbstractActor actor, Account account) {
 
     Person person = null;
-    Email email = null;
-    ArrayList<Object> personList = new ArrayList<Object>(2);
 
     // Does person exist
     String ifi =
@@ -240,14 +242,9 @@ public class ELRRMessageListener {
     if (identity != null) {
       log.info("Person exists.");
       person = identity.getPerson();
-      email = null;
     }
 
-    personList.add(person);
-    personList.add(identity);
-    personList.add(email);
-
-    return personList;
+    return person;
   }
 
   /**
@@ -280,93 +277,18 @@ public class ELRRMessageListener {
   /**
    * @param actor
    * @param account
-   * @param verb
-   * @param obj
-   * @param result
+   * @return Person
    */
-  private ArrayList<Object> processActivity(
-      AbstractActor actor, Account account, Verb verb, AbstractObject obj, Result result) {
-
-    log.info("Process activity.");
-
-    // Get activity
-    Activity activity = (Activity) obj;
-
-    // Process Person, Identity and Email
-    ArrayList<Object> personList = processPerson(actor, account);
-    Person person = (Person) personList.get(0);
-
-    // Process LearningResource
-    LearningResource learningResource = processLearningResource(activity);
-
-    // Process LearningRecord
-    LearningRecord learningRecord =
-        processLearningRecord(activity, person, result, learningResource);
-
-    ArrayList<Object> activityList = new ArrayList<Object>(6);
-    activityList.add(activity);
-    activityList.add((Person) personList.get(0));
-    activityList.add((Identity) personList.get(1));
-
-    // If Email
-    if (personList.get(2) != null) {
-      activityList.add((Email) personList.get(2));
-    } else {
-      activityList.add(null);
-    }
-
-    activityList.add(learningResource);
-    activityList.add(learningRecord);
-
-    return activityList;
-  }
-
-  /**
-   * @param actor
-   * @param account
-   * @return ArrayList
-   */
-  private ArrayList<Object> processPerson(AbstractActor actor, Account account) {
-
-    Person person = null;
-    ArrayList<Object> personList = new ArrayList<Object>(3);
-
-    // Get person
-    personList = getPerson(actor, account);
-    person = (Person) personList.get(0);
-
-    // If person doesn't exist
-    if (person == null) {
-      personList = createNewPerson(actor, account);
-    }
-
-    return personList;
-  }
-
-  /**
-   * @param actor
-   * @param account
-   * @return ArrayList
-   */
-  private ArrayList<Object> createNewPerson(AbstractActor actor, Account account) {
+  private Person createNewPerson(AbstractActor actor, Account account) {
 
     Email email = null;
-
     // If email
     if (actor.getMbox() != null && actor.getMbox().length() > 0) {
       email = createEmail(actor);
     }
-
     Person person = createPerson(actor, email);
-
     Identity identity = createIdentity(person, actor, account);
-
-    ArrayList<Object> personList = new ArrayList<Object>(3);
-    personList.add(person);
-    personList.add(identity);
-    personList.add(email);
-
-    return personList;
+    return person;
   }
 
   /**
@@ -398,12 +320,10 @@ public class ELRRMessageListener {
     identity.setMbox(actor.getMbox());
     identity.setOpenid(actor.getOpenid());
     identity.setPerson(person);
-
     if (account != null) {
       identity.setHomePage(account.getHomePage());
       identity.setName(account.getName());
     }
-
     identity.setUpdatedBy(updatedBy);
     identityService.save(identity);
     return identity;
