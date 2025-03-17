@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.InputSanatizer;
@@ -54,6 +55,8 @@ public class ELRRMessageListener {
 
   @Autowired private DroolsProcessStatementService droolsProcessStatementService;
 
+  @Autowired KafkaTemplate<?, String> kafkaTemplate;
+
   private static String updatedBy = "ELRR";
 
   /**
@@ -71,9 +74,9 @@ public class ELRRMessageListener {
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
-    } catch (JsonProcessingException e) {
-      log.error(e.getMessage());
-      e.getStackTrace();
+    } catch (Exception e) {
+      // Send to dead letter queue
+      kafkaTemplate.send("test-1-dlq", message);
     }
   }
 
@@ -82,19 +85,15 @@ public class ELRRMessageListener {
    */
   private void processMessage(final String payload) throws JsonProcessingException {
 
-    ObjectMapper mapper = Mapper.getMapper();
     log.info("Process kafka message.");
 
-    Activity activity = null;
-    Person person = null;
     Account account = null;
-    ObjectType objType = null;
+    Email email = null;
 
     try {
 
       // Get Statement
-      MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
-      Statement statement = messageVo.getStatement();
+      Statement statement = getStatement(payload);
 
       // Get Actor
       AbstractActor actor = getActor(statement);
@@ -118,15 +117,25 @@ public class ELRRMessageListener {
       if (obj != null) {
 
         // Object type
-        objType = obj.getObjectType();
+        ObjectType objType = obj.getObjectType();
         log.info("Object type = " + objType.name());
 
         // Rule # 3 = If object != null and object type = ACTIVITY process activity.
         if (objType.compareTo(objType.ACTIVITY) == 0) {
 
           // Process Activity
-          ArrayList<Object> activityList =
-              processActivity(actor, account, person, verb, obj, result);
+          ArrayList<Object> activityList = processActivity(actor, account, verb, obj, result);
+
+          // Parse activityList
+          Person person = (Person) activityList.get(0);
+          Identity identity = (Identity) activityList.get(1);
+
+          if (activityList.get(2) != null) {
+            email = (Email) activityList.get(2);
+          }
+
+          LearningResource learningResource = (LearningResource) activityList.get(3);
+          LearningRecord learningRecord = (LearningRecord) activityList.get(1);
 
         } else if (objType.compareTo(objType.AGENT) == 0) {
 
@@ -164,6 +173,24 @@ public class ELRRMessageListener {
       e.printStackTrace();
     }
   }*/
+
+  /**
+   * @param payload
+   * @return Statement
+   */
+  private Statement getStatement(String payload) throws JsonProcessingException {
+    Statement statement = null;
+    ObjectMapper mapper = Mapper.getMapper();
+    MessageVO messageVo;
+    try {
+      messageVo = mapper.readValue(payload, MessageVO.class);
+      statement = messageVo.getStatement();
+    } catch (JsonProcessingException e) {
+      log.info("Exception while getting statement.");
+      e.printStackTrace();
+    }
+    return statement;
+  }
 
   /**
    * @param statement
@@ -249,18 +276,12 @@ public class ELRRMessageListener {
   /**
    * @param actor
    * @param account
-   * @param person
    * @param verb
    * @param obj
    * @param result
    */
   private ArrayList<Object> processActivity(
-      AbstractActor actor,
-      Account account,
-      Person person,
-      Verb verb,
-      AbstractObject obj,
-      Result result) {
+      AbstractActor actor, Account account, Verb verb, AbstractObject obj, Result result) {
 
     log.info("Process activity.");
 
@@ -269,7 +290,7 @@ public class ELRRMessageListener {
 
     // Process Person, Identity and Email
     ArrayList<Object> personList = processPerson(actor, account);
-    person = (Person) personList.get(0);
+    Person person = (Person) personList.get(0);
 
     // Process LearningResource
     LearningResource learningResource = processLearningResource(activity);
@@ -297,14 +318,13 @@ public class ELRRMessageListener {
   }
 
   /**
-   * @param statement
+   * @param actor
+   * @param account
    * @return ArrayList
    */
   private ArrayList<Object> processPerson(AbstractActor actor, Account account) {
 
     Person person = null;
-    Identity identity = null;
-    Email email = null;
     ArrayList<Object> personList = new ArrayList<Object>(3);
 
     // Get person
@@ -320,7 +340,8 @@ public class ELRRMessageListener {
   }
 
   /**
-   * @param statement
+   * @param actor
+   * @param account
    * @return ArrayList
    */
   private ArrayList<Object> createNewPerson(AbstractActor actor, Account account) {
@@ -400,7 +421,7 @@ public class ELRRMessageListener {
   }
 
   /**
-   * @param statement
+   * @param activity
    * @return LearningResource
    */
   private LearningResource processLearningResource(Activity activity) {
