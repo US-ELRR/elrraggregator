@@ -76,7 +76,7 @@ public class ELRRMessageListener {
       }
     } catch (Exception e) {
       // Send to dead letter queue
-      kafkaTemplate.send("test-1-dlq", message);
+      kafkaTemplate.send("${kafka.dead.letter.topic}", message);
     }
   }
 
