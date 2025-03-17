@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,9 @@ public class ELRRMessageListener {
 
   @Autowired KafkaTemplate<?, String> kafkaTemplate;
 
+  @Value("${kafka.dead.letter.topic}")
+  private String deadLetterTopic;
+
   private static String updatedBy = "ELRR";
 
   /**
@@ -76,7 +80,7 @@ public class ELRRMessageListener {
       }
     } catch (Exception e) {
       // Send to dead letter queue
-      kafkaTemplate.send("${kafka.dead.letter.topic}", message);
+      kafkaTemplate.send(deadLetterTopic, message);
     }
   }
 
