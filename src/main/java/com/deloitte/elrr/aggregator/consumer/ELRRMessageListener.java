@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,9 @@ public class ELRRMessageListener {
   @Value("${kafka.dead.letter.topic}")
   private String deadLetterTopic;
 
+  @Value("${lang.codes}")
+  private String[] namLang = new String[10];
+
   private static String updatedBy = "ELRR";
 
   /**
@@ -107,8 +112,14 @@ public class ELRRMessageListener {
         account = getAccount(actor);
       }
 
+      // Completed Verb
+      String[] completedVerbArray = ActivityCompletedConstants.COMPLETED_VERB;
+
       // Get Verb
       Verb verb = getVerb(statement);
+
+      // Is Verb Id completed?
+      boolean activityComp = Arrays.asList(completedVerbArray).contains(verb.getId());
 
       // Get Object
       AbstractObject obj = getObject(statement);
@@ -116,15 +127,23 @@ public class ELRRMessageListener {
       // Get Result
       Result result = getResult(statement);
 
-      // Rule #2 = If object != null get object type
+      // Rule #2 = If object != null
       if (obj != null) {
 
         // Object type
         ObjectType objType = obj.getObjectType();
-        log.info("Object type = " + objType.name());
 
-        // Rule # 3 = If object != null and object type = ACTIVITY process activity.
-        if (objType.compareTo(objType.ACTIVITY) == 0) {
+        if (objType != null) {
+          log.info("Object type = " + objType.name());
+        } else if (objType == null && activityComp) {
+          log.info("Object type = Activity Completed.");
+        }
+
+        // Rule # 3 = If object != null and object type = ACTIVITY
+        // OR If object != null and Object type = null and verb id = completed
+        // process activity.
+        if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
+            || objType == null && activityComp) {
 
           log.info("Process activity.");
 
@@ -145,15 +164,6 @@ public class ELRRMessageListener {
           // Process LearningRecord
           LearningRecord learningRecord =
               processLearningRecord(activity, person, result, learningResource);
-
-        } else if (objType.compareTo(objType.AGENT) == 0) {
-
-        } else if (objType.compareTo(objType.GROUP) == 0) {
-
-        } else if (objType.compareTo(objType.STATEMENT_REF) == 0) {
-
-        } else if (objType.compareTo(objType.SUB_STATEMENT) == 0) {
-
         }
       }
 
@@ -375,9 +385,29 @@ public class ELRRMessageListener {
     ActivityDefinition activityDefenition = activity.getDefinition();
     LangMap nameLangMap = activityDefenition.getName();
 
+    // Activity name
     if (nameLangMap != null) {
       Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
-      nameLangCode = nameLangCodes.iterator().next();
+
+      // Get namLangCode
+      Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
+
+      while (nameLangCodesIterator.hasNext()) {
+
+        String code = nameLangCodesIterator.next();
+
+        boolean found = Arrays.asList(namLang).contains(code);
+        if (found) {
+          nameLangCode = code;
+          break;
+        }
+      }
+
+      // If namLangCode not found
+      if (nameLangCode.equalsIgnoreCase("")) {
+        nameLangCode = "en-us";
+      }
+
       activityName = activityDefenition.getName().get(nameLangCode);
     }
 
@@ -386,18 +416,73 @@ public class ELRRMessageListener {
     String langCode = "";
 
     LangMap descLangMap = activityDefenition.getDescription();
+    LangMap namLangMap = activityDefenition.getName();
 
+    // If activity description
     if (descLangMap != null) {
       Set<String> descLangCodes = descLangMap.getLanguageCodes();
-      langCode = descLangCodes.iterator().next();
+
+      // Get namDescCode
+      Iterator<String> descLangCodesIterator = descLangCodes.iterator();
+
+      while (descLangCodesIterator.hasNext()) {
+
+        String code = descLangCodesIterator.next();
+
+        boolean found = Arrays.asList(namLang).contains(code);
+        if (found) {
+          langCode = code;
+          break;
+        }
+      }
+
+      // If langCode not found
+      if (langCode.equalsIgnoreCase("")) {
+        langCode = "en-us";
+      }
+
       activityDescription = activityDefenition.getDescription().get(langCode);
+
+      // If activity name
+    } else if (namLangMap != null) {
+      Set<String> namLangCodes = namLangMap.getLanguageCodes();
+
+      // Get namDescCode
+      Iterator<String> namLangCodesIterator = namLangCodes.iterator();
+
+      while (namLangCodesIterator.hasNext()) {
+
+        String code = namLangCodesIterator.next();
+
+        boolean found = Arrays.asList(namLang).contains(code);
+        if (found) {
+          langCode = code;
+          break;
+        }
+      }
+
+      // If langCode not found
+      if (langCode.equalsIgnoreCase("")) {
+        langCode = "en-us";
+      }
+
+      activityDescription = activityDefenition.getName().get(langCode);
+
+    } else {
+      activityDescription = "";
     }
 
     LearningResource learningResource = new LearningResource();
     learningResource.setIri(activity.getId());
     learningResource.setDescription(activityDescription);
     learningResource.setNumber(activityName);
-    learningResource.setTitle(activityDescription);
+
+    if (activityDescription != null) {
+      learningResource.setTitle(activityDescription);
+    } else {
+      learningResource.setTitle("");
+    }
+
     learningResource.setUpdatedBy(updatedBy);
     learningResourceService.save(learningResource);
     return learningResource;
@@ -444,20 +529,19 @@ public class ELRRMessageListener {
 
     if (result != null) {
 
-      boolean success = result.getSuccess();
-      boolean completed = result.getCompletion();
+      Boolean success = result.getSuccess();
+      Boolean completed = result.getCompletion();
 
       // status
-      if (completed && success) {
+      if (completed && success == null) {
+        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+      } else if (completed && success) {
         learningRecord.setRecordStatus(LearningStatus.PASSED);
       } else if (completed && !success) {
         learningRecord.setRecordStatus(LearningStatus.FAILED);
-      } else if (completed) {
-        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
       } else {
         learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
       }
-
     } else {
       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
