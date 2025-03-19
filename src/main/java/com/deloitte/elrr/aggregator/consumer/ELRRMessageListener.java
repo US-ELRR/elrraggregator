@@ -378,14 +378,16 @@ public class ELRRMessageListener {
   private LearningResource createLearningResource(Activity activity) {
     log.info("Creating new learning resource.");
 
+    // Activity Defenition
+    ActivityDefinition activityDefenition = activity.getDefinition();
+
     // Activity name
     String activityName = "";
     String nameLangCode = "";
 
-    ActivityDefinition activityDefenition = activity.getDefinition();
     LangMap nameLangMap = activityDefenition.getName();
 
-    // Activity name
+    // If Activity name
     if (nameLangMap != null) {
       Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
 
@@ -393,9 +395,7 @@ public class ELRRMessageListener {
       Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
 
       while (nameLangCodesIterator.hasNext()) {
-
         String code = nameLangCodesIterator.next();
-
         boolean found = Arrays.asList(namLang).contains(code);
         if (found) {
           nameLangCode = code;
@@ -426,9 +426,7 @@ public class ELRRMessageListener {
       Iterator<String> descLangCodesIterator = descLangCodes.iterator();
 
       while (descLangCodesIterator.hasNext()) {
-
         String code = descLangCodesIterator.next();
-
         boolean found = Arrays.asList(namLang).contains(code);
         if (found) {
           langCode = code;
@@ -451,9 +449,7 @@ public class ELRRMessageListener {
       Iterator<String> namLangCodesIterator = namLangCodes.iterator();
 
       while (namLangCodesIterator.hasNext()) {
-
         String code = namLangCodesIterator.next();
-
         boolean found = Arrays.asList(namLang).contains(code);
         if (found) {
           langCode = code;
