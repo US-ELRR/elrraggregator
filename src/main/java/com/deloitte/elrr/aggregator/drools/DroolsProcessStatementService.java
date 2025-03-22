@@ -5,7 +5,11 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.deloitte.elrr.entity.LearningRecord;
+import com.deloitte.elrr.jpa.svc.EmailSvc;
+import com.deloitte.elrr.jpa.svc.IdentitySvc;
+import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
+import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,15 +18,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DroolsProcessStatementService {
 
-  @Autowired private static KieContainer kieContainer;
+  @Autowired private KieContainer kieContainer;
 
-  public static LearningRecord processStatement(Statement statement) {
+  @Autowired private EmailSvc emailService;
 
-    LearningRecord learningRecord = new LearningRecord();
+  @Autowired private IdentitySvc identityService;
+
+  @Autowired private PersonSvc personService;
+
+  @Autowired private LearningResourceSvc learningResourceService;
+
+  @Autowired private LearningRecordSvc learningRecordService;
+
+  public void processStatement(Statement statement) {
+
     try {
 
       KieSession kieSession = kieContainer.newKieSession();
-      kieSession.setGlobal("learningRecord", learningRecord);
+      kieSession.setGlobal("personService", personService);
+      kieSession.setGlobal("identityService", identityService);
+      kieSession.setGlobal("emailService", emailService);
+      kieSession.setGlobal("learningRecordService", learningRecordService);
+      kieSession.setGlobal("learningResourceService", learningResourceService);
       kieSession.setGlobal("statement", statement);
       kieSession.insert(statement);
       kieSession.fireAllRules();
@@ -32,6 +49,5 @@ public class DroolsProcessStatementService {
       log.info("Exception while creating KieSession.");
       e.printStackTrace();
     }
-    return learningRecord;
   }
 }

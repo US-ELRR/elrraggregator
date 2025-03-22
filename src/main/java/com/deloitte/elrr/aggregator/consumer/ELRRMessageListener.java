@@ -35,6 +35,7 @@ import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.ObjectType;
 import com.yetanalytics.xapi.model.Result;
+import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.util.Mapper;
@@ -65,6 +66,9 @@ public class ELRRMessageListener {
   @Value("${lang.codes}")
   private String[] namLang = new String[10];
 
+  @Value("${drools}")
+  private boolean useDrools;
+
   private static String updatedBy = "ELRR";
 
   /**
@@ -73,12 +77,18 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("Received Messasge in group - group-id: " + message);
+    log.info("\nReceived Messasge in group - group-id: " + message);
 
     try {
+
       if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        // processMessageFromRule(message);
+
+        if (!useDrools) {
+          processMessage(message);
+        } else {
+          processMessageFromRule(message);
+        }
+
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
@@ -93,10 +103,9 @@ public class ELRRMessageListener {
    */
   private void processMessage(final String payload) throws JsonProcessingException {
 
-    log.info("Process kafka message.");
+    log.info("\nProcess kafka message.");
 
     Account account = null;
-    Email email = null;
 
     try {
 
@@ -176,22 +185,16 @@ public class ELRRMessageListener {
   /**
    * @param statement
    */
-  /*private void processMessageFromRule(final String payload) {
-    ObjectMapper mapper = Mapper.getMapper();
-    log.info("payload received " + payload);
-    LearningRecord learningRecord = new LearningRecord();
-
+  private void processMessageFromRule(final String payload) {
+    log.info("\nProcess kafka message with Drools.");
     try {
-
-      MessageVO messageVo = mapper.readValue(payload, MessageVO.class);
-      Statement statement = messageVo.getStatement();
-      learningRecord = DroolsProcessStatementService.processStatement(statement);
-
+      Statement statement = getStatement(payload);
+      droolsProcessStatementService.processStatement(statement);
     } catch (JsonProcessingException e) {
       log.info("Exception while processing rule.");
       e.printStackTrace();
     }
-  }*/
+  }
 
   /**
    * @param payload
@@ -378,7 +381,7 @@ public class ELRRMessageListener {
   private LearningResource createLearningResource(Activity activity) {
     log.info("Creating new learning resource.");
 
-    // Activity Defenition
+    // Activity Definition
     ActivityDefinition activityDefenition = activity.getDefinition();
 
     // Activity name
@@ -471,7 +474,6 @@ public class ELRRMessageListener {
     LearningResource learningResource = new LearningResource();
     learningResource.setIri(activity.getId());
     learningResource.setDescription(activityDescription);
-    learningResource.setNumber(activityName);
 
     if (activityDescription != null) {
       learningResource.setTitle(activityDescription);
@@ -538,6 +540,14 @@ public class ELRRMessageListener {
       } else {
         learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
       }
+
+      // grade
+      Score score = result.getScore();
+
+      if (score != null) {
+        learningRecord.setAcademicGrade(score.getRaw().toString());
+      }
+
     } else {
       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
