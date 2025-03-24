@@ -40,290 +40,278 @@ global com.yetanalytics.xapi.model.Statement statement;
 dialect "java"
 
 rule "Process_Statement"
+    @description("Process xAPI Statement.")
+    @version(1.0)
    when
        Statement (id != "")
    then
-      System.out.println("\n");
-      System.out.println("==========Process Statement=============");
-      helper(drools);
+        System.out.println("\n ==========Process Statement=============");
+        helper(drools);
       
-      Account account = null;
+        Account account = null;
 
-    try {
-
-      String[] namLang = {"en-us"};
-      String updatedBy = "ELRR";
-
-      // Get Actor
-      AbstractActor actor = (AbstractActor) statement.getActor();
-
-      // Get Account
-      // Rule #1 = If actor != null get account.
-      if (actor != null) {
-        account = actor.getAccount();
-      }
-
-      // Completed Verb
-      String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
-
-      // Get Verb
-      Verb verb = statement.getVerb();
-
-      // Is Verb Id completed?
-      boolean activityComp = Arrays.asList(completedVerbArray).contains(verb.getId());
-
-      // Get Object
-      AbstractObject obj = statement.getObject();
-
-      // Get Result
-      Result result = statement.getResult();
-
-      // Rule #2 = If object != null
-      if (obj != null) {
-
-        // Object type
-        ObjectType objType = obj.getObjectType();
-
-        // Rule # 3 = If object != null and object type = ACTIVITY
-        // OR If object != null and Object type = null and verb id = completed
-        // process activity.
-        if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
-            || objType == null && activityComp) {
-
-          System.out.println("Process activity.");
-
-          // Get activity
-          Activity activity = (Activity) obj;
-
-          // Get person
-          Person person = null;
-    
-          // Does person exist
-          String ifi =
-            Identity.createIfi(
-                actor.getMbox_sha1sum(),
-                actor.getMbox(),
-                actor.getOpenid(),
-                (account != null) ? account.getHomePage() : null,
-                (account != null) ? account.getName() : null);
-    
-          Identity identity = identityService.getByIfi(ifi);
-    
-          // If person already exists
-          if (identity != null) {
-              System.out.println("Person exists.");
-              person = identity.getPerson();
+        try {
+        
+          String[] namLang = {"en-us"};
+          String updatedBy = "ELRR";
+        
+          // Get Actor
+          AbstractActor actor = (AbstractActor) statement.getActor();
+        
+          // Get Account
+          if (actor != null) {
+            account = actor.getAccount();
           }
-
-          // If person doesn't exist
-          if (person == null) {
-          
-            System.out.println("Creating new email.");
-            Email email = new Email();
-            email.setEmailAddress(actor.getMbox());
-            email.setEmailAddressType("primary");
-            email.setUpdatedBy(updatedBy);
-            emailService.save(email);
-            
-            System.out.println("Creating new person.");
-            person = new Person();
-            person.setName(actor.getName());
-            person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
-            person.getEmailAddresses().add(email);
-            person.setUpdatedBy(updatedBy);
-            personService.save(person);
-            
-            System.out.println("Creating new identity.");
-            identity = new Identity();
-            identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-            identity.setMbox(actor.getMbox());
-            identity.setOpenid(actor.getOpenid());
-            identity.setPerson(person);
-            if (account != null) {
-              identity.setHomePage(account.getHomePage());
-              identity.setName(account.getName());
-            }
-            identity.setUpdatedBy(updatedBy);
-            identityService.save(identity);
-          }
-
-          // Process LearningResource
-          // Get learningResource
-          LearningResource learningResource = learningResourceService.findByIri(activity.getId());
-    
-          // If LearningResource doesn't exist
-          if (learningResource == null) {
-          
-            System.out.println("Creating new learning resource.");
-            
-            // Activity Definition
-            ActivityDefinition activityDefenition = activity.getDefinition();
         
-            // Activity name
-            String activityName = "";
-            String nameLangCode = "";
+          // Completed Verb
+          String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
         
-            LangMap nameLangMap = activityDefenition.getName();
+          // Get Verb
+          Verb verb = statement.getVerb();
         
-            // If Activity name
-            if (nameLangMap != null) {
-              Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+          // Is Verb Id completed?
+          boolean activityComp =
+              Arrays.asList(completedVerbArray).contains(verb.getId());
         
-              // Get namLangCode
-              Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
+          // Get Object
+          AbstractObject obj = statement.getObject();
         
-              while (nameLangCodesIterator.hasNext()) {
-                String code = nameLangCodesIterator.next();
-                boolean found = Arrays.asList(namLang).contains(code);
-                if (found) {
-                  nameLangCode = code;
-                  break;
+          // Get Result
+          Result result = statement.getResult();
+        
+          if (obj != null) {
+            // Object type
+            ObjectType objType = obj.getObjectType();
+        
+            // If object != null and object type = ACTIVITY
+            // OR If object != null and Object type = null and verb id = completed
+            // process activity.
+            if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
+                || objType == null && activityComp) {
+              System.out.println("Process activity.");
+        
+              // Get activity
+              Activity activity = (Activity) obj;
+        
+              // Get person
+              Person person = null;
+        
+              // Does person exist
+              String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(),
+                  actor.getOpenid(), (account != null) ? account.getHomePage() : null,
+                  (account != null) ? account.getName() : null);
+        
+              Identity identity = identityService.getByIfi(ifi);
+        
+              // If person already exists
+              if (identity != null) {
+                System.out.println("Person exists.");
+                person = identity.getPerson();
+              }
+        
+              // If person doesn't exist
+              if (person == null) {
+                System.out.println("Creating new email.");
+                Email email = new Email();
+                email.setEmailAddress(actor.getMbox());
+                email.setEmailAddressType("primary");
+                email.setUpdatedBy(updatedBy);
+                emailService.save(email);
+        
+                System.out.println("Creating new person.");
+                person = new Person();
+                person.setName(actor.getName());
+                person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
+                person.getEmailAddresses().add(email);
+                person.setUpdatedBy(updatedBy);
+                personService.save(person);
+        
+                System.out.println("Creating new identity.");
+                identity = new Identity();
+                identity.setMboxSha1Sum(actor.getMbox_sha1sum());
+                identity.setMbox(actor.getMbox());
+                identity.setOpenid(actor.getOpenid());
+                identity.setPerson(person);
+                if (account != null) {
+                  identity.setHomePage(account.getHomePage());
+                  identity.setName(account.getName());
                 }
+                identity.setUpdatedBy(updatedBy);
+                identityService.save(identity);
               }
         
-              // If namLangCode not found
-              if (nameLangCode.equalsIgnoreCase("")) {
-                nameLangCode = "en-us";
-              }
+              // Process LearningResource
+              // Get learningResource
+              LearningResource learningResource =
+                  learningResourceService.findByIri(activity.getId());
         
-              activityName = activityDefenition.getName().get(nameLangCode);
-            }
+              // If LearningResource doesn't exist
+              if (learningResource == null) {
+                System.out.println("Creating new learning resource.");
         
-            // Activity Description
-            String activityDescription = "";
-            String langCode = "";
+                // Activity Definition
+                ActivityDefinition activityDefenition = activity.getDefinition();
         
-            LangMap descLangMap = activityDefenition.getDescription();
-            LangMap namLangMap = activityDefenition.getName();
+                // Activity name
+                String activityName = "";
+                String nameLangCode = "";
         
-            // If activity description
-            if (descLangMap != null) {
-              Set<String> descLangCodes = descLangMap.getLanguageCodes();
+                LangMap nameLangMap = activityDefenition.getName();
         
-              // Get namDescCode
-              Iterator<String> descLangCodesIterator = descLangCodes.iterator();
+                // If Activity name
+                if (nameLangMap != null) {
+                  Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
         
-              while (descLangCodesIterator.hasNext()) {
-                String code = descLangCodesIterator.next();
-                boolean found = Arrays.asList(namLang).contains(code);
-                if (found) {
-                  langCode = code;
-                  break;
+                  // Get namLangCode
+                  Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
+        
+                  while (nameLangCodesIterator.hasNext()) {
+                    String code = nameLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      nameLangCode = code;
+                      break;
+                    }
+                  }
+        
+                  // If namLangCode not found
+                  if (nameLangCode.equalsIgnoreCase("")) {
+                    nameLangCode = "en-us";
+                  }
+        
+                  activityName = activityDefenition.getName().get(nameLangCode);
                 }
-              }
         
-              // If langCode not found
-              if (langCode.equalsIgnoreCase("")) {
-                langCode = "en-us";
-              }
+                // Activity Description
+                String activityDescription = "";
+                String langCode = "";
         
-              activityDescription = activityDefenition.getDescription().get(langCode);
+                LangMap descLangMap = activityDefenition.getDescription();
+                LangMap namLangMap = activityDefenition.getName();
         
-              // If activity name
-            } else if (namLangMap != null) {
-              Set<String> namLangCodes = namLangMap.getLanguageCodes();
+                // If activity description
+                if (descLangMap != null) {
+                  Set<String> descLangCodes = descLangMap.getLanguageCodes();
         
-              // Get namDescCode
-              Iterator<String> namLangCodesIterator = namLangCodes.iterator();
+                  // Get namDescCode
+                  Iterator<String> descLangCodesIterator = descLangCodes.iterator();
         
-              while (namLangCodesIterator.hasNext()) {
-                String code = namLangCodesIterator.next();
-                boolean found = Arrays.asList(namLang).contains(code);
-                if (found) {
-                  langCode = code;
-                  break;
+                  while (descLangCodesIterator.hasNext()) {
+                    String code = descLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      langCode = code;
+                      break;
+                    }
+                  }
+        
+                  // If langCode not found
+                  if (langCode.equalsIgnoreCase("")) {
+                    langCode = "en-us";
+                  }
+        
+                  activityDescription =
+                      activityDefenition.getDescription().get(langCode);
+        
+                // If activity name
+                } else if (namLangMap != null) {
+                  Set<String> namLangCodes = namLangMap.getLanguageCodes();
+        
+                  // Get namDescCode
+                  Iterator<String> namLangCodesIterator = namLangCodes.iterator();
+        
+                  while (namLangCodesIterator.hasNext()) {
+                    String code = namLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      langCode = code;
+                      break;
+                    }
+                  }
+        
+                  // If langCode not found
+                  if (langCode.equalsIgnoreCase("")) {
+                    langCode = "en-us";
+                  }
+        
+                  activityDescription = activityDefenition.getName().get(langCode);
+        
+                } else {
+                  activityDescription = "";
                 }
+        
+                learningResource = new LearningResource();
+                learningResource.setIri(activity.getId());
+                learningResource.setDescription(activityDescription);
+        
+                if (activityDescription != null) {
+                  learningResource.setTitle(activityDescription);
+                } else {
+                  learningResource.setTitle("");
+                }
+        
+                learningResource.setUpdatedBy(updatedBy);
+                learningResourceService.save(learningResource);
               }
         
-              // If langCode not found
-              if (langCode.equalsIgnoreCase("")) {
-                langCode = "en-us";
-              }
+              // Process LearningRecord
+              // Get LearningRecord
+              LearningRecord learningRecord =
+                  learningRecordService.findByPersonIdAndLearninResourceId(
+                      person.getId(), learningResource.getId());
         
-              activityDescription = activityDefenition.getName().get(langCode);
+              // If LearningRecord doesn't exist
+              if (learningRecord == null) {
+                System.out.println("Creating new learning record.");
+                learningRecord = new LearningRecord();
         
-            } else {
-              activityDescription = "";
-            }
+                if (result != null) {
+                  Boolean success = result.getSuccess();
+                  Boolean completed = result.getCompletion();
         
-            learningResource = new LearningResource();
-            learningResource.setIri(activity.getId());
-            learningResource.setDescription(activityDescription);
+                    // status
+                  if (completed && success == null) {
+                    learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                  } else if (completed && success ) {
+                    learningRecord.setRecordStatus(LearningStatus.PASSED);
+                  } else if (completed && !success) {
+                    learningRecord.setRecordStatus(LearningStatus.FAILED);
+                  } else {
+                    learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                  }
         
-            if (activityDescription != null) {
-              learningResource.setTitle(activityDescription);
-            } else {
-              learningResource.setTitle("");
-            }
+                  // grade
+                  Score score = result.getScore();
         
-            learningResource.setUpdatedBy(updatedBy);
-            learningResourceService.save(learningResource);
-
-          }
-
-          // Process LearningRecord
-          // Get LearningRecord
-          LearningRecord learningRecord =
-              learningRecordService.findByPersonIdAndLearninResourceId(
-                  person.getId(), learningResource.getId());
-    
-          // If LearningRecord doesn't exist
-          if (learningRecord == null) {
-            System.out.println("Creating new learning record.");
-            learningRecord = new LearningRecord();
-    
-            if (result != null) {
+                  if (score != null) {
+                    learningRecord.setAcademicGrade(score.getRaw().toString());
+                  }
         
-              /*Boolean success = result.getSuccess();
-              Boolean completed = result.getCompletion();
- 
-                // status
-              if (completed == true && success == null) {
-                learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-              } else if (completed == true && success == true) {
-                learningRecord.setRecordStatus(LearningStatus.PASSED);
-              } else if (completed == true && success == false) {
-                learningRecord.setRecordStatus(LearningStatus.FAILED);
+                } else {
+                  learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                }
+        
+                learningRecord.setLearningResource(learningResource);
+                learningRecord.setPerson(person);
+                learningRecord.setUpdatedBy(updatedBy);
+                learningRecordService.save(learningRecord);
+        
+              // If learningRecord already exists
               } else {
-                learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                System.out.println("Update learning record.");
+                learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                learningRecord.setLearningResource(learningResource);
+                learningRecord.setPerson(person);
+                learningRecord.setUpdatedBy(updatedBy);
+                learningRecordService.update(learningRecord);
               }
-        
-               // grade
-               Score score = result.getScore();
-        
-               if (score != null) {
-                 learningRecord.setAcademicGrade(score.getRaw().toString());
-               }
-             }*/
-        
-              learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-              
-            } else {
-              learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
             }
-        
-            learningRecord.setLearningResource(learningResource);
-            learningRecord.setPerson(person);
-            learningRecord.setUpdatedBy(updatedBy);
-            learningRecordService.save(learningRecord);
-   
-          // If learningRecord already exists
-          } else {
-            System.out.println("Update learning record.");
-            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-            learningRecord.setLearningResource(learningResource);
-            learningRecord.setPerson(person);
-            learningRecord.setUpdatedBy(updatedBy);
-            learningRecordService.update(learningRecord);
           }
-             
-        }
-      }
-
-      } catch (Exception e) {
+        
+        } catch (Exception e) {
           System.out.println("Exception while firing processStatement rule.");
           System.out.println(e.getMessage());
           e.printStackTrace();
-      }
+        }
 
   end

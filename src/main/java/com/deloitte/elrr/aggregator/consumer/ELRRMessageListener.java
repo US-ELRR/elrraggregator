@@ -77,7 +77,7 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("\nReceived Messasge in group - group-id: " + message);
+    log.info("Received Messasge in group - group-id: " + message);
 
     try {
 
@@ -93,6 +93,7 @@ public class ELRRMessageListener {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
     } catch (Exception e) {
+      log.error(e.getMessage());
       // Send to dead letter queue
       kafkaTemplate.send(deadLetterTopic, message);
     }
@@ -103,7 +104,7 @@ public class ELRRMessageListener {
    */
   private void processMessage(final String payload) throws JsonProcessingException {
 
-    log.info("\nProcess kafka message.");
+    log.info("Process kafka message.");
 
     Account account = null;
 
@@ -116,7 +117,6 @@ public class ELRRMessageListener {
       AbstractActor actor = getActor(statement);
 
       // Get Account
-      // Rule #1 = If actor != null get account.
       if (actor != null) {
         account = getAccount(actor);
       }
@@ -136,7 +136,6 @@ public class ELRRMessageListener {
       // Get Result
       Result result = getResult(statement);
 
-      // Rule #2 = If object != null
       if (obj != null) {
 
         // Object type
@@ -148,7 +147,7 @@ public class ELRRMessageListener {
           log.info("Object type = Activity Completed.");
         }
 
-        // Rule # 3 = If object != null and object type = ACTIVITY
+        // If object != null and object type = ACTIVITY
         // OR If object != null and Object type = null and verb id = completed
         // process activity.
         if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
@@ -177,7 +176,7 @@ public class ELRRMessageListener {
       }
 
     } catch (JsonProcessingException e) {
-      log.info("Exception while processing message.");
+      log.error("Exception while processing message.");
       e.printStackTrace();
     }
   }
@@ -186,12 +185,12 @@ public class ELRRMessageListener {
    * @param statement
    */
   private void processMessageFromRule(final String payload) {
-    log.info("\nProcess kafka message with Drools.");
+    log.info("Process kafka message with Drools.");
     try {
       Statement statement = getStatement(payload);
       droolsProcessStatementService.processStatement(statement);
     } catch (JsonProcessingException e) {
-      log.info("Exception while processing rule.");
+      log.error("Exception while processing rule.");
       e.printStackTrace();
     }
   }
@@ -208,7 +207,7 @@ public class ELRRMessageListener {
       messageVo = mapper.readValue(payload, MessageVO.class);
       statement = messageVo.getStatement();
     } catch (JsonProcessingException e) {
-      log.info("Exception while getting statement.");
+      log.error("Exception while getting statement.");
       e.printStackTrace();
     }
     return statement;
