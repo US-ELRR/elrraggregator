@@ -40,8 +40,6 @@ global com.yetanalytics.xapi.model.Statement statement;
 dialect "java"
 
 rule "Process_Statement"
-    @description("Process xAPI Statement.")
-    @version(1.0)
    when
        Statement (id != "")
    then

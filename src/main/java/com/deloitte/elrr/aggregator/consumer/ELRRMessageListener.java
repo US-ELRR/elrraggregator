@@ -77,7 +77,7 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("Received Messasge in group - group-id: " + message);
+    log.info("\nReceived Messasge in group - group-id: " + message);
 
     try {
 
@@ -155,28 +155,37 @@ public class ELRRMessageListener {
 
           log.info("Process activity.");
 
-          // Get activity
+          // Get Activity
           Activity activity = (Activity) obj;
 
-          // Get person
+          // Get Person
           Person person = getPerson(actor, account);
 
-          // If person doesn't exist
+          // If Person doesn't exist
           if (person == null) {
             person = createNewPerson(actor, account);
           }
 
-          // Process LearningResource
-          LearningResource learningResource = processLearningResource(activity);
+          // If Person exists
+          if (person != null) {
 
-          // Process LearningRecord
-          LearningRecord learningRecord =
-              processLearningRecord(activity, person, result, learningResource);
-        }
-      }
+            // Process LearningResource
+            LearningResource learningResource = processLearningResource(activity);
+
+            // If LearningResource exists
+            if (learningResource != null) {
+              // Process LearningRecord
+              LearningRecord learningRecord =
+                  processLearningRecord(activity, person, result, learningResource);
+            }
+          } // if (person != null) {
+        } // if (objType != null && objType.compareTo(objType.ACTIVITY) == 0 || objType == null &&
+        // activityComp) {
+      } // if (obj != null) {
 
     } catch (JsonProcessingException e) {
       log.error("Exception while processing message.");
+      log.error(e.getMessage());
       e.printStackTrace();
     }
   }
@@ -191,6 +200,7 @@ public class ELRRMessageListener {
       droolsProcessStatementService.processStatement(statement);
     } catch (JsonProcessingException e) {
       log.error("Exception while processing rule.");
+      log.error(e.getMessage());
       e.printStackTrace();
     }
   }
@@ -208,6 +218,7 @@ public class ELRRMessageListener {
       statement = messageVo.getStatement();
     } catch (JsonProcessingException e) {
       log.error("Exception while getting statement.");
+      log.error(e.getMessage());
       e.printStackTrace();
     }
     return statement;
@@ -252,8 +263,8 @@ public class ELRRMessageListener {
 
     // If person already exists
     if (identity != null) {
-      log.info("Person exists.");
       person = identity.getPerson();
+      log.info("Person " + person.getName() + " exists.");
     }
 
     return person;
@@ -299,7 +310,11 @@ public class ELRRMessageListener {
       email = createEmail(actor);
     }
     Person person = createPerson(actor, email);
-    Identity identity = createIdentity(person, actor, account);
+
+    // If person created
+    if (person != null) {
+      Identity identity = createIdentity(person, actor, account);
+    }
     return person;
   }
 
@@ -316,6 +331,7 @@ public class ELRRMessageListener {
     person.getEmailAddresses().add(email);
     person.setUpdatedBy(updatedBy);
     personService.save(person);
+    log.info("Person " + person.getName() + " created.");
     return person;
   }
 
@@ -338,6 +354,7 @@ public class ELRRMessageListener {
     }
     identity.setUpdatedBy(updatedBy);
     identityService.save(identity);
+    log.info("Identity " + identity.getIfi() + " created.");
     return identity;
   }
 
@@ -346,13 +363,13 @@ public class ELRRMessageListener {
    * @return Email
    */
   private Email createEmail(AbstractActor actor) {
-
     log.info("Creating new email.");
     Email email = new Email();
     email.setEmailAddress(actor.getMbox());
     email.setEmailAddressType("primary");
     email.setUpdatedBy(updatedBy);
     emailService.save(email);
+    log.info("Email " + email.getEmailAddress() + " created.");
     return email;
   }
 
@@ -378,6 +395,7 @@ public class ELRRMessageListener {
    * @return LearningResource
    */
   private LearningResource createLearningResource(Activity activity) {
+
     log.info("Creating new learning resource.");
 
     // Activity Definition
@@ -482,6 +500,7 @@ public class ELRRMessageListener {
 
     learningResource.setUpdatedBy(updatedBy);
     learningResourceService.save(learningResource);
+    log.info("Learning resource " + learningResource.getTitle() + " created.");
     return learningResource;
   }
 
@@ -555,6 +574,12 @@ public class ELRRMessageListener {
     learningRecord.setPerson(person);
     learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.save(learningRecord);
+    log.info(
+        "Learning record for "
+            + person.getName()
+            + " - "
+            + learningResource.getTitle()
+            + " created.");
     return learningRecord;
   }
 
@@ -572,6 +597,12 @@ public class ELRRMessageListener {
     learningRecord.setPerson(person);
     learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.update(learningRecord);
+    log.info(
+        "Learning record for "
+            + person.getName()
+            + " - "
+            + learningResource.getTitle()
+            + " updated.");
     return learningRecord;
   }
 }
