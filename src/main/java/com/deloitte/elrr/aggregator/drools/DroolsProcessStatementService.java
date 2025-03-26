@@ -5,6 +5,7 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.jpa.svc.EmailSvc;
 import com.deloitte.elrr.jpa.svc.IdentitySvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
@@ -30,7 +31,7 @@ public class DroolsProcessStatementService {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
-  public void processStatement(Statement statement) {
+  public void processStatement(Person person, Statement statement) {
 
     try {
 
@@ -40,8 +41,10 @@ public class DroolsProcessStatementService {
       kieSession.setGlobal("emailService", emailService);
       kieSession.setGlobal("learningRecordService", learningRecordService);
       kieSession.setGlobal("learningResourceService", learningResourceService);
+      kieSession.setGlobal("person", person);
       kieSession.setGlobal("statement", statement);
-      // Insert fact into working memory
+      // Insert facts into working memory
+      kieSession.insert(person);
       kieSession.insert(statement);
       kieSession.fireAllRules();
       kieSession.dispose();

@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.drools;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -10,8 +11,12 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.internal.io.ResourceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
+@Slf4j
 public class DroolsConfig {
 
   private static final KieServices kieServices = KieServices.Factory.get();
@@ -29,13 +34,14 @@ public class DroolsConfig {
   }
 
   private void loadFileBasedRules(final KieFileSystem kieFileSystem) {
-    final File dir = new File("src/main/resources/rules");
-    final File[] directoryListing = dir.listFiles();
-    if (directoryListing != null) {
-      for (File child : directoryListing) {
-        // Load rule into working memory
-        kieFileSystem.write(ResourceFactory.newFileResource(child));
-      }
+
+    try {
+      File rule = new ClassPathResource("rules/processStatement_2.drl").getFile();
+      // Load rules into working memory
+      kieFileSystem.write(ResourceFactory.newFileResource(rule));
+    } catch (IOException e) {
+      log.error(e.getMessage());
+      e.printStackTrace();
     }
   }
 }

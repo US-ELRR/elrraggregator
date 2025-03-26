@@ -35,165 +35,38 @@ global com.deloitte.elrr.jpa.svc.LearningRecordSvc learningRecordService;
 global com.deloitte.elrr.jpa.svc.LearningResourceSvc learningResourceService;
 global com.deloitte.elrr.jpa.svc.PersonSvc personService;
 
+global com.deloitte.elrr.entity.Person person;
 global com.yetanalytics.xapi.model.Statement statement;
  
 dialect "java"
 
-rule "Process_Person"
-salience 100
-   when
-       Statement (id != "")
-   then
-        System.out.println("\n ==========Process Person=============");
-        helper(drools);
-      
-        Account account = null;
-        Email email = null;
-
-        try {
-        
-          String updatedBy = "ELRR";
-        
-          // Get Actor
-          AbstractActor actor = (AbstractActor) statement.getActor();
-        
-          // Get Account
-          if (actor != null) {
-            account = actor.getAccount();
-          }
-        
-          // Completed Verb
-          String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
-        
-          // Get Verb
-          Verb verb = statement.getVerb();
-        
-          // Is Verb Id completed?
-          boolean activityComp =
-              Arrays.asList(completedVerbArray).contains(verb.getId());
-        
-          // Get Object
-          AbstractObject obj = statement.getObject();
-        
-          if (obj != null) {
-            // Object type
-            ObjectType objType = obj.getObjectType();
-        
-            // If object != null and object type = ACTIVITY
-            // OR If object != null and Object type = null and verb id = completed
-            // process activity.
-            if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
-                || objType == null && activityComp) {
-                
-              System.out.println("Process activity.");
-        
-              // Get activity
-              Activity activity = (Activity) obj;
-        
-              // Get person
-              Person person = null;
-        
-              // Does person exist
-              String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(),
-                  actor.getOpenid(), (account != null) ? account.getHomePage() : null,
-                  (account != null) ? account.getName() : null);
-        
-              Identity identity = identityService.getByIfi(ifi);
-        
-              // If person already exists
-              if (identity != null) {
-                person = identity.getPerson();
-                System.out.println("Person " + person.getName() + " exists.");
-              }
-        
-              // If person doesn't exist
-              if (person == null) {
-              
-                // If email
-                if (actor.getMbox() != null && actor.getMbox().length() > 0) {
-                    System.out.println("Creating new email.");
-                    email = new Email();
-                    email.setEmailAddress(actor.getMbox());
-                    email.setEmailAddressType("primary");
-                    email.setUpdatedBy(updatedBy);
-                    emailService.save(email);
-                    System.out.println("Email " + email.getEmailAddress() + " created.");
-                }
-        
-                System.out.println("Creating new person.");
-                person = new Person();
-                person.setName(actor.getName());
-                // If email
-                if (email != null) {
-                  person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
-                  person.getEmailAddresses().add(email);
-                }
-                person.setUpdatedBy(updatedBy);
-                personService.save(person);
-                System.out.println("Person " + person.getName() + " created.");
-                
-                System.out.println("Creating new identity.");
-                identity = new Identity();
-                identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-                identity.setMbox(actor.getMbox());
-                identity.setOpenid(actor.getOpenid());
-                identity.setPerson(person);
-                if (account != null) {
-                  identity.setHomePage(account.getHomePage());
-                  identity.setName(account.getName());
-                }
-                identity.setUpdatedBy(updatedBy);
-                identityService.save(identity);
-                System.out.println("Identity " + identity.getIfi() + " created.");
-                
-              } // if (person == null) {
-        
-            } // if (objType != null && objType.compareTo(objType.ACTIVITY) == 0 || objType == null && activityComp) {
-            
-          } // if (obj != null) {
-        
-        } catch (Exception e) {
-          System.out.println("Exception while firing processStatement rule.");
-          System.out.println(e.getMessage());
-          e.printStackTrace();
-        }
-
-end
-  
-  
-  
 rule "Process_LearningResource"
-salience 90
+salience 100
    when
        Statement (id != "")
    then
         System.out.println("\n ==========Process LearningResource=============");
         helper(drools);
       
-        Account account = null;
-
-        try {
+         try {
         
           String[] namLang = {"en-us"};
           String updatedBy = "ELRR";
         
-          // Get Actor
-          AbstractActor actor = (AbstractActor) statement.getActor();
-        
-          // Get Account
-          if (actor != null) {
-            account = actor.getAccount();
-          }
-        
           // Completed Verb
           String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
-        
+
+          // Achieved Verb
+          String[] achievedVerbArray = {"https://adlnet.gov/expapi/verbs/achieved"};
+       
           // Get Verb
           Verb verb = statement.getVerb();
         
           // Is Verb Id completed?
-          boolean activityComp =
-              Arrays.asList(completedVerbArray).contains(verb.getId());
+          boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
+
+          // Is Verb Id achieved?
+          boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
         
           // Get Object
           AbstractObject obj = statement.getObject();
@@ -202,35 +75,19 @@ salience 90
           Result result = statement.getResult();
         
           if (obj != null) {
-            // Object type
-            ObjectType objType = obj.getObjectType();
         
-            // If object != null and object type = ACTIVITY
-            // OR If object != null and Object type = null and verb id = completed
-            // process activity.
-            if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
-                || objType == null && activityComp) {
-                
+            // Process completed or achieved Activity
+            if (activityCompleted || activityAchieved) {
+               
               System.out.println("Process activity.");
         
               // Get activity
               Activity activity = (Activity) obj;
         
-              // Get person
-              Person person = null;
-        
-              // Does person exist
-              String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(),
-                  actor.getOpenid(), (account != null) ? account.getHomePage() : null,
-                  (account != null) ? account.getName() : null);
-        
-              Identity identity = identityService.getByIfi(ifi);
-        
               // If person already exists
-              if (identity != null) {
+              if (person != null) {
               
-                    person = identity.getPerson();
-                    System.out.println("Person " + person.getName() + " exists.");
+                  System.out.println("Person " + person.getName() + " exists.");
         
                   // Process LearningResource
                   // Get LearningResource
@@ -353,9 +210,9 @@ salience 90
                     
                   } // If LearningResource doesn't exist
                   
-               } // if (identity != null) {
+               } // if (person != null) {
               
-            } // if (objType != null && objType.compareTo(objType.ACTIVITY) == 0 || objType == null && activityComp) {
+            } // if (activityCompleted || activityAchieved) {
             
           } // if (obj != null) {
         
@@ -370,37 +227,32 @@ salience 90
   
   
 rule "Process_LeaarningRecord"
-salience 80
+salience 90
    when
        Statement (id != "")
    then
         System.out.println("\n ==========Process LearningRecord=============");
         helper(drools);
       
-        Account account = null;
-
         try {
         
           String[] namLang = {"en-us"};
           String updatedBy = "ELRR";
         
-          // Get Actor
-          AbstractActor actor = (AbstractActor) statement.getActor();
-        
-          // Get Account
-          if (actor != null) {
-            account = actor.getAccount();
-          }
-        
-          // Completed Verb
+         // Completed Verb
           String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
-        
+
+          // Achieved Verb
+          String[] achievedVerbArray = {"https://adlnet.gov/expapi/verbs/achieved"};
+       
           // Get Verb
           Verb verb = statement.getVerb();
         
           // Is Verb Id completed?
-          boolean activityComp =
-              Arrays.asList(completedVerbArray).contains(verb.getId());
+          boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
+
+          // Is Verb Id achieved?
+          boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
         
           // Get Object
           AbstractObject obj = statement.getObject();
@@ -409,34 +261,18 @@ salience 80
           Result result = statement.getResult();
         
           if (obj != null) {
-            // Object type
-            ObjectType objType = obj.getObjectType();
         
-            // If object != null and object type = ACTIVITY
-            // OR If object != null and Object type = null and verb id = completed
-            // process activity.
-            if (objType != null && objType.compareTo(objType.ACTIVITY) == 0
-                || objType == null && activityComp) {
-                
+            // Process completed or achieved Activity
+            if (activityCompleted || activityAchieved) {
+               
               System.out.println("Process activity.");
         
               // Get activity
               Activity activity = (Activity) obj;
         
-              // Get person
-              Person person = null;
-        
-              // Does person exist
-              String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(),
-                  actor.getOpenid(), (account != null) ? account.getHomePage() : null,
-                  (account != null) ? account.getName() : null);
-        
-              Identity identity = identityService.getByIfi(ifi);
-        
               // If person already exists
-              if (identity != null) {
+              if (person != null) {
               
-                  person = identity.getPerson();
                   System.out.println("Person " + person.getName() + " exists.");
         
                   // Get LearningResource
@@ -504,9 +340,9 @@ salience 80
                       
                     } // if (learningResource != null) {
                     
-                } // if (identity != null) {
+                } // if (person != null) {
                   
-            } // if (objType != null && objType.compareTo(objType.ACTIVITY) == 0 || objType == null && activityComp) {
+            } // if (activityCompleted || activityAchieved) {
             
           } // if (obj != null) {
         
