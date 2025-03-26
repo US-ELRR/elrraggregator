@@ -48,6 +48,7 @@ salience 100
         helper(drools);
       
         Account account = null;
+        Email email = null;
 
         try {
         
@@ -108,19 +109,25 @@ salience 100
               // If person doesn't exist
               if (person == null) {
               
-                System.out.println("Creating new email.");
-                Email email = new Email();
-                email.setEmailAddress(actor.getMbox());
-                email.setEmailAddressType("primary");
-                email.setUpdatedBy(updatedBy);
-                emailService.save(email);
-                System.out.println("Email " + email.getEmailAddress() + " created.");
+                // If email
+                if (actor.getMbox() != null && actor.getMbox().length() > 0) {
+                    System.out.println("Creating new email.");
+                    email = new Email();
+                    email.setEmailAddress(actor.getMbox());
+                    email.setEmailAddressType("primary");
+                    email.setUpdatedBy(updatedBy);
+                    emailService.save(email);
+                    System.out.println("Email " + email.getEmailAddress() + " created.");
+                }
         
                 System.out.println("Creating new person.");
                 person = new Person();
                 person.setName(actor.getName());
-                person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
-                person.getEmailAddresses().add(email);
+                // If email
+                if (email != null) {
+                  person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
+                  person.getEmailAddresses().add(email);
+                }
                 person.setUpdatedBy(updatedBy);
                 personService.save(person);
                 System.out.println("Person " + person.getName() + " created.");
@@ -230,8 +237,13 @@ salience 90
                   LearningResource learningResource =
                       learningResourceService.findByIri(activity.getId());
             
+                  // If LearningResource already exists
+                  if (learningResource != null) {
+                  
+                       System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
+ 
                   // If LearningResource doesn't exist
-                  if (learningResource == null) {
+                  } else if (learningResource == null) {
                     System.out.println("Creating new learning resource.");
             
                     // Activity Definition

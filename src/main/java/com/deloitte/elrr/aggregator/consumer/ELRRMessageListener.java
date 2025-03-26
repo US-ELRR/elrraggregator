@@ -77,7 +77,7 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("\nReceived Messasge in group - group-id: " + message);
+    log.info("\n\nReceived Messasge in group - group-id: " + message);
 
     try {
 
@@ -305,16 +305,19 @@ public class ELRRMessageListener {
   private Person createNewPerson(AbstractActor actor, Account account) {
 
     Email email = null;
+
     // If email
     if (actor.getMbox() != null && actor.getMbox().length() > 0) {
       email = createEmail(actor);
     }
+
     Person person = createPerson(actor, email);
 
     // If person created
     if (person != null) {
       Identity identity = createIdentity(person, actor, account);
     }
+
     return person;
   }
 
@@ -327,8 +330,11 @@ public class ELRRMessageListener {
     log.info("Creating new person.");
     Person person = new Person();
     person.setName(actor.getName());
-    person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
-    person.getEmailAddresses().add(email);
+    // If email
+    if (email != null) {
+      person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
+      person.getEmailAddresses().add(email);
+    }
     person.setUpdatedBy(updatedBy);
     personService.save(person);
     log.info("Person " + person.getName() + " created.");
@@ -382,8 +388,13 @@ public class ELRRMessageListener {
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
 
-    // If LearningResource doesn't exist
-    if (learningResource == null) {
+    // If LearningResource already exists
+    if (learningResource != null) {
+
+      System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
+
+      // If LearningResource doesn't exist
+    } else if (learningResource == null) {
       learningResource = createLearningResource(activity);
     }
 

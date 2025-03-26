@@ -19,6 +19,7 @@ public class DroolsConfig {
   @Bean
   public KieContainer kieContainer() {
     KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
+    // Load rules into working memory
     loadFileBasedRules(kieFileSystem);
     KieBuilder kb = kieServices.newKieBuilder(kieFileSystem);
     kb.buildAll();
@@ -32,6 +33,7 @@ public class DroolsConfig {
     final File[] directoryListing = dir.listFiles();
     if (directoryListing != null) {
       for (File child : directoryListing) {
+        // Load rule into working memory
         kieFileSystem.write(ResourceFactory.newFileResource(child));
       }
     }

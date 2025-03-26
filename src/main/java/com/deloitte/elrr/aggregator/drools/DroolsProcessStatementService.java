@@ -41,6 +41,7 @@ public class DroolsProcessStatementService {
       kieSession.setGlobal("learningRecordService", learningRecordService);
       kieSession.setGlobal("learningResourceService", learningResourceService);
       kieSession.setGlobal("statement", statement);
+      // Insert fact into working memory
       kieSession.insert(statement);
       kieSession.fireAllRules();
       kieSession.dispose();
