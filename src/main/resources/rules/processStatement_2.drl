@@ -40,7 +40,7 @@ global com.yetanalytics.xapi.model.Statement statement;
  
 dialect "java"
 
-rule "Process_LearningResource"
+rule "Process_Completed"
 salience 100
    when
        Statement (id != "")
@@ -97,7 +97,7 @@ salience 100
                   // If LearningResource already exists
                   if (learningResource != null) {
                   
-                       System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
+                  System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
  
                   // If LearningResource doesn't exist
                   } else if (learningResource == null) {
@@ -208,82 +208,11 @@ salience 100
                     learningResourceService.save(learningResource);
                     System.out.println("Learning resource " + learningResource.getTitle() + " created.");
                     
-                  } // If LearningResource doesn't exist
+                  } // if (learningResource == null) {
                   
-               } // if (person != null) {
-              
-            } // if (activityCompleted || activityAchieved) {
-            
-          } // if (obj != null) {
-        
-        } catch (Exception e) {
-          System.out.println("Exception while firing processStatement rule.");
-          System.out.println(e.getMessage());
-          e.printStackTrace();
-        }
-
-  end
-  
-  
-  
-rule "Process_LeaarningRecord"
-salience 90
-   when
-       Statement (id != "")
-   then
-        System.out.println("\n ==========Process LearningRecord=============");
-        helper(drools);
-      
-        try {
-        
-          String[] namLang = {"en-us"};
-          String updatedBy = "ELRR";
-        
-         // Completed Verb
-          String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
-
-          // Achieved Verb
-          String[] achievedVerbArray = {"https://adlnet.gov/expapi/verbs/achieved"};
-       
-          // Get Verb
-          Verb verb = statement.getVerb();
-        
-          // Is Verb Id completed?
-          boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
-
-          // Is Verb Id achieved?
-          boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
-        
-          // Get Object
-          AbstractObject obj = statement.getObject();
-        
-          // Get Result
-          Result result = statement.getResult();
-        
-          if (obj != null) {
-        
-            // Process completed or achieved Activity
-            if (activityCompleted || activityAchieved) {
-               
-              System.out.println("Process activity.");
-        
-              // Get activity
-              Activity activity = (Activity) obj;
-        
-              // If person already exists
-              if (person != null) {
-              
-                  System.out.println("Person " + person.getName() + " exists.");
-        
-                  // Get LearningResource
-                  LearningResource learningResource =
-                      learningResourceService.findByIri(activity.getId());
-            
                   // If LearningResource already exists
                   if (learningResource != null) {
                   
-                        System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
-            
                       // Process LearningRecord
                       // Get LearningRecord
                       LearningRecord learningRecord =
@@ -339,9 +268,9 @@ salience 90
                       }
                       
                     } // if (learningResource != null) {
-                    
-                } // if (person != null) {
                   
+               } // if (person != null) {
+              
             } // if (activityCompleted || activityAchieved) {
             
           } // if (obj != null) {
@@ -353,4 +282,3 @@ salience 90
         }
 
   end
-  

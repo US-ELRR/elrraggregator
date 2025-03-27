@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ProcessActivity {
+public class ProcessCompleted implements Rule {
 
   @Autowired private LearningResourceSvc learningResourceService;
 
@@ -37,7 +37,8 @@ public class ProcessActivity {
 
   private static String updatedBy = "ELRR";
 
-  public void processActivity(Person person, Statement statement) throws Exception {
+  @Override
+  public void processRule(Person person, Statement statement) throws Exception {
 
     try {
 

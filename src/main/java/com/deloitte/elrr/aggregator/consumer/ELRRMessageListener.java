@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.rules.ProcessActivity;
 import com.deloitte.elrr.aggregator.rules.ProcessPerson;
+import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-  @Autowired private ProcessActivity processActivity;
+  // Import ProcessCompleted implementation of Rule interface
+  @Autowired private Rule processCompleted;
 
   @Autowired private ProcessPerson processPerson;
 
@@ -96,9 +97,9 @@ public class ELRRMessageListener {
       // Process Person
       person = processPerson.processPerson(statement);
 
-      // Process completed or achieved Activity
+      // Process completed or achieved
       if (activityCompleted || activityAchieved) {
-        processActivity.processActivity(person, statement);
+        processCompleted.processRule(person, statement);
       }
 
     } catch (Exception e) {
@@ -142,7 +143,7 @@ public class ELRRMessageListener {
 
       // Process Statement
       if (person != null) {
-        // Process completed or achieved Activity
+        // Process completed or achieved
         if (activityCompleted || activityAchieved) {
           droolsProcessStatementService.processStatement(person, statement);
         }
