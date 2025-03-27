@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.deloitte.elrr.aggregator.consumer.ActivityAchievedConstants;
+import com.deloitte.elrr.aggregator.consumer.ActivityCompletedConstants;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
@@ -21,6 +23,7 @@ import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Statement;
+import com.yetanalytics.xapi.model.Verb;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +39,32 @@ public class ProcessCompleted implements Rule {
   private String[] namLang = new String[10];
 
   private static String updatedBy = "ELRR";
+
+  @Override
+  public boolean fireRule(Statement statement) {
+
+    // Completed Verb
+    String[] completedVerbArray = ActivityCompletedConstants.COMPLETED_VERB;
+
+    // Achieved Verb
+    String[] achievedVerbArray = ActivityAchievedConstants.ACHIEVED_VERB;
+
+    // Get Verb
+    Verb verb = getVerb(statement);
+
+    // Is Verb Id completed?
+    boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
+
+    // Is Verb Id achieved?
+    boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
+
+    // If completed or achieved
+    if (activityCompleted || activityAchieved) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   @Override
   public void processRule(Person person, Statement statement) throws Exception {
@@ -83,6 +112,15 @@ public class ProcessCompleted implements Rule {
   public AbstractObject getObject(Statement statement) {
     AbstractObject obj = statement.getObject();
     return obj;
+  }
+
+  /**
+   * @param statement
+   * @return Verb
+   */
+  public Verb getVerb(Statement statement) {
+    Verb verb = statement.getVerb();
+    return verb;
   }
 
   /**

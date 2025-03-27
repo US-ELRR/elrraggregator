@@ -1,7 +1,5 @@
 package com.deloitte.elrr.aggregator.consumer;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,7 +15,6 @@ import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
-import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -52,8 +49,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        // processMessage(message);
-        processMessageFromRule(message);
+        processMessage(message);
+        // processMessageFromRule(message);
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
@@ -79,27 +76,17 @@ public class ELRRMessageListener {
       // Get Statement
       Statement statement = getStatement(payload);
 
-      // Completed Verb
-      String[] completedVerbArray = ActivityCompletedConstants.COMPLETED_VERB;
-
-      // Achieved Verb
-      String[] achievedVerbArray = ActivityAchievedConstants.ACHIEVED_VERB;
-
-      // Get Verb
-      Verb verb = getVerb(statement);
-
-      // Is Verb Id completed?
-      boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
-
-      // Is Verb Id achieved?
-      boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
-
       // Process Person
       person = processPerson.processPerson(statement);
 
-      // Process completed or achieved
-      if (activityCompleted || activityAchieved) {
-        processCompleted.processRule(person, statement);
+      if (person != null) {
+
+        // Process completed or achieved
+        boolean fireRule = processCompleted.fireRule(statement);
+
+        if (fireRule) {
+          processCompleted.processRule(person, statement);
+        }
       }
 
     } catch (Exception e) {
@@ -123,28 +110,15 @@ public class ELRRMessageListener {
       // Get Statement
       Statement statement = getStatement(payload);
 
-      // Completed Verb
-      String[] completedVerbArray = ActivityCompletedConstants.COMPLETED_VERB;
-
-      // Achieved Verb
-      String[] achievedVerbArray = ActivityAchievedConstants.ACHIEVED_VERB;
-
-      // Get Verb
-      Verb verb = getVerb(statement);
-
-      // Is Verb Id completed?
-      boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
-
-      // Is Verb Id achieved?
-      boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
-
       // Process Person
       person = processPerson.processPerson(statement);
 
-      // Process Statement
       if (person != null) {
+
         // Process completed or achieved
-        if (activityCompleted || activityAchieved) {
+        boolean fireRule = processCompleted.fireRule(statement);
+
+        if (fireRule) {
           droolsProcessStatementService.processStatement(person, statement);
         }
       }
@@ -173,14 +147,5 @@ public class ELRRMessageListener {
       e.printStackTrace();
     }
     return statement;
-  }
-
-  /**
-   * @param statement
-   * @return Verb
-   */
-  public Verb getVerb(Statement statement) {
-    Verb verb = statement.getVerb();
-    return verb;
   }
 }
