@@ -48,8 +48,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        // processMessage(message);
-        processMessageFromRule(message);
+        processMessage(message);
+        // processMessageFromRule(message);
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }

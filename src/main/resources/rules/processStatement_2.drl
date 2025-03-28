@@ -154,7 +154,6 @@ salience 100
                 String langCode = null;
         
                 LangMap descLangMap = activityDefenition.getDescription();
-                LangMap namLangMap = activityDefenition.getName();
         
                 // If activity description
                 if (descLangMap != null) {
@@ -194,7 +193,7 @@ salience 100
                   activityDescription = activityDefenition.getDescription().get(langCode);
         
                 // If activity name
-                } else if (namLangMap != null) {
+                } else if (nameLangMap != null) {
                 
                   Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
         

@@ -174,7 +174,6 @@ public class ProcessCompleted implements Rule {
     String langCode = null;
 
     LangMap descLangMap = activityDefenition.getDescription();
-    LangMap namLangMap = activityDefenition.getName();
 
     // If activity description
     if (descLangMap != null) {
@@ -183,7 +182,7 @@ public class ProcessCompleted implements Rule {
       activityDescription = activityDefenition.getDescription().get(langCode);
 
       // If activity name
-    } else if (namLangMap != null) {
+    } else if (nameLangMap != null) {
 
       langCode = getLangCode(nameLangMap);
       activityDescription = activityDefenition.getName().get(langCode);
