@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.consumer.ActivityAchievedConstants;
-import com.deloitte.elrr.aggregator.consumer.ActivityCompletedConstants;
+import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
@@ -43,23 +42,19 @@ public class ProcessCompleted implements Rule {
   @Override
   public boolean fireRule(Statement statement) {
 
-    // Completed Verb
-    String[] completedVerbArray = ActivityCompletedConstants.COMPLETED_VERB;
+    // Completed Verb Id
+    String completedVerbId = VerbIdConstants.COMPLETED_VERB_ID;
 
-    // Achieved Verb
-    String[] achievedVerbArray = ActivityAchievedConstants.ACHIEVED_VERB;
+    // Achieved Verb Id
+    String achievedVerbId = VerbIdConstants.ACHIEVED_VERB_ID;
 
     // Get Verb
     Verb verb = getVerb(statement);
 
-    // Is Verb Id completed?
-    boolean activityCompleted = Arrays.asList(completedVerbArray).contains(verb.getId());
-
-    // Is Verb Id achieved?
-    boolean activityAchieved = Arrays.asList(achievedVerbArray).contains(verb.getId());
-
-    // If completed or achieved
-    if (activityCompleted || activityAchieved) {
+    // Is Verb Id completed or achieved
+    if (verb.getId().equalsIgnoreCase(completedVerbId)) {
+      return true;
+    } else if (verb.getId().equalsIgnoreCase(achievedVerbId)) {
       return true;
     } else {
       return false;
@@ -167,7 +162,7 @@ public class ProcessCompleted implements Rule {
 
     // Activity name
     String activityName = "";
-    String nameLangCode = "";
+    String nameLangCode = null;
 
     LangMap nameLangMap = activityDefenition.getName();
 
@@ -178,6 +173,8 @@ public class ProcessCompleted implements Rule {
       // Get namLangCode
       Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
 
+      // Iterate over object.definition.name.languageCodes
+      // and compare to lang.codes in .properties
       while (nameLangCodesIterator.hasNext()) {
         String code = nameLangCodesIterator.next();
         boolean found = Arrays.asList(namLang).contains(code);
@@ -188,8 +185,16 @@ public class ProcessCompleted implements Rule {
       }
 
       // If namLangCode not found
-      if (nameLangCode.equalsIgnoreCase("")) {
-        nameLangCode = "en-us";
+      // Use en-us if it's in object.definition.name.languageCodes
+      // otherwise use the 1st code in object.definition.name.languageCodes
+      if (nameLangCode == null || nameLangCode.length() == 0) {
+
+        if (nameLangCodes.contains("en-us")) {
+          nameLangCode = "en-us";
+        } else {
+          String firstElement = nameLangCodes.stream().findFirst().orElse(null);
+          nameLangCode = firstElement;
+        }
       }
 
       activityName = activityDefenition.getName().get(nameLangCode);
@@ -197,7 +202,7 @@ public class ProcessCompleted implements Rule {
 
     // Activity Description
     String activityDescription = "";
-    String langCode = "";
+    String langCode = null;
 
     LangMap descLangMap = activityDefenition.getDescription();
     LangMap namLangMap = activityDefenition.getName();
@@ -219,8 +224,14 @@ public class ProcessCompleted implements Rule {
       }
 
       // If langCode not found
-      if (langCode.equalsIgnoreCase("")) {
-        langCode = "en-us";
+      if (langCode == null || langCode.length() == 0) {
+
+        if (descLangCodes.contains("en-us")) {
+          nameLangCode = "en-us";
+        } else {
+          String firstElement = descLangCodes.stream().findFirst().orElse(null);
+          nameLangCode = firstElement;
+        }
       }
 
       activityDescription = activityDefenition.getDescription().get(langCode);
@@ -242,8 +253,14 @@ public class ProcessCompleted implements Rule {
       }
 
       // If langCode not found
-      if (langCode.equalsIgnoreCase("")) {
-        langCode = "en-us";
+      if (langCode == null || langCode.length() == 0) {
+
+        if (namLangCodes.contains("en-us")) {
+          nameLangCode = "en-us";
+        } else {
+          String firstElement = namLangCodes.stream().findFirst().orElse(null);
+          nameLangCode = firstElement;
+        }
       }
 
       activityDescription = activityDefenition.getName().get(langCode);
@@ -252,16 +269,14 @@ public class ProcessCompleted implements Rule {
       activityDescription = "";
     }
 
+    if (activityDescription == null) {
+      activityDescription = "";
+    }
+
     LearningResource learningResource = new LearningResource();
     learningResource.setIri(activity.getId());
     learningResource.setDescription(activityDescription);
-
-    if (activityDescription != null) {
-      learningResource.setTitle(activityDescription);
-    } else {
-      learningResource.setTitle("");
-    }
-
+    learningResource.setTitle(activityDescription);
     learningResource.setUpdatedBy(updatedBy);
     learningResourceService.save(learningResource);
     log.info("Learning resource " + learningResource.getTitle() + " created.");
@@ -289,7 +304,7 @@ public class ProcessCompleted implements Rule {
 
       // If learningRecord already exists
     } else {
-      learningRecord = updateLearningRecord(person, learningRecord, learningResource);
+      learningRecord = updateLearningRecord(learningRecord, result);
     }
 
     return learningRecord;
@@ -351,22 +366,41 @@ public class ProcessCompleted implements Rule {
    * @param person
    * @param learningRecord
    * @param learningResource
+   * @param result
    * @return LearningRecord
    */
-  public LearningRecord updateLearningRecord(
-      Person person, LearningRecord learningRecord, LearningResource learningResource) {
+  public LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
     log.info("Update learning record.");
-    learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-    learningRecord.setLearningResource(learningResource);
-    learningRecord.setPerson(person);
+
+    if (result != null) {
+
+      Boolean success = result.getSuccess();
+      Boolean completed = result.getCompletion();
+
+      // status
+      if (completed && success == null) {
+        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+      } else if (completed && success) {
+        learningRecord.setRecordStatus(LearningStatus.PASSED);
+      } else if (completed && !success) {
+        learningRecord.setRecordStatus(LearningStatus.FAILED);
+      } else {
+        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+      }
+
+      // grade
+      Score score = result.getScore();
+
+      if (score != null) {
+        learningRecord.setAcademicGrade(score.getRaw().toString());
+      }
+
+    } else {
+      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+    }
+
     learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.update(learningRecord);
-    log.info(
-        "Learning record for "
-            + person.getName()
-            + " - "
-            + learningResource.getTitle()
-            + " updated.");
     return learningRecord;
   }
 }

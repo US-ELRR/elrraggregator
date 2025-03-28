@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.rules;
+package com.deloitte.elrr.aggregator.consumer;
 
 import java.util.HashSet;
 

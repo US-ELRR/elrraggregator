@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.rules.ProcessPerson;
 import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,8 +48,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        // processMessageFromRule(message);
+        // processMessage(message);
+        processMessageFromRule(message);
       } else {
         log.warn("Invalid message did not pass whitelist check - " + message);
       }
