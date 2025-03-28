@@ -72,24 +72,21 @@ public class ProcessCompleted implements Rule {
       // Get Result
       Result result = getResult(statement);
 
-      if (obj != null) {
+      // If Activity
+      if (obj instanceof Activity) {
 
         log.info("Process activity.");
 
         // Get Activity
         Activity activity = (Activity) obj;
 
-        // If Person exists
-        if (person != null) {
+        // Process LearningResource
+        LearningResource learningResource = processLearningResource(activity);
 
-          // Process LearningResource
-          LearningResource learningResource = processLearningResource(activity);
-
-          // Process LearningRecord
-          if (learningResource != null) {
-            LearningRecord learningRecord =
-                processLearningRecord(activity, person, result, learningResource);
-          }
+        // Process LearningRecord
+        if (learningResource != null) {
+          LearningRecord learningRecord =
+              processLearningRecord(activity, person, result, learningResource);
         }
       }
 
@@ -161,42 +158,14 @@ public class ProcessCompleted implements Rule {
     ActivityDefinition activityDefenition = activity.getDefinition();
 
     // Activity name
-    String activityName = "";
+    String activityName = null;
     String nameLangCode = null;
 
     LangMap nameLangMap = activityDefenition.getName();
 
     // If Activity name
     if (nameLangMap != null) {
-      Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
-
-      // Get namLangCode
-      Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
-
-      // Iterate over object.definition.name.languageCodes
-      // and compare to lang.codes in .properties
-      while (nameLangCodesIterator.hasNext()) {
-        String code = nameLangCodesIterator.next();
-        boolean found = Arrays.asList(namLang).contains(code);
-        if (found) {
-          nameLangCode = code;
-          break;
-        }
-      }
-
-      // If namLangCode not found
-      // Use en-us if it's in object.definition.name.languageCodes
-      // otherwise use the 1st code in object.definition.name.languageCodes
-      if (nameLangCode == null || nameLangCode.length() == 0) {
-
-        if (nameLangCodes.contains("en-us")) {
-          nameLangCode = "en-us";
-        } else {
-          String firstElement = nameLangCodes.stream().findFirst().orElse(null);
-          nameLangCode = firstElement;
-        }
-      }
-
+      nameLangCode = getLangCode(nameLangMap);
       activityName = activityDefenition.getName().get(nameLangCode);
     }
 
@@ -209,63 +178,18 @@ public class ProcessCompleted implements Rule {
 
     // If activity description
     if (descLangMap != null) {
-      Set<String> descLangCodes = descLangMap.getLanguageCodes();
 
-      // Get namDescCode
-      Iterator<String> descLangCodesIterator = descLangCodes.iterator();
-
-      while (descLangCodesIterator.hasNext()) {
-        String code = descLangCodesIterator.next();
-        boolean found = Arrays.asList(namLang).contains(code);
-        if (found) {
-          langCode = code;
-          break;
-        }
-      }
-
-      // If langCode not found
-      if (langCode == null || langCode.length() == 0) {
-
-        if (descLangCodes.contains("en-us")) {
-          nameLangCode = "en-us";
-        } else {
-          String firstElement = descLangCodes.stream().findFirst().orElse(null);
-          nameLangCode = firstElement;
-        }
-      }
-
+      langCode = getLangCode(descLangMap);
       activityDescription = activityDefenition.getDescription().get(langCode);
 
       // If activity name
     } else if (namLangMap != null) {
-      Set<String> namLangCodes = namLangMap.getLanguageCodes();
 
-      // Get namDescCode
-      Iterator<String> namLangCodesIterator = namLangCodes.iterator();
-
-      while (namLangCodesIterator.hasNext()) {
-        String code = namLangCodesIterator.next();
-        boolean found = Arrays.asList(namLang).contains(code);
-        if (found) {
-          langCode = code;
-          break;
-        }
-      }
-
-      // If langCode not found
-      if (langCode == null || langCode.length() == 0) {
-
-        if (namLangCodes.contains("en-us")) {
-          nameLangCode = "en-us";
-        } else {
-          String firstElement = namLangCodes.stream().findFirst().orElse(null);
-          nameLangCode = firstElement;
-        }
-      }
-
+      langCode = getLangCode(nameLangMap);
       activityDescription = activityDefenition.getName().get(langCode);
 
     } else {
+
       activityDescription = "";
     }
 
@@ -402,5 +326,50 @@ public class ProcessCompleted implements Rule {
     learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.update(learningRecord);
     return learningRecord;
+  }
+
+  /**
+   * @param map
+   * @return langCode
+   */
+  private String getLangCode(LangMap map) {
+
+    String langCode = null;
+
+    Set<String> langCodes = map.getLanguageCodes();
+
+    // Check for en-us then en
+    if (langCodes.contains("en-us")) {
+
+      langCode = "en-us";
+
+    } else if (langCodes.contains("en")) {
+
+      langCode = "en";
+
+    } else {
+
+      Iterator<String> langCodesIterator = langCodes.iterator();
+
+      // Iterate and compare to lang.codes in .properties
+      while (langCodesIterator.hasNext()) {
+
+        String code = langCodesIterator.next();
+
+        boolean found = Arrays.asList(namLang).contains(code);
+
+        if (found) {
+          langCode = code;
+          break;
+        }
+      }
+    }
+
+    if (langCode == null || langCode.length() == 0) {
+      String firstElement = langCodes.stream().findFirst().orElse(null);
+      langCode = firstElement;
+    }
+
+    return langCode;
   }
 }

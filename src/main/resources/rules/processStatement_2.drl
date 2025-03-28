@@ -74,7 +74,8 @@ salience 100
           // Get Result
           Result result = statement.getResult();
         
-          if (obj != null) {
+          // If Activity
+          if (obj instanceof Activity) {
         
             // Process completed or achieved Activity
             if (activityCompleted || activityAchieved) {
@@ -84,37 +85,46 @@ salience 100
               // Get activity
               Activity activity = (Activity) obj;
         
-              // If person already exists
-              if (person != null) {
-              
-                  System.out.println("Person " + person.getName() + " exists.");
+              System.out.println("Person " + person.getName() + " exists.");
+    
+              // Process LearningResource
+              // Get LearningResource
+              LearningResource learningResource =
+              learningResourceService.findByIri(activity.getId());
         
-                  // Process LearningResource
-                  // Get LearningResource
-                  LearningResource learningResource =
-                      learningResourceService.findByIri(activity.getId());
-            
-                  // If LearningResource already exists
-                  if (learningResource != null) {
+              // If LearningResource already exists
+              if (learningResource != null) {
                   
-                  System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
+                System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
  
-                  // If LearningResource doesn't exist
-                  } else if (learningResource == null) {
-                    System.out.println("Creating new learning resource.");
+              // If LearningResource doesn't exist
+              } else if (learningResource == null) {
+                System.out.println("Creating new learning resource.");
             
-                    // Activity Definition
-                    ActivityDefinition activityDefenition = activity.getDefinition();
+                // Activity Definition
+                ActivityDefinition activityDefenition = activity.getDefinition();
             
-                    // Activity name
-                    String activityName = "";
-                    String nameLangCode = null;
+                // Activity name
+                String activityName = null;
+                String nameLangCode = null;
+        
+                LangMap nameLangMap = activityDefenition.getName();
             
-                    LangMap nameLangMap = activityDefenition.getName();
-            
-                    // If Activity name
-                    if (nameLangMap != null) {
-                      Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+                // If Activity name
+                if (nameLangMap != null) {
+                
+                    Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+        
+                    // Check for en-us then en
+                    if (nameLangCodes.contains("en-us")) {
+                
+                      nameLangCode = "en-us";
+                
+                    } else if (nameLangCodes.contains("en")) {
+                
+                      nameLangCode = "en";
+                
+                    } else {
             
                       // Get namLangCode
                       Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
@@ -129,31 +139,39 @@ salience 100
                       }
             
                       if (nameLangCode == null || nameLangCode.length() == 0) {
-
-                    
-                        if (nameLangCodes.contains("en-us")) {
-                          nameLangCode = "en-us";
-                        } else {
                           String firstElement = nameLangCodes.stream().findFirst().orElse(null);
                           nameLangCode = firstElement;
-                        }
+                      }
                         
-                     } 
+                    } // if (nameLangCodes.contains("en-us")) {
                                     
-                      activityName = activityDefenition.getName().get(nameLangCode);
-                    }
+                    activityName = activityDefenition.getName().get(nameLangCode);
+                   
+                } // if (nameLangMap != null) {
             
-                    // Activity Description
-                    String activityDescription = null;
-                    String langCode = null;
-            
-                    LangMap descLangMap = activityDefenition.getDescription();
-                    LangMap namLangMap = activityDefenition.getName();
-            
-                    // If activity description
-                    if (descLangMap != null) {
-                      Set<String> descLangCodes = descLangMap.getLanguageCodes();
-            
+                // Activity Description
+                String activityDescription = "";
+                String langCode = null;
+        
+                LangMap descLangMap = activityDefenition.getDescription();
+                LangMap namLangMap = activityDefenition.getName();
+        
+                // If activity description
+                if (descLangMap != null) {
+                
+                  Set<String> descLangCodes = descLangMap.getLanguageCodes();
+        
+                  // Check for en-us then en
+                  if (descLangCodes.contains("en-us")) {
+                
+                      langCode = "en-us";
+                
+                  } else if (descLangCodes.contains("en")) {
+                
+                      langCode = "en";
+                
+                  } else {
+        
                       // Get namDescCode
                       Iterator<String> descLangCodesIterator = descLangCodes.iterator();
             
@@ -165,31 +183,37 @@ salience 100
                           break;
                         }
                       }
-            
-                      // If langCode not found
+                
                       if (langCode == null || langCode.length() == 0) {
-               
-                        if (descLangCodes.contains("en-us")) {
-                          nameLangCode = "en-us";
-                        } else {
                           String firstElement = descLangCodes.stream().findFirst().orElse(null);
                           nameLangCode = firstElement;
-                        }
-                        
                       }
-            
-                      activityDescription =
-                          activityDefenition.getDescription().get(langCode);
-            
-                    // If activity name
-                    } else if (namLangMap != null) {
-                      Set<String> namLangCodes = namLangMap.getLanguageCodes();
-            
+                          
+                  } // if (descLangCodes.contains("en-us")) {
+
+                  activityDescription = activityDefenition.getDescription().get(langCode);
+        
+                // If activity name
+                } else if (namLangMap != null) {
+                
+                  Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+        
+                  // Check for en-us then en
+                  if (nameLangCodes.contains("en-us")) {
+                
+                      langCode = "en-us";
+                
+                  } else if (nameLangCodes.contains("en")) {
+                
+                      langCode = "en";
+                
+                  } else {
+ 
                       // Get namDescCode
-                      Iterator<String> namLangCodesIterator = namLangCodes.iterator();
+                      Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
             
-                      while (namLangCodesIterator.hasNext()) {
-                        String code = namLangCodesIterator.next();
+                      while (nameLangCodesIterator.hasNext()) {
+                        String code = nameLangCodesIterator.next();
                         boolean found = Arrays.asList(namLang).contains(code);
                         if (found) {
                           langCode = code;
@@ -197,129 +221,124 @@ salience 100
                         }
                       }
             
-                      // If langCode not found
                       if (langCode == null || langCode.length() == 0) {
-                
-                        if (namLangCodes.contains("en-us")) {
-                          nameLangCode = "en-us";
-                        } else {
-                          String firstElement = namLangCodes.stream().findFirst().orElse(null);
+                          String firstElement = nameLangCodes.stream().findFirst().orElse(null);
                           nameLangCode = firstElement;
-                        }
+                      }
+                      
+                  } // if (nameLangCodes.contains("en-us")) {
+            
+                  activityDescription = activityDefenition.getName().get(langCode);
+        
+                } else {
+                
+                  activityDescription = "";
+                  
+                }
+        
+                if (activityDescription == null) {
+                     activityDescription = "";
+                }
+        
+                learningResource = new LearningResource();
+                learningResource.setIri(activity.getId());
+                learningResource.setDescription(activityDescription);
+                learningResource.setTitle(activityDescription);
+                learningResource.setUpdatedBy(updatedBy);
+                learningResourceService.save(learningResource);
+                System.out.println("Learning resource " + learningResource.getTitle() + " created.");
+                
+              } // if (learningResource == null) {
+              
+              // If LearningResource already exists
+              if (learningResource != null) {
+              
+                  // Get LearningRecord
+                  LearningRecord learningRecord =
+                      learningRecordService.findByPersonIdAndLearninResourceId(
+                          person.getId(), learningResource.getId());
+            
+                  // If LearningRecord doesn't exist
+                  if (learningRecord == null) {
+                      
+                    System.out.println("Creating new learning record.");
+                    learningRecord = new LearningRecord();
+                    
+                    if (result != null) {
+                  
+                      Boolean success = result.getSuccess();
+                      Boolean completed = result.getCompletion();
+            
+                      // status
+                      if (completed && success == null) {
+                        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                      } else if (completed && success ) {
+                        learningRecord.setRecordStatus(LearningStatus.PASSED);
+                      } else if (completed && !success) {
+                        learningRecord.setRecordStatus(LearningStatus.FAILED);
+                      } else {
+                        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
                       }
             
-                      activityDescription = activityDefenition.getName().get(langCode);
+                      // grade
+                      Score score = result.getScore();
+                
+                      if (score != null) {
+                        learningRecord.setAcademicGrade(score.getRaw().toString());
+                      }
             
                     } else {
-                      activityDescription = "";
+                        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
                     }
-            
-                    if (activityDescription == null) {
-                         activityDescription = "";
-                    }
-            
-                    learningResource = new LearningResource();
-                    learningResource.setIri(activity.getId());
-                    learningResource.setDescription(activityDescription);
-                    learningResource.setTitle(activityDescription);
-                    learningResource.setUpdatedBy(updatedBy);
-                    learningResourceService.save(learningResource);
-                    System.out.println("Learning resource " + learningResource.getTitle() + " created.");
-                    
-                  } // if (learningResource == null) {
-                  
-                  // If LearningResource already exists
-                  if (learningResource != null) {
-                  
-                      // Process LearningRecord
-                      // Get LearningRecord
-                      LearningRecord learningRecord =
-                          learningRecordService.findByPersonIdAndLearninResourceId(
-                              person.getId(), learningResource.getId());
-                
-                      // If LearningRecord doesn't exist
-                      if (learningRecord == null) {
-                      
-                        System.out.println("Creating new learning record.");
-                        learningRecord = new LearningRecord();
-                        
-                        if (result != null) {
-                  
-                          Boolean success = result.getSuccess();
-                          Boolean completed = result.getCompletion();
-                
-                          // status
-                          if (completed && success == null) {
-                            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-                          } else if (completed && success ) {
-                            learningRecord.setRecordStatus(LearningStatus.PASSED);
-                          } else if (completed && !success) {
-                            learningRecord.setRecordStatus(LearningStatus.FAILED);
-                          } else {
-                            learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-                          }
-                
-                          // grade
-                          Score score = result.getScore();
-                
-                          if (score != null) {
-                            learningRecord.setAcademicGrade(score.getRaw().toString());
-                          }
-                
-                        } else {
-                          learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-                        }
  
-                        learningRecord.setLearningResource(learningResource);
-                        learningRecord.setPerson(person);
-                        learningRecord.setUpdatedBy(updatedBy);
-                        learningRecordService.save(learningRecord);
-                        System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
+                    learningRecord.setLearningResource(learningResource);
+                    learningRecord.setPerson(person);
+                    learningRecord.setUpdatedBy(updatedBy);
+                    learningRecordService.save(learningRecord);
+                    System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
                 
-                      // If learningRecord already exists
-                      } else {
-                      
-                        System.out.println("Update learning record.");
-                        
-                        if (result != null) {
+                  // If learningRecord already exists
+                  } else {
                   
-                          Boolean success = result.getSuccess();
-                          Boolean completed = result.getCompletion();
-                
-                          // status
-                          if (completed && success == null) {
-                            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-                          } else if (completed && success ) {
-                            learningRecord.setRecordStatus(LearningStatus.PASSED);
-                          } else if (completed && !success) {
-                            learningRecord.setRecordStatus(LearningStatus.FAILED);
-                          } else {
-                            learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-                          }
-                
-                          // grade
-                          Score score = result.getScore();
-                
-                          if (score != null) {
-                            learningRecord.setAcademicGrade(score.getRaw().toString());
-                          }
-                
-                        } else {
-                          learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-                        }
-                        
-                        learningRecord.setUpdatedBy(updatedBy);
-                        learningRecordService.update(learningRecord);
-                        System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " updated.");
+                    System.out.println("Update learning record.");
+                    
+                    if (result != null) {
+              
+                      Boolean success = result.getSuccess();
+                      Boolean completed = result.getCompletion();
+            
+                      // status
+                      if (completed && success == null) {
+                        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                      } else if (completed && success ) {
+                        learningRecord.setRecordStatus(LearningStatus.PASSED);
+                      } else if (completed && !success) {
+                        learningRecord.setRecordStatus(LearningStatus.FAILED);
+                      } else {
+                        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
                       }
+            
+                      // grade
+                      Score score = result.getScore();
+            
+                      if (score != null) {
+                        learningRecord.setAcademicGrade(score.getRaw().toString());
+                      }
+            
+                    } else {
+                      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                    }
+                    
+                    learningRecord.setUpdatedBy(updatedBy);
+                    learningRecordService.update(learningRecord);
+                    System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " updated.");
+                  }
                       
                 } // if (learningResource != null) {
               
-              } // if (person != null) {
-              
             } // if (activityCompleted || activityAchieved) {
             
-          } // if (obj != null) {
+          } // if (obj instanceof Activity) {
         
         } catch (Exception e) {
           System.out.println("Exception while firing processStatement rule.");
