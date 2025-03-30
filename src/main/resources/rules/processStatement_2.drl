@@ -5,6 +5,9 @@ import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.LearningStatus;
 
+import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
+
 import java.lang.Exception
 
 import java.util.Set;
@@ -27,6 +30,7 @@ import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.model.Score;
 
+
 import function com.deloitte.elrr.aggregator.drools.RulesFiredHelper.helper;
 
 global com.deloitte.elrr.jpa.svc.EmailSvc emailService;
@@ -48,7 +52,7 @@ salience 100
         System.out.println("\n ==========Process LearningResource=============");
         helper(drools);
       
-         try {
+        try {
         
           String[] namLang = {"en-us"};
           String updatedBy = "ELRR";
@@ -337,7 +341,9 @@ salience 100
               
             } // if (activityCompleted || activityAchieved) {
             
-          } // if (obj instanceof Activity) {
+     	  } else {
+        	  throw new ActivityNotFoundException("Object is not an activity.");
+      	  }
         
         } catch (Exception e) {
           System.out.println("Exception while firing processStatement rule.");

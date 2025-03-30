@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
+import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
@@ -62,7 +63,8 @@ public class ProcessCompleted implements Rule {
   }
 
   @Override
-  public void processRule(Person person, Statement statement) throws Exception {
+  public void processRule(Person person, Statement statement)
+      throws ActivityNotFoundException, Exception {
 
     try {
 
@@ -88,12 +90,13 @@ public class ProcessCompleted implements Rule {
           LearningRecord learningRecord =
               processLearningRecord(activity, person, result, learningResource);
         }
+      } else {
+        throw new ActivityNotFoundException("Object is not an activity.");
       }
 
     } catch (Exception e) {
-      log.error("Exception while processing message.");
       log.error(e.getMessage());
-      e.printStackTrace();
+      e.getStackTrace();
     }
   }
 

@@ -10,6 +10,8 @@ import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,87 +47,104 @@ public class ELRRMessageListener {
 
     log.info("\n\n ===> Received Messasge in group - group-id: " + message);
 
-    try {
+    if (InputSanatizer.isValidInput(message)) {
 
-      if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        // processMessageFromRule(message);
-      } else {
-        log.warn("Invalid message did not pass whitelist check - " + message);
+      try {
+
+        //processMessage(message);
+        processMessageFromRule(message);
+
+      } catch (Exception e) {
+        // Send to dead letter queue
+        kafkaTemplate.send(deadLetterTopic, message);
       }
 
-    } catch (Exception e) {
-      log.error(e.getMessage());
-      // Send to dead letter queue
-      kafkaTemplate.send(deadLetterTopic, message);
+    } else {
+      log.warn("Invalid message did not pass whitelist check - " + message);
     }
   }
 
   /**
    * @param statement
+   * @throws ActivityNotFoundException, PersonNotFoundException, JsonProcessingException, Exception
    */
-  private void processMessage(final String payload) throws JsonProcessingException {
+  private void processMessage(final String payload)
+      throws ActivityNotFoundException,
+          PersonNotFoundException,
+          JsonProcessingException,
+          Exception {
 
     log.info("Process kafka message.");
 
+    Statement statement = null;
     Person person = null;
 
+    // Get Statement
     try {
+      statement = getStatement(payload);
+    } catch (JsonProcessingException e) {
+      throw e;
+    }
 
-      // Get Statement
-      Statement statement = getStatement(payload);
+    // Process Person
+    person = processPerson.processPerson(statement);
 
-      // Process Person
-      person = processPerson.processPerson(statement);
+    // If person exists
+    if (person != null) {
 
-      if (person != null) {
+      // Process completed or achieved
+      boolean fireRule = processCompleted.fireRule(statement);
 
-        // Process completed or achieved
-        boolean fireRule = processCompleted.fireRule(statement);
-
-        if (fireRule) {
+      if (fireRule) {
+        try {
           processCompleted.processRule(person, statement);
+        } catch (Exception e) {
+          throw e;
         }
       }
-
-    } catch (Exception e) {
-      log.error("Exception while processing message.");
-      log.error(e.getMessage());
-      e.printStackTrace();
+    } else {
+      throw new PersonNotFoundException("Person not found.");
     }
   }
 
   /**
    * @param statement
    */
-  private void processMessageFromRule(final String payload) {
+  private void processMessageFromRule(final String payload)
+      throws ActivityNotFoundException,
+          PersonNotFoundException,
+          JsonProcessingException,
+          Exception {
 
     log.info("Process kafka message with Drools.");
 
+    Statement statement = null;
     Person person = null;
 
+    // Get Statement
     try {
+      statement = getStatement(payload);
+    } catch (JsonProcessingException e) {
+      throw e;
+    }
 
-      // Get Statement
-      Statement statement = getStatement(payload);
+    // Process Person
+    person = processPerson.processPerson(statement);
 
-      // Process Person
-      person = processPerson.processPerson(statement);
+    if (person != null) {
 
-      if (person != null) {
+      // Process completed or achieved
+      boolean fireRule = processCompleted.fireRule(statement);
 
-        // Process completed or achieved
-        boolean fireRule = processCompleted.fireRule(statement);
-
+      try {
         if (fireRule) {
           droolsProcessStatementService.processStatement(person, statement);
         }
+      } catch (Exception e) {
+        throw e;
       }
-
-    } catch (Exception e) {
-      log.error("Exception while processing rule.");
-      log.error(e.getMessage());
-      e.printStackTrace();
+    } else {
+      throw new PersonNotFoundException("Person not found.");
     }
   }
 

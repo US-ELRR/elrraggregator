@@ -34,36 +34,27 @@ public class ProcessPerson {
 
   private static String updatedBy = "ELRR";
 
-  public Person processPerson(Statement statement) throws Exception {
+  public Person processPerson(Statement statement) {
 
     Person person = null;
+    Account account = null;
 
-    try {
+    // Get Actor
+    AbstractActor actor = getActor(statement);
 
-      Account account = null;
+    // Get Account
+    if (actor != null) {
+      account = getAccount(actor);
+    }
 
-      // Get Actor
-      AbstractActor actor = getActor(statement);
+    log.info("Process person.");
 
-      // Get Account
-      if (actor != null) {
-        account = getAccount(actor);
-      }
+    // Get Person
+    person = getPerson(actor, account);
 
-      log.info("Process person.");
-
-      // Get Person
-      person = getPerson(actor, account);
-
-      // If Person doesn't exist
-      if (person == null) {
-        person = createNewPerson(actor, account);
-      }
-
-    } catch (Exception e) {
-      log.error("Exception while processing person.");
-      log.error(e.getMessage());
-      e.printStackTrace();
+    // If Person doesn't exist
+    if (person == null) {
+      person = createNewPerson(actor, account);
     }
 
     return person;
