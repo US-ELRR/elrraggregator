@@ -46,16 +46,11 @@ public class ProcessCompleted implements Rule {
     // Completed Verb Id
     String completedVerbId = VerbIdConstants.COMPLETED_VERB_ID;
 
-    // Achieved Verb Id
-    String achievedVerbId = VerbIdConstants.ACHIEVED_VERB_ID;
-
     // Get Verb
     Verb verb = getVerb(statement);
 
-    // Is Verb Id completed or achieved
+    // Is Verb Id completed
     if (verb.getId().equalsIgnoreCase(completedVerbId)) {
-      return true;
-    } else if (verb.getId().equalsIgnoreCase(achievedVerbId)) {
       return true;
     } else {
       return false;
@@ -90,6 +85,7 @@ public class ProcessCompleted implements Rule {
           LearningRecord learningRecord =
               processLearningRecord(activity, person, result, learningResource);
         }
+
       } else {
         log.error("Object is not an activity.");
         throw new ActivityNotFoundException("Object is not an activity.");

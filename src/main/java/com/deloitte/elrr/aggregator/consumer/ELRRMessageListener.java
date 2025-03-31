@@ -50,8 +50,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        // processMessage(message);
-        processMessageFromRule(message);
+        processMessage(message);
+        // processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
@@ -82,22 +82,26 @@ public class ELRRMessageListener {
     // Get Statement
     statement = getStatement(payload);
 
-    // Process Person
-    person = processPerson.processPerson(statement);
+    // Process completed
+    boolean fireRule = processCompleted.fireRule(statement);
 
-    // If person exists
-    if (person != null) {
+    if (fireRule) {
 
-      // Process completed or achieved
-      boolean fireRule = processCompleted.fireRule(statement);
+      log.info("Process verb " + statement.getVerb().getId());
 
-      if (fireRule) {
+      // Process Person
+      person = processPerson.processPerson(statement);
+
+      // If person exists
+      if (person != null) {
         processCompleted.processRule(person, statement);
+      } else {
+        log.error("Person not found.");
+        throw new PersonNotFoundException("Person not found.");
       }
 
     } else {
-      log.error("Person not found.");
-      throw new PersonNotFoundException("Person not found.");
+      log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
     }
   }
 
@@ -118,21 +122,26 @@ public class ELRRMessageListener {
     // Get Statement
     statement = getStatement(payload);
 
-    // Process Person
-    person = processPerson.processPerson(statement);
+    // Process completed
+    boolean fireRule = processCompleted.fireRule(statement);
 
-    if (person != null) {
+    if (fireRule) {
 
-      // Process completed or achieved
-      boolean fireRule = processCompleted.fireRule(statement);
+      log.info("Process verb " + statement.getVerb().getId());
 
-      if (fireRule) {
+      // Process Person
+      person = processPerson.processPerson(statement);
+
+      // If person exists
+      if (person != null) {
         droolsProcessStatementService.processStatement(person, statement);
+      } else {
+        log.error("Person not found.");
+        throw new PersonNotFoundException("Person not found.");
       }
 
     } else {
-      log.error("Person not found.");
-      throw new PersonNotFoundException("Person not found.");
+      log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
     }
   }
 
