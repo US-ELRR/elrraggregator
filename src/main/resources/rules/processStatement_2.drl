@@ -112,8 +112,15 @@ salience 100
                 String activityName = null;
                 String nameLangCode = null;
         
-                LangMap nameLangMap = activityDefenition.getName();
-            
+                LangMap nameLangMap = null;
+                
+                try {
+                    nameLangMap = activityDefenition.getName();
+                } catch (ClassCastException | NullPointerException e) {
+                    System.out.println(e.getMessage());
+                    e.getStackTrace();
+                }
+        
                 // If Activity name
                 if (nameLangMap != null) {
                 

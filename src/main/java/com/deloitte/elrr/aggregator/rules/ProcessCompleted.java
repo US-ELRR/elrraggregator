@@ -64,7 +64,7 @@ public class ProcessCompleted implements Rule {
 
   @Override
   public void processRule(Person person, Statement statement)
-      throws ActivityNotFoundException, Exception {
+      throws ActivityNotFoundException, ClassCastException, NullPointerException {
 
     try {
 
@@ -91,10 +91,11 @@ public class ProcessCompleted implements Rule {
               processLearningRecord(activity, person, result, learningResource);
         }
       } else {
+        log.error("Object is not an activity.");
         throw new ActivityNotFoundException("Object is not an activity.");
       }
 
-    } catch (Exception e) {
+    } catch (ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
       e.getStackTrace();
     }
@@ -131,7 +132,8 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource processLearningResource(Activity activity) {
+  public LearningResource processLearningResource(Activity activity)
+      throws ClassCastException, NullPointerException {
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -139,11 +141,19 @@ public class ProcessCompleted implements Rule {
     // If LearningResource already exists
     if (learningResource != null) {
 
-      System.out.println("Learning resource " + learningResource.getTitle() + " exists.");
+      log.info("Learning resource " + learningResource.getTitle() + " exists.");
 
-      // If LearningResource doesn't exist
     } else if (learningResource == null) {
-      learningResource = createLearningResource(activity);
+
+      try {
+
+        learningResource = createLearningResource(activity);
+
+      } catch (ClassCastException | NullPointerException e) {
+
+        log.error("Error crfeating learning resource - " + e.getMessage());
+        e.getStackTrace();
+      }
     }
 
     return learningResource;
@@ -153,9 +163,12 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource createLearningResource(Activity activity) {
+  public LearningResource createLearningResource(Activity activity)
+      throws ClassCastException, NullPointerException {
 
     log.info("Creating new learning resource.");
+
+    LearningResource learningResource = null;
 
     // Activity Definition
     ActivityDefinition activityDefenition = activity.getDefinition();
@@ -166,46 +179,54 @@ public class ProcessCompleted implements Rule {
 
     LangMap nameLangMap = activityDefenition.getName();
 
-    // If Activity name
-    if (nameLangMap != null) {
-      nameLangCode = getLangCode(nameLangMap);
-      activityName = activityDefenition.getName().get(nameLangCode);
+    try {
+
+      // If Activity name
+      if (nameLangMap != null) {
+        nameLangCode = getLangCode(nameLangMap);
+        activityName = activityDefenition.getName().get(nameLangCode);
+      }
+
+      // Activity Description
+      String activityDescription = "";
+      String langCode = null;
+
+      LangMap descLangMap = activityDefenition.getDescription();
+
+      // If activity description
+      if (descLangMap != null) {
+
+        langCode = getLangCode(descLangMap);
+        activityDescription = activityDefenition.getDescription().get(langCode);
+
+        // If activity name
+      } else if (nameLangMap != null) {
+
+        langCode = getLangCode(nameLangMap);
+        activityDescription = activityDefenition.getName().get(langCode);
+
+      } else {
+
+        activityDescription = "";
+      }
+
+      if (activityDescription == null) {
+        activityDescription = "";
+      }
+
+      learningResource = new LearningResource();
+      learningResource.setIri(activity.getId());
+      learningResource.setDescription(activityDescription);
+      learningResource.setTitle(activityDescription);
+      learningResource.setUpdatedBy(updatedBy);
+      learningResourceService.save(learningResource);
+      log.info("Learning resource " + learningResource.getTitle() + " created.");
+
+    } catch (ClassCastException | NullPointerException e) {
+      log.error(e.getMessage());
+      e.getStackTrace();
     }
 
-    // Activity Description
-    String activityDescription = "";
-    String langCode = null;
-
-    LangMap descLangMap = activityDefenition.getDescription();
-
-    // If activity description
-    if (descLangMap != null) {
-
-      langCode = getLangCode(descLangMap);
-      activityDescription = activityDefenition.getDescription().get(langCode);
-
-      // If activity name
-    } else if (nameLangMap != null) {
-
-      langCode = getLangCode(nameLangMap);
-      activityDescription = activityDefenition.getName().get(langCode);
-
-    } else {
-
-      activityDescription = "";
-    }
-
-    if (activityDescription == null) {
-      activityDescription = "";
-    }
-
-    LearningResource learningResource = new LearningResource();
-    learningResource.setIri(activity.getId());
-    learningResource.setDescription(activityDescription);
-    learningResource.setTitle(activityDescription);
-    learningResource.setUpdatedBy(updatedBy);
-    learningResourceService.save(learningResource);
-    log.info("Learning resource " + learningResource.getTitle() + " created.");
     return learningResource;
   }
 
@@ -249,28 +270,7 @@ public class ProcessCompleted implements Rule {
     LearningRecord learningRecord = new LearningRecord();
 
     if (result != null) {
-
-      Boolean success = result.getSuccess();
-      Boolean completed = result.getCompletion();
-
-      // status
-      if (completed && success == null) {
-        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-      } else if (completed && success) {
-        learningRecord.setRecordStatus(LearningStatus.PASSED);
-      } else if (completed && !success) {
-        learningRecord.setRecordStatus(LearningStatus.FAILED);
-      } else {
-        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-      }
-
-      // grade
-      Score score = result.getScore();
-
-      if (score != null) {
-        learningRecord.setAcademicGrade(score.getRaw().toString());
-      }
-
+      learningRecord = setStatus(learningRecord, result);
     } else {
       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
@@ -279,12 +279,14 @@ public class ProcessCompleted implements Rule {
     learningRecord.setPerson(person);
     learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.save(learningRecord);
+
     log.info(
         "Learning record for "
             + person.getName()
             + " - "
             + learningResource.getTitle()
             + " created.");
+
     return learningRecord;
   }
 
@@ -297,6 +299,67 @@ public class ProcessCompleted implements Rule {
    */
   public LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
     log.info("Update learning record.");
+
+    if (result != null) {
+      learningRecord = setStatus(learningRecord, result);
+    } else {
+      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+    }
+
+    learningRecord.setUpdatedBy(updatedBy);
+    learningRecordService.update(learningRecord);
+
+    return learningRecord;
+  }
+
+  /**
+   * @param map
+   * @return langCode
+   */
+  private String getLangCode(LangMap map) throws ClassCastException, NullPointerException {
+
+    String langCode = null;
+
+    Set<String> langCodes = map.getLanguageCodes();
+
+    try {
+
+      // Check for en-us then en
+      if (langCodes.contains("en-us")) {
+        langCode = "en-us";
+      } else if (langCodes.contains("en")) {
+        langCode = "en";
+      } else {
+        Iterator<String> langCodesIterator = langCodes.iterator();
+        // Iterate and compare to lang.codes in .properties
+        while (langCodesIterator.hasNext()) {
+          String code = langCodesIterator.next();
+          boolean found = Arrays.asList(namLang).contains(code);
+          if (found) {
+            langCode = code;
+            break;
+          }
+        }
+      }
+      if (langCode == null || langCode.length() == 0) {
+        String firstElement = langCodes.stream().findFirst().orElse(null);
+        langCode = firstElement;
+      }
+
+    } catch (ClassCastException | NullPointerException e) {
+      log.error("Error getting language codes - " + e.getMessage());
+      e.getStackTrace();
+    }
+
+    return langCode;
+  }
+
+  /**
+   * @param learningRecord
+   * @param result
+   * @return learningRecord
+   */
+  private LearningRecord setStatus(LearningRecord learningRecord, Result result) {
 
     if (result != null) {
 
@@ -325,53 +388,6 @@ public class ProcessCompleted implements Rule {
       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
 
-    learningRecord.setUpdatedBy(updatedBy);
-    learningRecordService.update(learningRecord);
     return learningRecord;
-  }
-
-  /**
-   * @param map
-   * @return langCode
-   */
-  private String getLangCode(LangMap map) {
-
-    String langCode = null;
-
-    Set<String> langCodes = map.getLanguageCodes();
-
-    // Check for en-us then en
-    if (langCodes.contains("en-us")) {
-
-      langCode = "en-us";
-
-    } else if (langCodes.contains("en")) {
-
-      langCode = "en";
-
-    } else {
-
-      Iterator<String> langCodesIterator = langCodes.iterator();
-
-      // Iterate and compare to lang.codes in .properties
-      while (langCodesIterator.hasNext()) {
-
-        String code = langCodesIterator.next();
-
-        boolean found = Arrays.asList(namLang).contains(code);
-
-        if (found) {
-          langCode = code;
-          break;
-        }
-      }
-    }
-
-    if (langCode == null || langCode.length() == 0) {
-      String firstElement = langCodes.stream().findFirst().orElse(null);
-      langCode = firstElement;
-    }
-
-    return langCode;
   }
 }

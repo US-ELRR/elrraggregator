@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.Person;
@@ -34,7 +35,7 @@ public class ProcessPerson {
 
   private static String updatedBy = "ELRR";
 
-  public Person processPerson(Statement statement) {
+  public Person processPerson(Statement statement) throws PersonNotFoundException {
 
     Person person = null;
     Account account = null;
@@ -45,6 +46,9 @@ public class ProcessPerson {
     // Get Account
     if (actor != null) {
       account = getAccount(actor);
+    } else {
+      log.error("Actor not found.");
+      throw new PersonNotFoundException("Actor not found.");
     }
 
     log.info("Process person.");

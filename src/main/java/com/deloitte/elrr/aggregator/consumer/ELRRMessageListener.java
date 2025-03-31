@@ -47,20 +47,20 @@ public class ELRRMessageListener {
 
     log.info("\n\n ===> Received Messasge in group - group-id: " + message);
 
-    if (InputSanatizer.isValidInput(message)) {
+    try {
 
-      try {
-
-        //processMessage(message);
+      if (InputSanatizer.isValidInput(message)) {
+        // processMessage(message);
         processMessageFromRule(message);
-
-      } catch (Exception e) {
+      } else {
+        log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
         kafkaTemplate.send(deadLetterTopic, message);
       }
 
-    } else {
-      log.warn("Invalid message did not pass whitelist check - " + message);
+    } catch (Exception e) {
+      // Send to dead letter queue
+      kafkaTemplate.send(deadLetterTopic, message);
     }
   }
 
@@ -80,11 +80,7 @@ public class ELRRMessageListener {
     Person person = null;
 
     // Get Statement
-    try {
-      statement = getStatement(payload);
-    } catch (JsonProcessingException e) {
-      throw e;
-    }
+    statement = getStatement(payload);
 
     // Process Person
     person = processPerson.processPerson(statement);
@@ -96,13 +92,11 @@ public class ELRRMessageListener {
       boolean fireRule = processCompleted.fireRule(statement);
 
       if (fireRule) {
-        try {
-          processCompleted.processRule(person, statement);
-        } catch (Exception e) {
-          throw e;
-        }
+        processCompleted.processRule(person, statement);
       }
+
     } else {
+      log.error("Person not found.");
       throw new PersonNotFoundException("Person not found.");
     }
   }
@@ -122,11 +116,7 @@ public class ELRRMessageListener {
     Person person = null;
 
     // Get Statement
-    try {
-      statement = getStatement(payload);
-    } catch (JsonProcessingException e) {
-      throw e;
-    }
+    statement = getStatement(payload);
 
     // Process Person
     person = processPerson.processPerson(statement);
@@ -136,14 +126,12 @@ public class ELRRMessageListener {
       // Process completed or achieved
       boolean fireRule = processCompleted.fireRule(statement);
 
-      try {
-        if (fireRule) {
-          droolsProcessStatementService.processStatement(person, statement);
-        }
-      } catch (Exception e) {
-        throw e;
+      if (fireRule) {
+        droolsProcessStatementService.processStatement(person, statement);
       }
+
     } else {
+      log.error("Person not found.");
       throw new PersonNotFoundException("Person not found.");
     }
   }
@@ -153,17 +141,22 @@ public class ELRRMessageListener {
    * @return Statement
    */
   public Statement getStatement(String payload) throws JsonProcessingException {
+
     Statement statement = null;
     ObjectMapper mapper = Mapper.getMapper();
     MessageVO messageVo;
+
     try {
+
       messageVo = mapper.readValue(payload, MessageVO.class);
       statement = messageVo.getStatement();
+
     } catch (JsonProcessingException e) {
-      log.error("Exception while getting statement.");
-      log.error(e.getMessage());
+
+      log.error("Error getting statement - " + e.getMessage());
       e.printStackTrace();
     }
+
     return statement;
   }
 }
