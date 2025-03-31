@@ -5,6 +5,7 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.jpa.svc.EmailSvc;
 import com.deloitte.elrr.jpa.svc.IdentitySvc;
@@ -31,7 +32,7 @@ public class DroolsProcessStatementService {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
-  public void processStatement(Person person, Statement statement) {
+  public void processStatement(Person person, Statement statement) throws AggregatorException {
 
     try {
 
@@ -51,7 +52,7 @@ public class DroolsProcessStatementService {
 
     } catch (RuntimeException e) {
       log.info("Exception while creating KieSession.");
-      e.printStackTrace();
+      throw new AggregatorException("Exception while creating KieSession. " + e.getMessage());
     }
   }
 }

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
-import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
@@ -38,8 +38,6 @@ public class ProcessCompleted implements Rule {
   @Value("${lang.codes}")
   private String[] namLang = new String[10];
 
-  private static String updatedBy = "ELRR";
-
   @Override
   public boolean fireRule(Statement statement) {
 
@@ -47,7 +45,7 @@ public class ProcessCompleted implements Rule {
     String completedVerbId = VerbIdConstants.COMPLETED_VERB_ID;
 
     // Get Verb
-    Verb verb = getVerb(statement);
+    Verb verb = statement.getVerb();
 
     // Is Verb Id completed
     if (verb.getId().equalsIgnoreCase(completedVerbId)) {
@@ -59,15 +57,15 @@ public class ProcessCompleted implements Rule {
 
   @Override
   public void processRule(Person person, Statement statement)
-      throws ActivityNotFoundException, ClassCastException, NullPointerException {
+      throws AggregatorException, Exception {
 
     try {
 
       // Get Object
-      AbstractObject obj = getObject(statement);
+      AbstractObject obj = statement.getObject();
 
       // Get Result
-      Result result = getResult(statement);
+      Result result = statement.getResult();
 
       // If Activity
       if (obj instanceof Activity) {
@@ -88,48 +86,23 @@ public class ProcessCompleted implements Rule {
 
       } else {
         log.error("Object is not an activity.");
-        throw new ActivityNotFoundException("Object is not an activity.");
+        throw new AggregatorException("Object is not an activity.");
       }
 
-    } catch (ClassCastException | NullPointerException e) {
+    } catch (AggregatorException e) {
       log.error(e.getMessage());
-      e.getStackTrace();
+      throw e;
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      throw e;
     }
-  }
-
-  /**
-   * @param statement
-   * @return AbstractObject
-   */
-  public AbstractObject getObject(Statement statement) {
-    AbstractObject obj = statement.getObject();
-    return obj;
-  }
-
-  /**
-   * @param statement
-   * @return Verb
-   */
-  public Verb getVerb(Statement statement) {
-    Verb verb = statement.getVerb();
-    return verb;
-  }
-
-  /**
-   * @param statement
-   * @return Result
-   */
-  public Result getResult(Statement statement) {
-    Result result = statement.getResult();
-    return result;
   }
 
   /**
    * @param activity
    * @return LearningResource
    */
-  public LearningResource processLearningResource(Activity activity)
-      throws ClassCastException, NullPointerException {
+  public LearningResource processLearningResource(Activity activity) throws AggregatorException {
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -147,8 +120,8 @@ public class ProcessCompleted implements Rule {
 
       } catch (ClassCastException | NullPointerException e) {
 
-        log.error("Error crfeating learning resource - " + e.getMessage());
-        e.getStackTrace();
+        log.error("Error processing learning resource - " + e.getMessage());
+        throw new AggregatorException("Error processing learning resource - " + e.getMessage());
       }
     }
 
@@ -159,8 +132,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource createLearningResource(Activity activity)
-      throws ClassCastException, NullPointerException {
+  public LearningResource createLearningResource(Activity activity) throws AggregatorException {
 
     log.info("Creating new learning resource.");
 
@@ -214,13 +186,12 @@ public class ProcessCompleted implements Rule {
       learningResource.setIri(activity.getId());
       learningResource.setDescription(activityDescription);
       learningResource.setTitle(activityDescription);
-      learningResource.setUpdatedBy(updatedBy);
       learningResourceService.save(learningResource);
       log.info("Learning resource " + learningResource.getTitle() + " created.");
 
     } catch (ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
-      e.getStackTrace();
+      throw new AggregatorException("Error creating learning resource - " + e.getMessage());
     }
 
     return learningResource;
@@ -273,7 +244,6 @@ public class ProcessCompleted implements Rule {
 
     learningRecord.setLearningResource(learningResource);
     learningRecord.setPerson(person);
-    learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.save(learningRecord);
 
     log.info(
@@ -302,7 +272,6 @@ public class ProcessCompleted implements Rule {
       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
     }
 
-    learningRecord.setUpdatedBy(updatedBy);
     learningRecordService.update(learningRecord);
 
     return learningRecord;

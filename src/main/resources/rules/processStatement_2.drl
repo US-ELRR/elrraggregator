@@ -7,6 +7,7 @@ import com.deloitte.elrr.entity.types.LearningStatus;
 
 import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 
 import java.lang.Exception
 
@@ -55,7 +56,6 @@ salience 100
         try {
         
           String[] namLang = {"en-us"};
-          String updatedBy = "ELRR";
         
           // Completed Verb
           String[] completedVerbArray = {"http://adlnet.gov/expapi/verbs/completed"};
@@ -118,7 +118,7 @@ salience 100
                     nameLangMap = activityDefenition.getName();
                 } catch (ClassCastException | NullPointerException e) {
                     System.out.println(e.getMessage());
-                    e.getStackTrace();
+                    throw new AggregatorException("Error processing learning resource - " + e.getMessage());
                 }
         
                 // If Activity name
@@ -254,7 +254,6 @@ salience 100
                 learningResource.setIri(activity.getId());
                 learningResource.setDescription(activityDescription);
                 learningResource.setTitle(activityDescription);
-                learningResource.setUpdatedBy(updatedBy);
                 learningResourceService.save(learningResource);
                 System.out.println("Learning resource " + learningResource.getTitle() + " created.");
                 
@@ -303,7 +302,6 @@ salience 100
  
                     learningRecord.setLearningResource(learningResource);
                     learningRecord.setPerson(person);
-                    learningRecord.setUpdatedBy(updatedBy);
                     learningRecordService.save(learningRecord);
                     System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
                 
@@ -339,7 +337,6 @@ salience 100
                       learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
                     }
                     
-                    learningRecord.setUpdatedBy(updatedBy);
                     learningRecordService.update(learningRecord);
                     System.out.println("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " updated.");
                   }
@@ -354,8 +351,7 @@ salience 100
         
         } catch (Exception e) {
           System.out.println("Exception while firing processStatement rule.");
-          System.out.println(e.getMessage());
-          e.printStackTrace();
+          throw new AggregatorException("while firing processStatement rule - " + e.getMessage());
         }
 
   end
