@@ -3,7 +3,6 @@ package com.deloitte.elrr.aggregator.consumer;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
@@ -29,19 +28,15 @@ public class ProcessPerson {
 
   @Autowired private PersonSvc personService;
 
-  @Value("${lang.codes}")
-  private String[] namLang = new String[10];
-
   public Person processPerson(Statement statement) throws PersonNotFoundException {
 
+    AbstractActor actor = null;
     Person person = null;
     Account account = null;
 
-    // Get Actor
-    AbstractActor actor = (AbstractActor) statement.getActor();
-
-    // Get Account
-    if (actor != null) {
+    // Get Actor and account
+    if (statement.getActor() instanceof AbstractActor) {
+      actor = (AbstractActor) statement.getActor();
       account = actor.getAccount();
     } else {
       log.error("Actor not found.");
@@ -56,6 +51,11 @@ public class ProcessPerson {
     // If Person doesn't exist
     if (person == null) {
       person = createNewPerson(actor, account);
+    }
+
+    // If error creating Person
+    if (person == null) {
+      throw new PersonNotFoundException("Person not found.");
     }
 
     return person;

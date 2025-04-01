@@ -56,8 +56,7 @@ public class ProcessCompleted implements Rule {
   }
 
   @Override
-  public void processRule(Person person, Statement statement)
-      throws AggregatorException, Exception {
+  public void processRule(Person person, Statement statement) throws AggregatorException {
 
     try {
 
@@ -90,10 +89,6 @@ public class ProcessCompleted implements Rule {
       }
 
     } catch (AggregatorException e) {
-      log.error(e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      log.error(e.getMessage());
       throw e;
     }
   }
@@ -112,7 +107,7 @@ public class ProcessCompleted implements Rule {
 
       log.info("Learning resource " + learningResource.getTitle() + " exists.");
 
-    } else if (learningResource == null) {
+    } else {
 
       try {
 
@@ -121,6 +116,7 @@ public class ProcessCompleted implements Rule {
       } catch (ClassCastException | NullPointerException e) {
 
         log.error("Error processing learning resource - " + e.getMessage());
+        e.printStackTrace();
         throw new AggregatorException("Error processing learning resource - " + e.getMessage());
       }
     }
@@ -189,8 +185,9 @@ public class ProcessCompleted implements Rule {
       learningResourceService.save(learningResource);
       log.info("Learning resource " + learningResource.getTitle() + " created.");
 
-    } catch (ClassCastException | NullPointerException e) {
+    } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
+      e.printStackTrace();
       throw new AggregatorException("Error creating learning resource - " + e.getMessage());
     }
 
@@ -265,23 +262,17 @@ public class ProcessCompleted implements Rule {
    */
   public LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
     log.info("Update learning record.");
-
-    if (result != null) {
-      learningRecord = setStatus(learningRecord, result);
-    } else {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-    }
-
+    learningRecord = setStatus(learningRecord, result);
     learningRecordService.update(learningRecord);
-
     return learningRecord;
   }
 
   /**
    * @param map
    * @return langCode
+   * @throws AggregatorException
    */
-  private String getLangCode(LangMap map) throws ClassCastException, NullPointerException {
+  private String getLangCode(LangMap map) throws AggregatorException {
 
     String langCode = null;
 
@@ -289,31 +280,44 @@ public class ProcessCompleted implements Rule {
 
     try {
 
-      // Check for en-us then en
-      if (langCodes.contains("en-us")) {
-        langCode = "en-us";
-      } else if (langCodes.contains("en")) {
-        langCode = "en";
-      } else {
-        Iterator<String> langCodesIterator = langCodes.iterator();
-        // Iterate and compare to lang.codes in .properties
-        while (langCodesIterator.hasNext()) {
-          String code = langCodesIterator.next();
-          boolean found = Arrays.asList(namLang).contains(code);
-          if (found) {
-            langCode = code;
-            break;
-          }
+      Iterator<String> langCodesIterator = langCodes.iterator();
+
+      // Iterate and compare to lang.codes in .properties
+      while (langCodesIterator.hasNext()) {
+
+        String code = langCodesIterator.next();
+
+        boolean found = Arrays.asList(namLang).contains(code);
+
+        if (found) {
+          langCode = code;
+          break;
         }
       }
+
+      // If langCode not found
       if (langCode == null || langCode.length() == 0) {
-        String firstElement = langCodes.stream().findFirst().orElse(null);
-        langCode = firstElement;
+
+        // Check for en-us then en
+        if (langCodes.contains("en-us")) {
+
+          langCode = "en-us";
+
+        } else if (langCodes.contains("en")) {
+
+          langCode = "en";
+
+        } else {
+
+          String firstElement = langCodes.stream().findFirst().orElse(null);
+          langCode = firstElement;
+        }
       }
 
     } catch (ClassCastException | NullPointerException e) {
       log.error("Error getting language codes - " + e.getMessage());
       e.getStackTrace();
+      throw new AggregatorException("Error getting language codes - " + e.getMessage());
     }
 
     return langCode;

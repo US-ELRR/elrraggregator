@@ -36,7 +36,7 @@ public class DroolsConfig {
   private void loadFileBasedRules(final KieFileSystem kieFileSystem) {
 
     try {
-      File rule = new ClassPathResource("rules/processStatement_2.drl").getFile();
+      File rule = new ClassPathResource("rules/processCompleted.drl").getFile();
       // Load rules into working memory
       kieFileSystem.write(ResourceFactory.newFileResource(rule));
     } catch (IOException e) {

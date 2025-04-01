@@ -1,0 +1,335 @@
+import com.deloitte.elrr.entity.Email;
+import com.deloitte.elrr.entity.Identity;
+import com.deloitte.elrr.entity.LearningRecord;
+import com.deloitte.elrr.entity.LearningResource;
+import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.entity.types.LearningStatus;
+
+import com.deloitte.elrr.elrraggregator.exception.ActivityNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
+import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+
+import java.lang.Exception
+
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import com.yetanalytics.xapi.model.AbstractActor;
+import com.yetanalytics.xapi.model.AbstractObject;
+import com.yetanalytics.xapi.model.Account;
+import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.ActivityDefinition;
+import com.yetanalytics.xapi.model.LangMap;
+import com.yetanalytics.xapi.model.ObjectType;
+import com.yetanalytics.xapi.model.Result;
+import com.yetanalytics.xapi.model.Statement;
+import com.yetanalytics.xapi.model.Verb;
+import com.yetanalytics.xapi.model.Score;
+
+
+import function com.deloitte.elrr.aggregator.drools.RulesFiredHelper.helper;
+
+global com.deloitte.elrr.jpa.svc.EmailSvc emailService;
+global com.deloitte.elrr.jpa.svc.IdentitySvc identityService;
+global com.deloitte.elrr.jpa.svc.LearningRecordSvc learningRecordService;
+global com.deloitte.elrr.jpa.svc.LearningResourceSvc learningResourceService;
+global com.deloitte.elrr.jpa.svc.PersonSvc personService;
+
+global com.deloitte.elrr.entity.Person person;
+global com.yetanalytics.xapi.model.Statement statement;
+ 
+dialect "java"
+
+rule "Process_Completed"
+salience 100
+   when
+        Statement (id != "")
+   then
+        System.out.println("\n ==========Process Completed=============");
+        helper(drools);
+        
+        try {
+        
+          String[] namLang = {"en-us"};
+          
+          // Get Object
+          AbstractObject obj = statement.getObject();
+        
+          // Get Result
+          Result result = statement.getResult();
+        
+          // If Activity
+          if (obj instanceof Activity) {
+          
+              // Process completed
+              System.out.println("Process activity.");
+        
+              // Get activity
+              Activity activity = (Activity) obj;
+        
+              System.out.println("Person " + person.getName() + " exists.");
+        
+              // Process LearningResource
+              // Get LearningResource
+              LearningResource learningResource =
+                  learningResourceService.findByIri(activity.getId());
+        
+              // If LearningResource already exists
+              if (learningResource != null) {
+                System.out.println(
+                    "Learning resource " + learningResource.getTitle() + " exists.");
+        
+              // If LearningResource doesn't exist
+              } else if (learningResource == null) {
+                System.out.println("Creating new learning resource.");
+        
+                // Activity Definition
+                ActivityDefinition activityDefenition = activity.getDefinition();
+        
+                // Activity name
+                String activityName = null;
+                String nameLangCode = null;
+        
+                LangMap nameLangMap = null;
+        
+                try {
+                  nameLangMap = activityDefenition.getName();
+                } catch (ClassCastException | NullPointerException e) {
+                  System.out.println(e.getMessage());
+                  throw new AggregatorException("Error processing learning resource - " + e.getMessage());
+                }
+        
+                // If Activity name
+                if (nameLangMap != null) {
+                  Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+        
+                  // Get namLangCode
+                  Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
+        
+                  while (nameLangCodesIterator.hasNext()) {
+                    String code = nameLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      nameLangCode = code;
+                      break;
+                    }
+                  }
+        
+                  if (nameLangCode == null || nameLangCode.length() == 0) {
+                  
+                    // Check for en-us then en
+                    if (nameLangCodes.contains("en-us")) {
+                    
+                      nameLangCode = "en-us";
+        
+                    } else if (nameLangCodes.contains("en")) {
+                    
+                      nameLangCode = "en";
+        
+                    } else {
+                      String firstElement =
+                      nameLangCodes.stream().findFirst().orElse(null);
+                      nameLangCode = firstElement;
+                    }
+        
+                  } // if (nameLangCode == null || nameLangCode.length() == 0) {
+        
+                  activityName = activityDefenition.getName().get(nameLangCode);
+        
+                } // if (nameLangMap != null) {
+        
+                // Activity Description
+                String activityDescription = "";
+                String langCode = null;
+        
+                LangMap descLangMap = activityDefenition.getDescription();
+        
+                // If activity description
+                if (descLangMap != null) {
+                  Set<String> descLangCodes = descLangMap.getLanguageCodes();
+        
+                  // Get namDescCode
+                  Iterator<String> descLangCodesIterator = descLangCodes.iterator();
+        
+                  while (descLangCodesIterator.hasNext()) {
+                    String code = descLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      langCode = code;
+                      break;
+                    }
+                  }
+        
+                  if (langCode == null || langCode.length() == 0) {
+                  
+                    // Check for en-us then en
+                    if (descLangCodes.contains("en-us")) {
+                    
+                      langCode = "en-us";
+        
+                    } else if (descLangCodes.contains("en")) {
+                    
+                      langCode = "en";
+        
+                    } else {
+                      String firstElement =
+                      descLangCodes.stream().findFirst().orElse(null);
+                      nameLangCode = firstElement;
+                    }
+        
+                  } // if (langCode == null || langCode.length() == 0) {
+        
+                  activityDescription = activityDefenition.getDescription().get(langCode);
+        
+                // If activity name
+                } else if (nameLangMap != null) {
+                
+                  Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
+        
+                  // Get namDescCode
+                  Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
+        
+                  while (nameLangCodesIterator.hasNext()) {
+                    String code = nameLangCodesIterator.next();
+                    boolean found = Arrays.asList(namLang).contains(code);
+                    if (found) {
+                      langCode = code;
+                      break;
+                    }
+                  }
+        
+                  if (langCode == null || langCode.length() == 0) {
+                  
+                    // Check for en-us then en
+                    if (nameLangCodes.contains("en-us")) {
+                    
+                      langCode = "en-us";
+        
+                    } else if (nameLangCodes.contains("en")) {
+                    
+                      langCode = "en";
+        
+                    } else {
+                    
+                      String firstElement = nameLangCodes.stream().findFirst().orElse(null);
+                      nameLangCode = firstElement;
+                    }
+        
+                  } // if (langCode == null || langCode.length() == 0) {
+        
+                  activityDescription = activityDefenition.getName().get(langCode);
+        
+                } else {
+                  activityDescription = "";
+                }
+        
+                if (activityDescription == null) {
+                  activityDescription = "";
+                }
+        
+                learningResource = new LearningResource();
+                learningResource.setIri(activity.getId());
+                learningResource.setDescription(activityDescription);
+                learningResource.setTitle(activityDescription);
+                learningResourceService.save(learningResource);
+                System.out.println("Learning resource " + learningResource.getTitle() + " created.");
+        
+              } // if (learningResource == null) {
+        
+              // If LearningResource already exists
+              if (learningResource != null) {
+                // Get LearningRecord
+                LearningRecord learningRecord =
+                    learningRecordService.findByPersonIdAndLearninResourceId(
+                        person.getId(), learningResource.getId());
+        
+                // If LearningRecord doesn't exist
+                if (learningRecord == null) {
+                  System.out.println("Creating new learning record.");
+                  learningRecord = new LearningRecord();
+        
+                  if (result != null) {
+                    Boolean success = result.getSuccess();
+                    Boolean completed = result.getCompletion();
+        
+                    // status
+                    if (completed && success == null) {
+                      learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                    } else if (completed && success) {
+                      learningRecord.setRecordStatus(LearningStatus.PASSED);
+                    } else if (completed && !success) {
+                      learningRecord.setRecordStatus(LearningStatus.FAILED);
+                    } else {
+                      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                    }
+        
+                    // grade
+                    Score score = result.getScore();
+        
+                    if (score != null) {
+                      learningRecord.setAcademicGrade(score.getRaw().toString());
+                    }
+        
+                  } else {
+                    learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                  }
+        
+                  learningRecord.setLearningResource(learningResource);
+                  learningRecord.setPerson(person);
+                  learningRecordService.save(learningRecord);
+                  System.out.println("Learning record for " + person.getName() + " - "
+                      + learningResource.getTitle() + " created.");
+        
+                  // If learningRecord already exists
+                } else {
+                  System.out.println("Update learning record.");
+        
+                  if (result != null) {
+                    Boolean success = result.getSuccess();
+                    Boolean completed = result.getCompletion();
+        
+                    // status
+                    if (completed && success == null) {
+                      learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+                    } else if (completed && success) {
+                      learningRecord.setRecordStatus(LearningStatus.PASSED);
+                    } else if (completed && !success) {
+                      learningRecord.setRecordStatus(LearningStatus.FAILED);
+                    } else {
+                      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                    }
+        
+                    // grade
+                    Score score = result.getScore();
+        
+                    if (score != null) {
+                      learningRecord.setAcademicGrade(score.getRaw().toString());
+                    }
+        
+                  } else {
+                    learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+                  }
+        
+                  learningRecordService.update(learningRecord);
+                  System.out.println("Learning record for " + person.getName() + " - "
+                      + learningResource.getTitle() + " updated.");
+                }
+        
+              } // if (learningResource != null) {
+        
+          } else {
+            throw new ActivityNotFoundException("Object is not an activity.");
+          }
+        
+        } catch (Exception e) {
+          System.out.println("Exception while firing processStatement rule.");
+          throw new AggregatorException(
+              "while firing processStatement rule - " + e.getMessage());
+        }
+
+  end

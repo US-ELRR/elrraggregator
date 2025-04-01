@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -24,8 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-  // Import ProcessCompleted implementation of Rule interface
-  @Autowired private Rule processCompleted;
+  @Autowired private ProcessCompleted processCompleted;
 
   @Autowired private ProcessPerson processPerson;
 
@@ -50,17 +49,14 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        // processMessage(message);
-        processMessageFromRule(message);
+        processMessage(message);
+        // processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
         kafkaTemplate.send(deadLetterTopic, message);
       }
 
-    } catch (AggregatorException | PersonNotFoundException e) {
-      // Send to dead letter queue
-      kafkaTemplate.send(deadLetterTopic, message);
     } catch (Exception e) {
       // Send to dead letter queue
       kafkaTemplate.send(deadLetterTopic, message);
@@ -69,13 +65,12 @@ public class ELRRMessageListener {
 
   /**
    * @param statement
-   * @throws AggregatorException, Exception
    * @throws AggregatorEXception
    */
   private void processMessage(final String payload)
-      throws AggregatorException, PersonNotFoundException, Exception {
+      throws AggregatorException, PersonNotFoundException {
 
-    log.info("Process kafka message.");
+    log.info("Process Kafka message.");
 
     Statement statement = null;
     Person person = null;
@@ -95,34 +90,27 @@ public class ELRRMessageListener {
         // Process Person
         person = processPerson.processPerson(statement);
 
-        // If person exists
-        if (person != null) {
-          processCompleted.processRule(person, statement);
-        } else {
-          log.error("Person not found.");
-          throw new PersonNotFoundException("Person not found.");
-        }
+        // Process rule
+        processCompleted.processRule(person, statement);
 
       } else {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
       }
 
-    } catch (PersonNotFoundException | AggregatorException e) {
-      log.error(e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      log.error(e.getMessage());
-      throw e;
+    } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
+      log.error("Error processing Kafka message - " + e.getMessage());
+      e.printStackTrace();
+      throw new AggregatorException("Error processing Kafka message - " + e.getMessage());
     }
   }
 
   /**
    * @param statement
+   * @throws Exception
    */
-  private void processMessageFromRule(final String payload)
-      throws AggregatorException, PersonNotFoundException, Exception {
+  private void processMessageFromRule(final String payload) throws Exception {
 
-    log.info("Process kafka message with Drools.");
+    log.info("Process Kafka message with Drools.");
 
     Statement statement = null;
     Person person = null;
@@ -142,24 +130,17 @@ public class ELRRMessageListener {
         // Process Person
         person = processPerson.processPerson(statement);
 
-        // If person exists
-        if (person != null) {
-          droolsProcessStatementService.processStatement(person, statement);
-        } else {
-          log.error("Person not found.");
-          throw new PersonNotFoundException("Person not found.");
-        }
+        // Process rule
+        droolsProcessStatementService.processStatement(person, statement);
 
       } else {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
       }
 
-    } catch (PersonNotFoundException | AggregatorException e) {
-      log.error(e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      log.error(e.getMessage());
-      throw e;
+    } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
+      log.error("Error processing Kafka message - " + e.getMessage());
+      e.printStackTrace();
+      throw new AggregatorException("Error processing Kafka message - " + e.getMessage());
     }
   }
 
