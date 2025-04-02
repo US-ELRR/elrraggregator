@@ -101,6 +101,7 @@ salience 100
                   nameLangMap = activityDefenition.getName();
                 } catch (ClassCastException | NullPointerException e) {
                   System.out.println(e.getMessage());
+                  e.printStackTrace();
                   throw new AggregatorException("Error processing learning resource - " + e.getMessage());
                 }
         
@@ -328,8 +329,8 @@ salience 100
         
         } catch (Exception e) {
           System.out.println("Exception while firing processStatement rule.");
-          throw new AggregatorException(
-              "while firing processStatement rule - " + e.getMessage());
+          e.printStackTrace();
+          throw new AggregatorException("while firing processStatement rule - " + e.getMessage());
         }
 
   end

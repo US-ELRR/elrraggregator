@@ -28,7 +28,7 @@ public class ProcessPerson {
 
   @Autowired private PersonSvc personService;
 
-  public Person processPerson(Statement statement) throws PersonNotFoundException {
+  public Person processPerson(Statement statement) {
 
     AbstractActor actor = null;
     Person person = null;
@@ -107,7 +107,7 @@ public class ProcessPerson {
 
     // If person created
     if (person != null) {
-      Identity identity = createIdentity(person, actor, account);
+      createIdentity(person, actor, account);
     }
 
     return person;

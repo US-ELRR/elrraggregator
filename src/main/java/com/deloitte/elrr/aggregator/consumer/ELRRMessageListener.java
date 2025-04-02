@@ -35,9 +35,6 @@ public class ELRRMessageListener {
   @Value("${kafka.dead.letter.topic}")
   private String deadLetterTopic;
 
-  @Value("${lang.codes}")
-  private String[] namLang = new String[10];
-
   /**
    * @param message
    */
@@ -49,15 +46,15 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        // processMessageFromRule(message);
+        // processMessage(message);
+        processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
         kafkaTemplate.send(deadLetterTopic, message);
       }
 
-    } catch (Exception e) {
+    } catch (AggregatorException e) {
       // Send to dead letter queue
       kafkaTemplate.send(deadLetterTopic, message);
     }
@@ -65,10 +62,9 @@ public class ELRRMessageListener {
 
   /**
    * @param statement
-   * @throws AggregatorEXception
+   * @throws AggregatorException
    */
-  private void processMessage(final String payload)
-      throws AggregatorException, PersonNotFoundException {
+  private void processMessage(final String payload) {
 
     log.info("Process Kafka message.");
 
@@ -106,9 +102,9 @@ public class ELRRMessageListener {
 
   /**
    * @param statement
-   * @throws Exception
+   * @throws AggregatorException
    */
-  private void processMessageFromRule(final String payload) throws Exception {
+  private void processMessageFromRule(final String payload) {
 
     log.info("Process Kafka message with Drools.");
 
@@ -160,9 +156,9 @@ public class ELRRMessageListener {
       statement = messageVo.getStatement();
 
     } catch (JsonProcessingException e) {
-
       log.error("Error getting statement - " + e.getMessage());
       e.printStackTrace();
+      throw e;
     }
 
     return statement;

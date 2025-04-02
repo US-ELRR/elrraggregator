@@ -56,7 +56,7 @@ public class ProcessCompleted implements Rule {
   }
 
   @Override
-  public void processRule(Person person, Statement statement) throws AggregatorException {
+  public void processRule(Person person, Statement statement) {
 
     try {
 
@@ -97,7 +97,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource processLearningResource(Activity activity) throws AggregatorException {
+  public LearningResource processLearningResource(Activity activity) {
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -128,7 +128,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource createLearningResource(Activity activity) throws AggregatorException {
+  public LearningResource createLearningResource(Activity activity) {
 
     log.info("Creating new learning resource.");
 
@@ -272,7 +272,7 @@ public class ProcessCompleted implements Rule {
    * @return langCode
    * @throws AggregatorException
    */
-  private String getLangCode(LangMap map) throws AggregatorException {
+  private String getLangCode(LangMap map) {
 
     String langCode = null;
 
