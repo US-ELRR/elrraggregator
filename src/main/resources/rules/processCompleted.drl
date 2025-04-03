@@ -34,8 +34,6 @@ import com.yetanalytics.xapi.model.Score;
 
 import function com.deloitte.elrr.aggregator.drools.RulesFiredHelper.helper;
 
-global com.deloitte.elrr.jpa.svc.EmailSvc emailService;
-global com.deloitte.elrr.jpa.svc.IdentitySvc identityService;
 global com.deloitte.elrr.jpa.svc.LearningRecordSvc learningRecordService;
 global com.deloitte.elrr.jpa.svc.LearningResourceSvc learningResourceService;
 
@@ -53,7 +51,6 @@ salience 100
         helper(drools);
         
         try {
-        
         
           String[] namLang = {"en-us"};
           

@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.jpa.svc.EmailSvc;
-import com.deloitte.elrr.jpa.svc.IdentitySvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Statement;
@@ -21,10 +19,6 @@ public class DroolsProcessStatementService {
 
   @Autowired private KieContainer kieContainer;
 
-  @Autowired private EmailSvc emailService;
-
-  @Autowired private IdentitySvc identityService;
-
   @Autowired private LearningResourceSvc learningResourceService;
 
   @Autowired private LearningRecordSvc learningRecordService;
@@ -34,8 +28,6 @@ public class DroolsProcessStatementService {
     try {
 
       KieSession kieSession = kieContainer.newKieSession();
-      kieSession.setGlobal("identityService", identityService);
-      kieSession.setGlobal("emailService", emailService);
       kieSession.setGlobal("learningRecordService", learningRecordService);
       kieSession.setGlobal("learningResourceService", learningResourceService);
       kieSession.setGlobal("person", person);
