@@ -38,7 +38,6 @@ global com.deloitte.elrr.jpa.svc.EmailSvc emailService;
 global com.deloitte.elrr.jpa.svc.IdentitySvc identityService;
 global com.deloitte.elrr.jpa.svc.LearningRecordSvc learningRecordService;
 global com.deloitte.elrr.jpa.svc.LearningResourceSvc learningResourceService;
-global com.deloitte.elrr.jpa.svc.PersonSvc personService;
 
 global com.deloitte.elrr.entity.Person person;
 global com.yetanalytics.xapi.model.Statement statement;
@@ -48,12 +47,13 @@ dialect "java"
 rule "Process_Completed"
 salience 100
    when
-        Statement (id != "")
+        $statement : Statement(id != "")
    then
         System.out.println("\n ==========Process Completed=============");
         helper(drools);
         
         try {
+        
         
           String[] namLang = {"en-us"};
           

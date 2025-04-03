@@ -11,7 +11,6 @@ import com.deloitte.elrr.jpa.svc.EmailSvc;
 import com.deloitte.elrr.jpa.svc.IdentitySvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
-import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +25,6 @@ public class DroolsProcessStatementService {
 
   @Autowired private IdentitySvc identityService;
 
-  @Autowired private PersonSvc personService;
-
   @Autowired private LearningResourceSvc learningResourceService;
 
   @Autowired private LearningRecordSvc learningRecordService;
@@ -37,7 +34,6 @@ public class DroolsProcessStatementService {
     try {
 
       KieSession kieSession = kieContainer.newKieSession();
-      kieSession.setGlobal("personService", personService);
       kieSession.setGlobal("identityService", identityService);
       kieSession.setGlobal("emailService", emailService);
       kieSession.setGlobal("learningRecordService", learningRecordService);
