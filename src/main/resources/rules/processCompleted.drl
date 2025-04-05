@@ -52,7 +52,9 @@ salience 100
         
         try {
         
-          String[] namLang = {"en-us"};
+          ArrayList<String> languageCodes = new ArrayList<String>();
+          languageCodes.add("en-us");
+          languageCodes.add("en");
           
           // Get Object
           AbstractObject obj = statement.getObject();
@@ -111,7 +113,7 @@ salience 100
         
                   while (nameLangCodesIterator.hasNext()) {
                     String code = nameLangCodesIterator.next();
-                    boolean found = Arrays.asList(namLang).contains(code);
+                    boolean found = Arrays.asList(languageCodes).contains(code);
                     if (found) {
                       nameLangCode = code;
                       break;
@@ -156,7 +158,7 @@ salience 100
         
                   while (descLangCodesIterator.hasNext()) {
                     String code = descLangCodesIterator.next();
-                    boolean found = Arrays.asList(namLang).contains(code);
+                    boolean found = Arrays.asList(languageCodes).contains(code);
                     if (found) {
                       langCode = code;
                       break;
@@ -194,7 +196,7 @@ salience 100
         
                   while (nameLangCodesIterator.hasNext()) {
                     String code = nameLangCodesIterator.next();
-                    boolean found = Arrays.asList(namLang).contains(code);
+                    boolean found = Arrays.asList(languageCodes).contains(code);
                     if (found) {
                       langCode = code;
                       break;
@@ -243,7 +245,7 @@ salience 100
               if (learningResource != null) {
                 // Get LearningRecord
                 LearningRecord learningRecord =
-                    learningRecordService.findByPersonIdAndLearninResourceId(
+                    learningRecordService.findByPersonIdAndLearningResourceId(
                         person.getId(), learningResource.getId());
         
                 // If LearningRecord doesn't exist

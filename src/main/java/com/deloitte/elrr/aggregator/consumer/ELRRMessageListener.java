@@ -93,7 +93,10 @@ public class ELRRMessageListener {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
       }
 
-    } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | PersonNotFoundException
+        | JsonProcessingException e) {
       log.error("Error processing Kafka message - " + e.getMessage());
       e.printStackTrace();
       throw new AggregatorException("Error processing Kafka message - " + e.getMessage());
@@ -133,7 +136,10 @@ public class ELRRMessageListener {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
       }
 
-    } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | PersonNotFoundException
+        | JsonProcessingException e) {
       log.error("Error processing Kafka message - " + e.getMessage());
       e.printStackTrace();
       throw new AggregatorException("Error processing Kafka message - " + e.getMessage());

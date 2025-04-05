@@ -1,14 +1,13 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
+import com.deloitte.elrr.aggregator.utils.ActivityDscriptionValue;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
@@ -35,20 +34,23 @@ public class ProcessCompleted implements Rule {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
+  @Autowired private ActivityDscriptionValue activityDescriptionValue;
+
   @Value("${lang.codes}")
-  private String[] namLang = new String[10];
+  ArrayList<String> languageCodes = new ArrayList<String>();
 
   @Override
   public boolean fireRule(Statement statement) {
 
-    // Completed Verb Id
-    String completedVerbId = VerbIdConstants.COMPLETED_VERB_ID;
+    // Get Object
+    AbstractObject obj = statement.getObject();
 
     // Get Verb
     Verb verb = statement.getVerb();
 
-    // Is Verb Id completed
-    if (verb.getId().equalsIgnoreCase(completedVerbId)) {
+    // Is Verb Id completed and activity
+    if (verb.getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+        && obj instanceof Activity) {
       return true;
     } else {
       return false;
@@ -66,29 +68,20 @@ public class ProcessCompleted implements Rule {
       // Get Result
       Result result = statement.getResult();
 
-      // If Activity
-      if (obj instanceof Activity) {
+      log.info("Process activity.");
 
-        log.info("Process activity.");
+      // Get Activity
+      Activity activity = (Activity) obj;
 
-        // Get Activity
-        Activity activity = (Activity) obj;
+      // Process LearningResource
+      LearningResource learningResource = processLearningResource(activity);
 
-        // Process LearningResource
-        LearningResource learningResource = processLearningResource(activity);
-
-        // Process LearningRecord
-        if (learningResource != null) {
-          LearningRecord learningRecord =
-              processLearningRecord(activity, person, result, learningResource);
-        }
-
-      } else {
-        log.error("Object is not an activity.");
-        throw new AggregatorException("Object is not an activity.");
+      // Process LearningRecord
+      if (learningResource != null) {
+        processLearningRecord(activity, person, result, learningResource);
       }
 
-    } catch (AggregatorException e) {
+    } catch (AggregatorException | ClassCastException | NullPointerException e) {
       throw e;
     }
   }
@@ -113,11 +106,11 @@ public class ProcessCompleted implements Rule {
 
         learningResource = createLearningResource(activity);
 
-      } catch (ClassCastException | NullPointerException e) {
+      } catch (AggregatorException | ClassCastException | NullPointerException e) {
 
         log.error("Error processing learning resource - " + e.getMessage());
         e.printStackTrace();
-        throw new AggregatorException("Error processing learning resource - " + e.getMessage());
+        throw e;
       }
     }
 
@@ -135,47 +128,26 @@ public class ProcessCompleted implements Rule {
     LearningResource learningResource = null;
 
     // Activity Definition
-    ActivityDefinition activityDefenition = activity.getDefinition();
+    ActivityDefinition activityDefinition = activity.getDefinition();
 
-    // Activity name
-    String activityName = null;
-    String nameLangCode = null;
+    // Activity Description
+    String activityDescription = "";
 
-    LangMap nameLangMap = activityDefenition.getName();
+    LangMap nameLangMap = activityDefinition.getName();
+    LangMap descLangMap = activityDefinition.getDescription();
 
     try {
 
       // If Activity name
       if (nameLangMap != null) {
-        nameLangCode = getLangCode(nameLangMap);
-        activityName = activityDefenition.getName().get(nameLangCode);
-      }
-
-      // Activity Description
-      String activityDescription = "";
-      String langCode = null;
-
-      LangMap descLangMap = activityDefenition.getDescription();
-
-      // If activity description
-      if (descLangMap != null) {
-
-        langCode = getLangCode(descLangMap);
-        activityDescription = activityDefenition.getDescription().get(langCode);
-
-        // If activity name
-      } else if (nameLangMap != null) {
-
-        langCode = getLangCode(nameLangMap);
-        activityDescription = activityDefenition.getName().get(langCode);
-
-      } else {
-
-        activityDescription = "";
-      }
-
-      if (activityDescription == null) {
-        activityDescription = "";
+        activityDescription =
+            activityDescriptionValue.getActivityDescription(
+                nameLangMap, activityDefinition, "name");
+        // If activity description
+      } else if (descLangMap != null) {
+        activityDescription =
+            activityDescriptionValue.getActivityDescription(
+                descLangMap, activityDefinition, "desc");
       }
 
       learningResource = new LearningResource();
@@ -188,7 +160,7 @@ public class ProcessCompleted implements Rule {
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
       e.printStackTrace();
-      throw new AggregatorException("Error creating learning resource - " + e.getMessage());
+      throw e;
     }
 
     return learningResource;
@@ -206,7 +178,7 @@ public class ProcessCompleted implements Rule {
 
     // Get LearningRecord
     LearningRecord learningRecord =
-        learningRecordService.findByPersonIdAndLearninResourceId(
+        learningRecordService.findByPersonIdAndLearningResourceId(
             person.getId(), learningResource.getId());
 
     // If LearningRecord doesn't exist
@@ -265,62 +237,6 @@ public class ProcessCompleted implements Rule {
     learningRecord = setStatus(learningRecord, result);
     learningRecordService.update(learningRecord);
     return learningRecord;
-  }
-
-  /**
-   * @param map
-   * @return langCode
-   * @throws AggregatorException
-   */
-  private String getLangCode(LangMap map) {
-
-    String langCode = null;
-
-    Set<String> langCodes = map.getLanguageCodes();
-
-    try {
-
-      Iterator<String> langCodesIterator = langCodes.iterator();
-
-      // Iterate and compare to lang.codes in .properties
-      while (langCodesIterator.hasNext()) {
-
-        String code = langCodesIterator.next();
-
-        boolean found = Arrays.asList(namLang).contains(code);
-
-        if (found) {
-          langCode = code;
-          break;
-        }
-      }
-
-      // If langCode not found
-      if (langCode == null || langCode.length() == 0) {
-
-        // Check for en-us then en
-        if (langCodes.contains("en-us")) {
-
-          langCode = "en-us";
-
-        } else if (langCodes.contains("en")) {
-
-          langCode = "en";
-
-        } else {
-
-          String firstElement = langCodes.stream().findFirst().orElse(null);
-          langCode = firstElement;
-        }
-      }
-
-    } catch (ClassCastException | NullPointerException e) {
-      log.error("Error getting language codes - " + e.getMessage());
-      e.getStackTrace();
-      throw new AggregatorException("Error getting language codes - " + e.getMessage());
-    }
-
-    return langCode;
   }
 
   /**
