@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -43,9 +42,7 @@ public class ActivityDescriptionValue {
 
         String code = langCodesIterator.next();
 
-        boolean found = Arrays.asList(languageCodes).contains(code);
-
-        if (found) {
+        if (languageCodes.contains(code)) {
           langCode = code;
           break;
         }
