@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ActivityDscriptionValue {
+public class ActivityDescriptionValue {
 
   @Value("${lang.codes}")
   ArrayList<String> languageCodes = new ArrayList<String>();

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
-import com.deloitte.elrr.aggregator.utils.ActivityDscriptionValue;
+import com.deloitte.elrr.aggregator.utils.ActivityDescriptionValue;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
@@ -34,7 +34,7 @@ public class ProcessCompleted implements Rule {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
-  @Autowired private ActivityDscriptionValue activityDescriptionValue;
+  @Autowired private ActivityDescriptionValue activityDescriptionValue;
 
   @Value("${lang.codes}")
   ArrayList<String> languageCodes = new ArrayList<String>();
