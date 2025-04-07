@@ -17,6 +17,7 @@ import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
+import com.yetanalytics.xapi.model.Verb;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        //processMessageFromRule(message);
+        // processMessage(message);
+        processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
@@ -59,6 +60,7 @@ public class ELRRMessageListener {
     } catch (AggregatorException e) {
       // Send to dead letter queue
       kafkaTemplate.send(deadLetterTopic, message);
+      throw e;
     }
   }
 
@@ -66,6 +68,7 @@ public class ELRRMessageListener {
    * @param statement
    * @throws AggregatorException
    */
+  @Transactional
   private void processMessage(final String payload) {
 
     log.info("Process Kafka message.");
@@ -131,8 +134,12 @@ public class ELRRMessageListener {
         // Process Person
         person = processPerson.processPerson(statement);
 
+        // Get VerbId
+        Verb verb = statement.getVerb();
+        String verbId = verb.getId();
+
         // Process rule
-        droolsProcessStatementService.processStatement(person, statement);
+        droolsProcessStatementService.processStatement(person, statement, verbId);
 
       } else {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
 import com.deloitte.elrr.aggregator.utils.ActivityDescriptionValue;
@@ -58,6 +59,7 @@ public class ProcessCompleted implements Rule {
   }
 
   @Override
+  @Transactional
   public void processRule(Person person, Statement statement) {
 
     try {

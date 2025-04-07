@@ -36,13 +36,15 @@ global com.deloitte.elrr.jpa.svc.LearningResourceSvc learningResourceService;
 
 global com.deloitte.elrr.entity.Person person;
 global com.yetanalytics.xapi.model.Statement statement;
+
+global String verbId;
  
 dialect "java"
 
 rule "Process_Completed"
 salience 100
    when
-        $statement : Statement(id != "")
+        Statement(verbId == "http://adlnet.gov/expapi/verbs/completed")
    then
         System.out.println("\n ==========Process Completed=============");
         System.out.println("rule triggered: " + drools.getRule().getName() + "\n");

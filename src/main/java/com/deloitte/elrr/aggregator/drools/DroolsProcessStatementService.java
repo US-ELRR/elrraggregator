@@ -23,7 +23,8 @@ public class DroolsProcessStatementService {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
-  public void processStatement(Person person, Statement statement) throws AggregatorException {
+  public void processStatement(Person person, Statement statement, String verbId)
+      throws AggregatorException {
 
     try {
 
@@ -32,9 +33,11 @@ public class DroolsProcessStatementService {
       kieSession.setGlobal("learningResourceService", learningResourceService);
       kieSession.setGlobal("person", person);
       kieSession.setGlobal("statement", statement);
+      kieSession.setGlobal("verbId", verbId);
       // Insert facts into working memory
       kieSession.insert(person);
       kieSession.insert(statement);
+      kieSession.insert(verbId);
       kieSession.fireAllRules();
       kieSession.dispose();
 
