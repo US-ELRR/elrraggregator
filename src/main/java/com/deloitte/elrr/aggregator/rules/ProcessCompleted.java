@@ -23,7 +23,6 @@ import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Statement;
-import com.yetanalytics.xapi.model.Verb;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,15 +42,9 @@ public class ProcessCompleted implements Rule {
   @Override
   public boolean fireRule(Statement statement) {
 
-    // Get Object
-    AbstractObject obj = statement.getObject();
-
-    // Get Verb
-    Verb verb = statement.getVerb();
-
-    // Is Verb Id completed and activity
-    if (verb.getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
-        && obj instanceof Activity) {
+    // Is Verb Id completed and object an activity
+    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+        && statement.getObject() instanceof Activity) {
       return true;
     } else {
       return false;
