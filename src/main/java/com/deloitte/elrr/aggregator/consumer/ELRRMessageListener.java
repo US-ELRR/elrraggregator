@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
@@ -38,6 +39,7 @@ public class ELRRMessageListener {
   /**
    * @param message
    */
+  @Transactional
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
@@ -47,7 +49,7 @@ public class ELRRMessageListener {
 
       if (InputSanatizer.isValidInput(message)) {
         processMessage(message);
-        // processMessageFromRule(message);
+        //processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
