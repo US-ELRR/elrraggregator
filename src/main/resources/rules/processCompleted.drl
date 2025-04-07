@@ -55,9 +55,6 @@ salience 100
           languageCodes.add("en-us");
           languageCodes.add("en");
           
-          // Get Object
-          AbstractObject obj = statement.getObject();
-        
           // Get Result
           Result result = statement.getResult();
         
@@ -65,7 +62,7 @@ salience 100
           System.out.println("Process activity.");
     
           // Get activity
-          Activity activity = (Activity) obj;
+          Activity activity = (Activity) statement.getObject();
     
           System.out.println("Person " + person.getName() + " exists.");
     

@@ -16,7 +16,6 @@ import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.LearningStatus;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
-import com.yetanalytics.xapi.model.AbstractObject;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
@@ -57,23 +56,17 @@ public class ProcessCompleted implements Rule {
 
     try {
 
-      // Get Object
-      AbstractObject obj = statement.getObject();
-
-      // Get Result
-      Result result = statement.getResult();
-
       log.info("Process activity.");
 
       // Get Activity
-      Activity activity = (Activity) obj;
+      Activity activity = (Activity) statement.getObject();
 
       // Process LearningResource
       LearningResource learningResource = processLearningResource(activity);
 
       // Process LearningRecord
       if (learningResource != null) {
-        processLearningRecord(activity, person, result, learningResource);
+        processLearningRecord(activity, person, statement.getResult(), learningResource);
       }
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
