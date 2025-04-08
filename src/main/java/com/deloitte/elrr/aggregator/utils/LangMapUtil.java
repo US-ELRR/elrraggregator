@@ -8,27 +8,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
-import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ActivityDescriptionValue {
+public class LangMapUtil {
 
   @Value("${lang.codes}")
   ArrayList<String> languageCodes = new ArrayList<String>();
 
   /**
    * @param map
-   * @param activityDefinition
-   * @param pred
-   * @return activityDEscription
+   * @return langCode
    * @throws AggregatorException
    */
-  public String getActivityDescription(
-      LangMap map, ActivityDefinition activityDefinition, String pref) {
+  public String getLangMapValue(LangMap map) {
 
     String langCode = null;
     Set<String> langCodes = map.getLanguageCodes();
@@ -41,6 +37,7 @@ public class ActivityDescriptionValue {
       while (langCodesIterator.hasNext()) {
 
         String code = langCodesIterator.next();
+        log.info("===> langCode = " + code);
 
         if (languageCodes.contains(code)) {
           langCode = code;
@@ -50,28 +47,25 @@ public class ActivityDescriptionValue {
 
       // If langCode not found
       if (langCode == null || langCode.length() == 0) {
-        // Check for en-us then en
+        // Check for en-us
         if (langCodes.contains("en-us")) {
           langCode = "en-us";
+          // Check for en
         } else if (langCodes.contains("en")) {
           langCode = "en";
+          // Get 1st element
         } else {
           String firstElement = langCodes.stream().findFirst().orElse(null);
           langCode = firstElement;
         }
       }
 
-      // Get activity definition
-      if (pref.equalsIgnoreCase("name")) {
-        return activityDefinition.getName().get(langCode);
-      } else {
-        return activityDefinition.getDescription().get(langCode);
-      }
+      return langCode;
 
     } catch (ClassCastException | NullPointerException e) {
       log.error("Error getting language codes - " + e.getMessage());
       e.printStackTrace();
-      throw new AggregatorException("Error getting language codes - " + e.getMessage());
+      throw new AggregatorException("Error getting language code - " + e.getMessage());
     }
   }
 }

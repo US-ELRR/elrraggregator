@@ -1,4 +1,4 @@
-package com.deloitte.elrr;
+package com.deloitte.elrr.aggregator;
 
 import org.apache.commons.validator.GenericValidator;
 

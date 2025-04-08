@@ -7,9 +7,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.deloitte.elrr.InputSanatizer;
+import com.deloitte.elrr.aggregator.InputSanatizer;
 import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
+import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
@@ -26,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ELRRMessageListener {
 
   @Autowired private ProcessCompleted processCompleted;
+
+  @Autowired private ProcessCompetency processCompetency;
 
   @Autowired private ProcessPerson processPerson;
 
@@ -74,6 +77,7 @@ public class ELRRMessageListener {
 
     Statement statement = null;
     Person person = null;
+    boolean fireRule = false;
 
     try {
 
@@ -81,20 +85,42 @@ public class ELRRMessageListener {
       statement = getStatement(payload);
 
       // Process completed
-      boolean fireRule = processCompleted.fireRule(statement);
+      if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)) {
 
-      if (fireRule) {
+        fireRule = processCompleted.fireRule(statement);
 
-        log.info("Process verb " + statement.getVerb().getId());
+        if (fireRule) {
 
-        // Process Person
-        person = processPerson.processPerson(statement);
+          log.info("Process verb " + statement.getVerb().getId());
 
-        // Process rule
-        processCompleted.processRule(person, statement);
+          // Process Person
+          person = processPerson.processPerson(statement);
 
-      } else {
-        log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+          // Process rule
+          processCompleted.processRule(person, statement);
+
+        } else {
+          log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+        }
+
+        // If competency
+      } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)) {
+
+        fireRule = processCompetency.fireRule(statement);
+
+        if (fireRule) {
+
+          log.info("Process verb " + statement.getVerb().getId());
+
+          // Process Person
+          person = processPerson.processPerson(statement);
+
+          // Process rule
+          processCompetency.processRule(person, statement);
+
+        } else {
+          log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+        }
       }
 
     } catch (AggregatorException

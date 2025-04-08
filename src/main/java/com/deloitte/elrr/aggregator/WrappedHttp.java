@@ -1,4 +1,4 @@
-package com.deloitte.elrr;
+package com.deloitte.elrr.aggregator;
 
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;

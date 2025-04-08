@@ -1,14 +1,11 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
-import com.deloitte.elrr.aggregator.utils.ActivityDescriptionValue;
+import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
@@ -17,7 +14,6 @@ import com.deloitte.elrr.entity.types.LearningStatus;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.ActivityDefinition;
 import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Score;
@@ -33,15 +29,12 @@ public class ProcessCompleted implements Rule {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
-  @Autowired private ActivityDescriptionValue activityDescriptionValue;
-
-  @Value("${lang.codes}")
-  ArrayList<String> languageCodes = new ArrayList<String>();
+  @Autowired private LangMapUtil langMapUtil;
 
   @Override
   public boolean fireRule(Statement statement) {
 
-    // Is Verb Id completed and object an activity
+    // Is Verb Id = completed and object =n activity
     if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
         && statement.getObject() instanceof Activity) {
       return true;
@@ -56,7 +49,7 @@ public class ProcessCompleted implements Rule {
 
     try {
 
-      log.info("Process activity.");
+      log.info("Process activity completed");
 
       // Get Activity
       Activity activity = (Activity) statement.getObject();
@@ -114,29 +107,19 @@ public class ProcessCompleted implements Rule {
     log.info("Creating new learning resource.");
 
     LearningResource learningResource = null;
-
-    // Activity Definition
-    ActivityDefinition activityDefinition = activity.getDefinition();
+    String langCode = null;
 
     // Activity Description
     String activityDescription = "";
 
-    LangMap nameLangMap = activityDefinition.getName();
-    LangMap descLangMap = activityDefinition.getDescription();
+    LangMap nameLangMap = activity.getDefinition().getName();
+    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
 
     try {
 
-      // If Activity name
-      if (nameLangMap != null) {
-        activityDescription =
-            activityDescriptionValue.getActivityDescription(
-                nameLangMap, activityDefinition, "name");
-        // If activity description
-      } else if (descLangMap != null) {
-        activityDescription =
-            activityDescriptionValue.getActivityDescription(
-                descLangMap, activityDefinition, "desc");
-      }
+      langCode = langMapUtil.getLangMapValue(nameLangMap);
+
+      activityDescription = activity.getDefinition().getName().get(langCode);
 
       learningResource = new LearningResource();
       learningResource.setIri(activity.getId());

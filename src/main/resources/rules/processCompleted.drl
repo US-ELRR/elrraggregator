@@ -95,6 +95,7 @@ salience 100
     
             // If Activity name
             if (nameLangMap != null) {
+            
               Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
     
               // Get namLangCode
@@ -103,6 +104,7 @@ salience 100
               while (nameLangCodesIterator.hasNext()) {
               
                 String code = nameLangCodesIterator.next();
+                System.out.println("===> code = " + code);
                 
                 if (languageCodes.contains(code)) {
                     nameLangCode = code;
@@ -132,95 +134,9 @@ salience 100
     
               activityDescription = activityDefenition.getName().get(nameLangCode);
     
-            } // if (nameLangMap != null) {
-    
-            // Activity Description
-            String langCode = null;
-    
-            LangMap descLangMap = activityDefenition.getDescription();
-    
-            // If activity description
-            if (descLangMap != null) {
-              Set<String> descLangCodes = descLangMap.getLanguageCodes();
-    
-              // Get namDescCode
-              Iterator<String> descLangCodesIterator = descLangCodes.iterator();
-    
-              while (descLangCodesIterator.hasNext()) {
-              
-                String code = descLangCodesIterator.next();
-                
-                if (languageCodes.contains(code)) {
-                    langCode = code;
-                    break;
-                }
-                 
-              }
-    
-              if (langCode == null || langCode.length() == 0) {
-              
-                // Check for en-us then en
-                if (descLangCodes.contains("en-us")) {
-                
-                  langCode = "en-us";
-    
-                } else if (descLangCodes.contains("en")) {
-                
-                  langCode = "en";
-    
-                } else {
-                  String firstElement =
-                  descLangCodes.stream().findFirst().orElse(null);
-                  nameLangCode = firstElement;
-                }
-    
-              } // if (langCode == null || langCode.length() == 0) {
-    
-              activityDescription = activityDefenition.getDescription().get(langCode);
-    
-            // If activity name
-            } else if (nameLangMap != null) {
-            
-              Set<String> nameLangCodes = nameLangMap.getLanguageCodes();
-    
-              // Get namDescCode
-              Iterator<String> nameLangCodesIterator = nameLangCodes.iterator();
-    
-              while (nameLangCodesIterator.hasNext()) {
-              
-                String code = nameLangCodesIterator.next();
-                
-                if (languageCodes.contains(code)) {
-                    langCode = code;
-                    break;
-                }
-                
-              }
-    
-              if (langCode == null || langCode.length() == 0) {
-              
-                // Check for en-us then en
-                if (nameLangCodes.contains("en-us")) {
-                
-                  langCode = "en-us";
-    
-                } else if (nameLangCodes.contains("en")) {
-                
-                  langCode = "en";
-    
-                } else {
-                
-                  String firstElement = nameLangCodes.stream().findFirst().orElse(null);
-                  nameLangCode = firstElement;
-                }
-    
-              } // if (langCode == null || langCode.length() == 0) {
-    
-              activityDescription = activityDefenition.getName().get(langCode);
-    
             } else {
               activityDescription = "";
-            }
+            } // if (nameLangMap != null) {
     
             learningResource = new LearningResource();
             learningResource.setIri(activity.getId());
