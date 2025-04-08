@@ -82,26 +82,28 @@ public class ProcessCompetency implements Rule {
    */
   public Competency processCompetency(Activity activity) {
 
-    // Get competency
-    Competency competency = competencyService.findByIdentifier(activity.getId());
+    Competency competency = null;
 
-    // If competency already exists
-    if (competency != null) {
+    try {
 
-      log.info("Competency " + competency.getFrameworkTitle() + " exists.");
+      // Get competency
+      competency = competencyService.findByIdentifier(activity.getId());
 
-    } else {
-
-      try {
+      // If competency doesn't exist
+      if (competency == null) {
 
         competency = createCompetency(activity);
 
-      } catch (AggregatorException | ClassCastException | NullPointerException e) {
+      } else {
 
-        log.error("Error processing learning resource - " + e.getMessage());
-        e.printStackTrace();
-        throw e;
+        competency = updateCompetency(competency, activity);
       }
+
+    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+
+      log.error("Error processing learning resource - " + e.getMessage());
+      e.printStackTrace();
+      throw e;
     }
 
     return competency;
@@ -151,6 +153,47 @@ public class ProcessCompetency implements Rule {
   }
 
   /**
+   * @param activity
+   * @return competency
+   */
+  public Competency updateCompetency(Competency competency, Activity activity) {
+
+    log.info("Updating competency.");
+
+    String nameLangCode = null;
+    String descLangCode = null;
+
+    String activityName = "";
+    String activityDescription = "";
+
+    LangMap nameLangMap = activity.getDefinition().getName();
+    LangMap descLangMap = activity.getDefinition().getDescription();
+
+    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
+
+    try {
+
+      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
+      activityName = activity.getDefinition().getName().get(nameLangCode);
+
+      descLangCode = langMapUtil.getLangMapValue(descLangMap);
+      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
+
+      competency.setFrameworkTitle(activityName);
+      competency.setFrameworkDescription(activityDescription);
+      competencyService.update(competency);
+      log.info("Competency " + competency.getFrameworkTitle() + " updated.");
+
+    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+      log.error(e.getMessage());
+      e.printStackTrace();
+      throw e;
+    }
+
+    return competency;
+  }
+
+  /**
    * @param Activity
    * @param Person
    * @param Competency
@@ -159,7 +202,19 @@ public class ProcessCompetency implements Rule {
   public PersonalCompetency processPersonalCompetency(
       Activity activity, Person person, Competency competency) {
 
-    PersonalCompetency personalCompetency = createPersonalCompetency(person, competency);
+    // Get PersonalCompetency
+    PersonalCompetency personalCompetency =
+        personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(), competency.getId());
+
+    // If PersonalCompetancy doesn't exist
+    if (personalCompetency == null) {
+
+      personalCompetency = createPersonalCompetency(person, competency);
+
+    } else {
+
+      personalCompetency = updatePersonalCompetency(personalCompetency, person, competency);
+    }
 
     return personalCompetency;
   }
@@ -167,7 +222,7 @@ public class ProcessCompetency implements Rule {
   /**
    * @param Person
    * @param Competency
-   * @return LearningRecord
+   * @return PersonalCompetency
    */
   public PersonalCompetency createPersonalCompetency(Person person, Competency competency) {
 
@@ -185,6 +240,22 @@ public class ProcessCompetency implements Rule {
             + " - "
             + competency.getFrameworkTitle()
             + " created.");
+
+    return personalCompetency;
+  }
+
+  private PersonalCompetency updatePersonalCompetency(
+      PersonalCompetency personalCompetency, Person person, Competency competency) {
+
+    personalCompetency.setHasRecord(true);
+    personalCompetencyService.update(personalCompetency);
+
+    log.info(
+        "Personal Competency for "
+            + person.getName()
+            + " - "
+            + competency.getFrameworkTitle()
+            + " updated.");
 
     return personalCompetency;
   }

@@ -154,10 +154,12 @@ public class ProcessCompleted implements Rule {
 
     // If LearningRecord doesn't exist
     if (learningRecord == null) {
+
       learningRecord = createLearningRecord(person, learningResource, result);
 
       // If learningRecord already exists
     } else {
+
       learningRecord = updateLearningRecord(learningRecord, result);
     }
 
