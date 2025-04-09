@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
+import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,10 @@ public class DroolsProcessStatementService {
 
   @Autowired private LearningRecordSvc learningRecordService;
 
+  @Autowired private CompetencySvc competencyService;
+
+  @Autowired private PersonalCompetencySvc personalCompetencyService;
+
   public void processStatement(Person person, Statement statement, String verbId)
       throws AggregatorException {
 
@@ -31,6 +37,8 @@ public class DroolsProcessStatementService {
       KieSession kieSession = kieContainer.newKieSession();
       kieSession.setGlobal("learningRecordService", learningRecordService);
       kieSession.setGlobal("learningResourceService", learningResourceService);
+      kieSession.setGlobal("competencyService", competencyService);
+      kieSession.setGlobal("personalCompetencyService", personalCompetencyService);
       kieSession.setGlobal("person", person);
       kieSession.setGlobal("statement", statement);
       kieSession.setGlobal("verbId", verbId);

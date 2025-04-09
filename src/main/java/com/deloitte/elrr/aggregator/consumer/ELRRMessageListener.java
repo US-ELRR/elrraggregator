@@ -151,9 +151,12 @@ public class ELRRMessageListener {
       statement = getStatement(payload);
 
       // Process completed
-      boolean fireRule = processCompleted.fireRule(statement);
+      boolean fireCompletedRule = processCompleted.fireRule(statement);
 
-      if (fireRule) {
+      // Process competency
+      boolean fireCompetencyRule = processCompetency.fireRule(statement);
+
+      if (fireCompletedRule || fireCompetencyRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 

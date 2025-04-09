@@ -14,8 +14,6 @@ import java.lang.Exception
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -59,7 +57,7 @@ salience 100
           Result result = statement.getResult();
         
           // Process completed
-          System.out.println("Process activity.");
+          System.out.println("Process activity completed.");
     
           // Get activity
           Activity activity = (Activity) statement.getObject();
