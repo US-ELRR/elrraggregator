@@ -71,7 +71,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource processLearningResource(Activity activity) {
+  private LearningResource processLearningResource(Activity activity) {
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -102,7 +102,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  public LearningResource createLearningResource(Activity activity) {
+  private LearningResource createLearningResource(Activity activity) {
 
     log.info("Creating new learning resource.");
 
@@ -144,7 +144,7 @@ public class ProcessCompleted implements Rule {
    * @param LearningResource
    * @return LearningRccord
    */
-  public LearningRecord processLearningRecord(
+  private LearningRecord processLearningRecord(
       Activity activity, Person person, Result result, LearningResource learningResource) {
 
     // Get LearningRecord
@@ -155,12 +155,12 @@ public class ProcessCompleted implements Rule {
     // If LearningRecord doesn't exist
     if (learningRecord == null) {
 
-      learningRecord = createLearningRecord(person, learningResource, result);
+      createLearningRecord(person, learningResource, result);
 
       // If learningRecord already exists
     } else {
 
-      learningRecord = updateLearningRecord(learningRecord, result);
+      updateLearningRecord(learningRecord, result);
     }
 
     return learningRecord;
@@ -172,7 +172,7 @@ public class ProcessCompleted implements Rule {
    * @param Result
    * @return LearningRecord
    */
-  public LearningRecord createLearningRecord(
+  private LearningRecord createLearningRecord(
       Person person, LearningResource learningResource, Result result) {
 
     log.info("Creating new learning record.");
@@ -205,7 +205,7 @@ public class ProcessCompleted implements Rule {
    * @param result
    * @return LearningRecord
    */
-  public LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
+  private LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
     log.info("Update learning record.");
     learningRecord = setStatus(learningRecord, result);
     learningRecordService.update(learningRecord);

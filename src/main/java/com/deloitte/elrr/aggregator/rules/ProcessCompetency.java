@@ -80,7 +80,7 @@ public class ProcessCompetency implements Rule {
    * @param statement
    * @return competency
    */
-  public Competency processCompetency(Activity activity) {
+  private Competency processCompetency(Activity activity) {
 
     Competency competency = null;
 
@@ -114,7 +114,7 @@ public class ProcessCompetency implements Rule {
    * @param activity
    * @return competency
    */
-  public Competency createCompetency(Activity activity) {
+  private Competency createCompetency(Activity activity) {
 
     log.info("Creating new competency.");
 
@@ -128,8 +128,6 @@ public class ProcessCompetency implements Rule {
     LangMap nameLangMap = activity.getDefinition().getName();
     LangMap descLangMap = activity.getDefinition().getDescription();
 
-    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
-
     try {
 
       nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
@@ -140,7 +138,6 @@ public class ProcessCompetency implements Rule {
 
       competency = new Competency();
       competency.setIdentifier(activity.getId());
-      competency.setFrameworkIdentifier(activity.getId());
       competency.setFrameworkTitle(activityName);
       competency.setFrameworkDescription(activityDescription);
       competencyService.save(competency);
@@ -159,7 +156,7 @@ public class ProcessCompetency implements Rule {
    * @param activity
    * @return competency
    */
-  public Competency updateCompetency(Competency competency, Activity activity) {
+  private Competency updateCompetency(Competency competency, Activity activity) {
 
     log.info("Updating competency.");
 
@@ -202,7 +199,7 @@ public class ProcessCompetency implements Rule {
    * @param Competency
    * @return PersonalCompetency
    */
-  public PersonalCompetency processPersonalCompetency(
+  private PersonalCompetency processPersonalCompetency(
       Activity activity, Person person, Competency competency) {
 
     // Get PersonalCompetency
@@ -212,11 +209,11 @@ public class ProcessCompetency implements Rule {
     // If PersonalCompetancy doesn't exist
     if (personalCompetency == null) {
 
-      personalCompetency = createPersonalCompetency(person, competency);
+      createPersonalCompetency(person, competency);
 
     } else {
 
-      personalCompetency = updatePersonalCompetency(personalCompetency, person, competency);
+      updatePersonalCompetency(personalCompetency, person, competency);
     }
 
     return personalCompetency;
@@ -227,7 +224,7 @@ public class ProcessCompetency implements Rule {
    * @param Competency
    * @return PersonalCompetency
    */
-  public PersonalCompetency createPersonalCompetency(Person person, Competency competency) {
+  private PersonalCompetency createPersonalCompetency(Person person, Competency competency) {
 
     log.info("Creating new personal competency record.");
     PersonalCompetency personalCompetency = new PersonalCompetency();
@@ -250,15 +247,15 @@ public class ProcessCompetency implements Rule {
   private PersonalCompetency updatePersonalCompetency(
       PersonalCompetency personalCompetency, Person person, Competency competency) {
 
-    personalCompetency.setHasRecord(true);
-    personalCompetencyService.update(personalCompetency);
+    // TO DO
+    // personalCompetencyService.update(personalCompetency);
 
-    log.info(
-        "Personal Competency for "
-            + person.getName()
-            + " - "
-            + competency.getFrameworkTitle()
-            + " updated.");
+    /*log.info(
+    "Personal Competency for "
+        + person.getName()
+        + " - "
+        + competency.getFrameworkTitle()
+        + " updated.");*/
 
     return personalCompetency;
   }
