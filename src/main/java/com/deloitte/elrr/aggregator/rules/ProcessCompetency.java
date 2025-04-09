@@ -96,12 +96,13 @@ public class ProcessCompetency implements Rule {
 
       } else {
 
+        log.info("Competency " + activity.getId() + " exists.");
         competency = updateCompetency(competency, activity);
       }
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
 
-      log.error("Error processing learning resource - " + e.getMessage());
+      log.error("Error processing competency - " + e.getMessage());
       e.printStackTrace();
       throw e;
     }
@@ -138,10 +139,12 @@ public class ProcessCompetency implements Rule {
       activityDescription = activity.getDefinition().getDescription().get(descLangCode);
 
       competency = new Competency();
+      competency.setIdentifier(activity.getId());
+      competency.setFrameworkIdentifier(activity.getId());
       competency.setFrameworkTitle(activityName);
       competency.setFrameworkDescription(activityDescription);
       competencyService.save(competency);
-      log.info("Competency " + competency.getFrameworkTitle() + " created.");
+      log.info("Competency " + activity.getId() + " created.");
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
@@ -182,7 +185,7 @@ public class ProcessCompetency implements Rule {
       competency.setFrameworkTitle(activityName);
       competency.setFrameworkDescription(activityDescription);
       competencyService.update(competency);
-      log.info("Competency " + competency.getFrameworkTitle() + " updated.");
+      log.info("Competency " + activity.getId() + " updated.");
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());

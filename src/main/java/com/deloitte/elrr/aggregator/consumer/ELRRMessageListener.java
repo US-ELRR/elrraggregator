@@ -123,13 +123,14 @@ public class ELRRMessageListener {
         }
       }
 
-    } catch (AggregatorException
-        | ClassCastException
-        | PersonNotFoundException
-        | JsonProcessingException e) {
+    } catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
       log.error("Error processing Kafka message - " + e.getMessage());
       e.printStackTrace();
-      throw new AggregatorException("Error processing Kafka message - " + e.getMessage());
+      throw e;
+
+    } catch (JsonProcessingException e) {
+      log.error("Error processing Kafka message - " + e.getMessage());
+      e.printStackTrace();
     }
   }
 

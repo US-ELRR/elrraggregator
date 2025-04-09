@@ -37,7 +37,6 @@ public class LangMapUtil {
       while (langCodesIterator.hasNext()) {
 
         String code = langCodesIterator.next();
-        log.info("===> langCode = " + code);
 
         if (languageCodes.contains(code)) {
           langCode = code;

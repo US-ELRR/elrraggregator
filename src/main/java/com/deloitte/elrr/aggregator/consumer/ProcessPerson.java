@@ -4,7 +4,6 @@ import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Email;
@@ -29,7 +28,6 @@ public class ProcessPerson {
 
   @Autowired private PersonSvc personService;
 
-  @Transactional
   public Person processPerson(Statement statement) {
 
     AbstractActor actor = null;
