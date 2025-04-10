@@ -34,7 +34,7 @@ public class ProcessCompleted implements Rule {
   @Override
   public boolean fireRule(Statement statement) {
 
-    // Is Verb Id = completed and object =n activity
+    // Is Verb Id = completed and object = activity
     if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
         && statement.getObject() instanceof Activity) {
       return true;
@@ -107,24 +107,27 @@ public class ProcessCompleted implements Rule {
     log.info("Creating new learning resource.");
 
     LearningResource learningResource = null;
-    String langCode = null;
+    String nameLangCode = null;
+    String descLangCode = null;
 
-    // Activity Description
+    String activityName = "";
     String activityDescription = "";
 
     LangMap nameLangMap = activity.getDefinition().getName();
-    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
+    LangMap descLangMap = activity.getDefinition().getDescription();
 
     try {
 
-      langCode = langMapUtil.getLangMapValue(nameLangMap);
+      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
+      activityName = activity.getDefinition().getName().get(nameLangCode);
 
-      activityDescription = activity.getDefinition().getName().get(langCode);
+      descLangCode = langMapUtil.getLangMapValue(descLangMap);
+      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
 
       learningResource = new LearningResource();
       learningResource.setIri(activity.getId());
       learningResource.setDescription(activityDescription);
-      learningResource.setTitle(activityDescription);
+      learningResource.setTitle(activityName);
       learningResourceService.save(learningResource);
       log.info("Learning resource " + learningResource.getTitle() + " created.");
 

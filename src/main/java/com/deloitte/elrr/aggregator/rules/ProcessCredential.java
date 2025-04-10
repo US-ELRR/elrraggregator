@@ -8,11 +8,11 @@ import com.deloitte.elrr.aggregator.consumer.ObjectTypeConstants;
 import com.deloitte.elrr.aggregator.consumer.VerbIdConstants;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
-import com.deloitte.elrr.entity.Competency;
+import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.entity.PersonalCompetency;
-import com.deloitte.elrr.jpa.svc.CompetencySvc;
-import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
+import com.deloitte.elrr.entity.PersonalCredential;
+import com.deloitte.elrr.jpa.svc.CredentialSvc;
+import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Statement;
@@ -21,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ProcessCompetency implements Rule {
+public class ProcessCredential implements Rule {
 
-  @Autowired private CompetencySvc competencyService;
+  @Autowired private CredentialSvc credentialService;
 
-  @Autowired private PersonalCompetencySvc personalCompetencyService;
+  @Autowired private PersonalCredentialSvc personalCredentialService;
 
   @Autowired private LangMapUtil langMapUtil;
 
@@ -44,8 +44,8 @@ public class ProcessCompetency implements Rule {
       // If no object type
       if (objType == null) {
         fireRule = false;
-        // If object type = competency
-      } else if (objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)) {
+        // If object type = credential
+      } else if (objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
         fireRule = true;
       }
     }
@@ -58,17 +58,17 @@ public class ProcessCompetency implements Rule {
 
     try {
 
-      log.info("Process competency.");
+      log.info("Process credential.");
 
       // Get Activity
       Activity activity = (Activity) statement.getObject();
 
-      // Process Competency
-      Competency competency = processCompetency(activity);
+      // Process Credential
+      Credential credential = processCredential(activity);
 
-      // Process PersonalCompetency
-      if (competency != null) {
-        processPersonalCompetency(activity, person, competency);
+      // Process PersonalCredential
+      if (credential != null) {
+        processPersonalCredential(activity, person, credential);
       }
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
@@ -78,26 +78,26 @@ public class ProcessCompetency implements Rule {
 
   /**
    * @param statement
-   * @return competency
+   * @return credential
    */
-  private Competency processCompetency(Activity activity) {
+  private Credential processCredential(Activity activity) {
 
-    Competency competency = null;
+    Credential credential = null;
 
     try {
 
-      // Get competency
-      competency = competencyService.findByIdentifier(activity.getId());
+      // Get credential
+      credential = credentialService.findByIdentifier(activity.getId());
 
-      // If competency doesn't exist
-      if (competency == null) {
+      // If credential doesn't exist
+      if (credential == null) {
 
-        competency = createCompetency(activity);
+        credential = createCredential(activity);
 
       } else {
 
-        log.info("Competency " + activity.getId() + " exists.");
-        competency = updateCompetency(competency, activity);
+        log.info("Credential " + activity.getId() + " exists.");
+        credential = updateCredential(credential, activity);
       }
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
@@ -107,18 +107,18 @@ public class ProcessCompetency implements Rule {
       throw e;
     }
 
-    return competency;
+    return credential;
   }
 
   /**
    * @param activity
-   * @return competency
+   * @return credential
    */
-  private Competency createCompetency(Activity activity) {
+  private Credential createCredential(Activity activity) {
 
-    log.info("Creating new competency.");
+    log.info("Creating new credential.");
 
-    Competency competency = null;
+    Credential credential = null;
     String nameLangCode = null;
     String descLangCode = null;
 
@@ -136,12 +136,12 @@ public class ProcessCompetency implements Rule {
       descLangCode = langMapUtil.getLangMapValue(descLangMap);
       activityDescription = activity.getDefinition().getDescription().get(descLangCode);
 
-      competency = new Competency();
-      competency.setIdentifier(activity.getId());
-      competency.setFrameworkTitle(activityName);
-      competency.setFrameworkDescription(activityDescription);
-      competencyService.save(competency);
-      log.info("Competency " + activity.getId() + " created.");
+      credential = new Credential();
+      credential.setIdentifier(activity.getId());
+      credential.setFrameworkTitle(activityName);
+      credential.setFrameworkDescription(activityDescription);
+      credentialService.save(credential);
+      log.info("Credential " + activity.getId() + " created.");
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
@@ -149,16 +149,16 @@ public class ProcessCompetency implements Rule {
       throw e;
     }
 
-    return competency;
+    return credential;
   }
 
   /**
    * @param activity
-   * @return competency
+   * @return credential
    */
-  private Competency updateCompetency(Competency competency, Activity activity) {
+  private Credential updateCredential(Credential credential, Activity activity) {
 
-    log.info("Updating competency.");
+    log.info("Updating credential.");
 
     String nameLangCode = null;
     String descLangCode = null;
@@ -179,10 +179,10 @@ public class ProcessCompetency implements Rule {
       descLangCode = langMapUtil.getLangMapValue(descLangMap);
       activityDescription = activity.getDefinition().getDescription().get(descLangCode);
 
-      competency.setFrameworkTitle(activityName);
-      competency.setFrameworkDescription(activityDescription);
-      competencyService.update(competency);
-      log.info("Competency " + activity.getId() + " updated.");
+      credential.setFrameworkTitle(activityName);
+      credential.setFrameworkDescription(activityDescription);
+      credentialService.update(credential);
+      log.info("Credential " + activity.getId() + " updated.");
 
     } catch (AggregatorException | ClassCastException | NullPointerException e) {
       log.error(e.getMessage());
@@ -190,73 +190,73 @@ public class ProcessCompetency implements Rule {
       throw e;
     }
 
-    return competency;
+    return credential;
   }
 
   /**
    * @param Activity
    * @param Person
-   * @param Competency
-   * @return PersonalCompetency
+   * @param Credential
+   * @return PersonalCredential
    */
-  private PersonalCompetency processPersonalCompetency(
-      Activity activity, Person person, Competency competency) {
+  private PersonalCredential processPersonalCredential(
+      Activity activity, Person person, Credential credential) {
 
-    // Get PersonalCompetency
-    PersonalCompetency personalCompetency =
-        personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(), competency.getId());
+    // Get PersonalCredential
+    PersonalCredential personalCredential =
+        personalCredentialService.findByPersonIdAndCredentialId(person.getId(), credential.getId());
 
-    // If PersonalCompetancy doesn't exist
-    if (personalCompetency == null) {
+    // If PersonalCredential doesn't exist
+    if (personalCredential == null) {
 
-      createPersonalCompetency(person, competency);
+      createPersonalCredential(person, credential);
 
     } else {
 
-      updatePersonalCompetency(personalCompetency, person, competency);
+      updatePersonalCredential(personalCredential, person, credential);
     }
 
-    return personalCompetency;
+    return personalCredential;
   }
 
   /**
    * @param Person
-   * @param Competency
-   * @return PersonalCompetency
+   * @param Credential
+   * @return PersonalCredential
    */
-  private PersonalCompetency createPersonalCompetency(Person person, Competency competency) {
+  private PersonalCredential createPersonalCredential(Person person, Credential credential) {
 
-    log.info("Creating new personal competency record.");
-    PersonalCompetency personalCompetency = new PersonalCompetency();
+    log.info("Creating new personal credential record.");
+    PersonalCredential personalCredential = new PersonalCredential();
 
-    personalCompetency.setPerson(person);
-    personalCompetency.setCompetency(competency);
-    personalCompetency.setHasRecord(true);
-    personalCompetencyService.save(personalCompetency);
+    personalCredential.setPerson(person);
+    personalCredential.setCredential(credential);
+    personalCredential.setHasRecord(true);
+    personalCredentialService.save(personalCredential);
 
     log.info(
-        "Personal Competency for "
+        "Personal Credential for "
             + person.getName()
             + " - "
-            + competency.getFrameworkTitle()
+            + credential.getFrameworkTitle()
             + " created.");
 
-    return personalCompetency;
+    return personalCredential;
   }
 
-  private PersonalCompetency updatePersonalCompetency(
-      PersonalCompetency personalCompetency, Person person, Competency competency) {
+  private PersonalCredential updatePersonalCredential(
+      PersonalCredential personalCredential, Person person, Credential credential) {
 
     // TO DO
-    // personalCompetencyService.update(personalCompetency);
+    // personalCredentialService.update(personalCredential);
 
     /*log.info(
-    "Personal Competency for "
+    "Personal Credential for "
         + person.getName()
         + " - "
-        + competency.getFrameworkTitle()
+        + credential.getFrameworkTitle()
         + " updated.");*/
 
-    return personalCompetency;
+    return personalCredential;
   }
 }

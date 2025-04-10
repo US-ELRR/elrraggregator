@@ -79,8 +79,11 @@ salience 100
             // Activity Definition
             ActivityDefinition activityDefenition = activity.getDefinition();
     
+            String activityName = "";
             String activityDescription = "";
             String nameLangCode = null;
+            String descLangCode = null;
+ 
             LangMap nameLangMap = null;
     
             try {
@@ -88,7 +91,7 @@ salience 100
             } catch (ClassCastException | NullPointerException e) {
               System.out.println(e.getMessage());
               e.printStackTrace();
-              throw new AggregatorException("Error processing learning resource - " + e.getMessage());
+              throw new AggregatorException("Error processing competency - " + e.getMessage());
             }
     
             // If Activity name
@@ -102,7 +105,6 @@ salience 100
               while (nameLangCodesIterator.hasNext()) {
               
                 String code = nameLangCodesIterator.next();
-                System.out.println("===> code = " + code);
                 
                 if (languageCodes.contains(code)) {
                     nameLangCode = code;
@@ -130,16 +132,70 @@ salience 100
     
               } // if (nameLangCode == null || nameLangCode.length() == 0) {
     
-              activityDescription = activityDefenition.getName().get(nameLangCode);
+              activityName = activityDefenition.getName().get(nameLangCode);
+    
+            } else {
+              activityName = "";
+            } // if (nameLangMap != null) {
+            
+            LangMap descLangMap = null;
+    
+            try {
+              descLangMap = activity.getDefinition().getDescription();
+            } catch (ClassCastException | NullPointerException e) {
+              System.out.println(e.getMessage());
+              e.printStackTrace();
+              throw new AggregatorException("Error processing competency - " + e.getMessage());
+            }
+    
+            // If Activity description
+            if (descLangMap != null) {
+            
+              Set<String> descLangCodes = descLangMap.getLanguageCodes();
+    
+              // Get descLangCode
+              Iterator<String> descLangCodesIterator = descLangCodes.iterator();
+    
+              while (descLangCodesIterator.hasNext()) {
+              
+                String code = descLangCodesIterator.next();
+                
+                if (languageCodes.contains(code)) {
+                    descLangCode = code;
+                    break;
+                }
+                
+              }
+    
+              if (descLangCode == null || descLangCode.length() == 0) {
+              
+                // Check for en-us then en
+                if (descLangCodes.contains("en-us")) {
+                
+                  descLangCode = "en-us";
+    
+                } else if (descLangCodes.contains("en")) {
+                
+                  descLangCode = "en";
+    
+                } else {
+                  String firstElement =
+                  descLangCodes.stream().findFirst().orElse(null);
+                  descLangCode = firstElement;
+                }
+    
+              } // if (descLangCode == null || descLangCode.length() == 0) {
+    
+              activityDescription = activityDefenition.getDescription().get(nameLangCode);
     
             } else {
               activityDescription = "";
-            } // if (nameLangMap != null) {
+            } // if (descLangMap != null) {
     
             learningResource = new LearningResource();
             learningResource.setIri(activity.getId());
             learningResource.setDescription(activityDescription);
-            learningResource.setTitle(activityDescription);
+            learningResource.setTitle(activityName);
             learningResourceService.save(learningResource);
             System.out.println("Learning resource " + learningResource.getTitle() + " created.");
     

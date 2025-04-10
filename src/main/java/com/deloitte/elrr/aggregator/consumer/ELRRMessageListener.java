@@ -12,11 +12,13 @@ import com.deloitte.elrr.aggregator.drools.DroolsProcessStatementService;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
+import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -29,6 +31,8 @@ public class ELRRMessageListener {
   @Autowired private ProcessCompleted processCompleted;
 
   @Autowired private ProcessCompetency processCompetency;
+
+  @Autowired private ProcessCredential processCredential;
 
   @Autowired private ProcessPerson processPerson;
 
@@ -84,17 +88,39 @@ public class ELRRMessageListener {
       // Get Statement
       statement = getStatement(payload);
 
-      // Process completed
+      Activity obj = (Activity) statement.getObject();
+      String objType = obj.getDefinition().getType();
+
+      // If completed, achieved competency or achieved credential
+      if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+          || statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+              && objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)
+          || statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+              && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
+
+        log.info("Process verb " + statement.getVerb().getId());
+
+        // Process Person
+        person = processPerson.processPerson(statement);
+
+      } else {
+
+        log.info(
+            "Verb "
+                + statement.getVerb().getId()
+                + " Object Type "
+                + objType
+                + "is not recognized.");
+
+        return;
+      }
+
+      // If completed
       if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)) {
 
         fireRule = processCompleted.fireRule(statement);
 
         if (fireRule) {
-
-          log.info("Process verb " + statement.getVerb().getId());
-
-          // Process Person
-          person = processPerson.processPerson(statement);
 
           // Process rule
           processCompleted.processRule(person, statement);
@@ -103,25 +129,38 @@ public class ELRRMessageListener {
           log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
         }
 
-        // If competency
+        // If achieved
       } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)) {
 
-        fireRule = processCompetency.fireRule(statement);
+        // If competency
+        if (objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)) {
 
-        if (fireRule) {
+          fireRule = processCompetency.fireRule(statement);
 
-          log.info("Process verb " + statement.getVerb().getId());
+          if (fireRule) {
 
-          // Process Person
-          person = processPerson.processPerson(statement);
+            // Process rule
+            processCompetency.processRule(person, statement);
 
-          // Process rule
-          processCompetency.processRule(person, statement);
+          } else {
+            log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+          }
 
-        } else {
-          log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+          // If credential
+        } else if (objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
+
+          fireRule = processCredential.fireRule(statement);
+
+          if (fireRule) {
+
+            // Process rule
+            processCredential.processRule(person, statement);
+
+          } else {
+            log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
+          }
         }
-      }
+      } // If achieved
 
     } catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
       log.error("Error processing Kafka message - " + e.getMessage());
@@ -150,13 +189,19 @@ public class ELRRMessageListener {
       // Get Statement
       statement = getStatement(payload);
 
+      Activity obj = (Activity) statement.getObject();
+      String objType = obj.getDefinition().getType();
+
       // Process completed
       boolean fireCompletedRule = processCompleted.fireRule(statement);
 
       // Process competency
       boolean fireCompetencyRule = processCompetency.fireRule(statement);
 
-      if (fireCompletedRule || fireCompetencyRule) {
+      // Process credential
+      boolean fireCredentialRule = processCredential.fireRule(statement);
+
+      if (fireCompletedRule || fireCompetencyRule || fireCredentialRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 
@@ -167,7 +212,7 @@ public class ELRRMessageListener {
         String verbId = statement.getVerb().getId();
 
         // Process rule
-        droolsProcessStatementService.processStatement(person, statement, verbId);
+        droolsProcessStatementService.processStatement(person, statement, verbId, objType);
 
       } else {
         log.info("Verb " + statement.getVerb().getId() + " is not recognized.");

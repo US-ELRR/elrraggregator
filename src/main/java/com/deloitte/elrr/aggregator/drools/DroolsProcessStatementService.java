@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
+import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
+import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +31,11 @@ public class DroolsProcessStatementService {
 
   @Autowired private PersonalCompetencySvc personalCompetencyService;
 
-  public void processStatement(Person person, Statement statement, String verbId)
+  @Autowired private CredentialSvc credentialService;
+
+  @Autowired private PersonalCredentialSvc personalCredentialService;
+
+  public void processStatement(Person person, Statement statement, String verbId, String objType)
       throws AggregatorException {
 
     try {
@@ -39,9 +45,12 @@ public class DroolsProcessStatementService {
       kieSession.setGlobal("learningResourceService", learningResourceService);
       kieSession.setGlobal("competencyService", competencyService);
       kieSession.setGlobal("personalCompetencyService", personalCompetencyService);
+      kieSession.setGlobal("credentialService", credentialService);
+      kieSession.setGlobal("personalCredentialService", personalCredentialService);
       kieSession.setGlobal("person", person);
       kieSession.setGlobal("statement", statement);
       kieSession.setGlobal("verbId", verbId);
+      kieSession.setGlobal("objType", objType);
       // Insert facts into working memory
       kieSession.insert(person);
       kieSession.insert(statement);
