@@ -55,8 +55,8 @@ public class ELRRMessageListener {
     try {
 
       if (InputSanatizer.isValidInput(message)) {
-        processMessage(message);
-        // processMessageFromRule(message);
+        // processMessage(message);
+        processMessageFromRule(message);
       } else {
         log.error("Invalid message did not pass whitelist check - " + message);
         // Send to dead letter queue
@@ -81,7 +81,9 @@ public class ELRRMessageListener {
 
     Statement statement = null;
     Person person = null;
-    boolean fireRule = false;
+    boolean fireCompletedRule = false;
+    boolean fireCompetencyRule = false;
+    boolean fireCredentialRule = false;
 
     try {
 
@@ -91,17 +93,47 @@ public class ELRRMessageListener {
       Activity obj = (Activity) statement.getObject();
       String objType = obj.getDefinition().getType();
 
+      fireCompletedRule = processCompleted.fireRule(statement);
+
+      if (!fireCompletedRule) {
+        fireCompetencyRule = processCompetency.fireRule(statement);
+      }
+
+      if (!fireCompletedRule && !fireCompetencyRule) {
+        fireCredentialRule = processCredential.fireRule(statement);
+      }
+
       // If completed, achieved competency or achieved credential
-      if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
-          || statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-              && objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)
-          || statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-              && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
+      if (fireCompletedRule || fireCompetencyRule || fireCredentialRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 
         // Process Person
         person = processPerson.processPerson(statement);
+
+        // If completed
+        if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+            && fireCompletedRule) {
+
+          // Process rule
+          processCompleted.processRule(person, statement);
+
+          // If achieved competency
+        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+            && objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)
+            && fireCompetencyRule) {
+
+          // Process rule
+          processCompetency.processRule(person, statement);
+
+          // If achieved credential
+        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+            && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)
+            && fireCredentialRule) {
+
+          // Process rule
+          processCredential.processRule(person, statement);
+        } // If achieved
 
       } else {
 
@@ -111,56 +143,7 @@ public class ELRRMessageListener {
                 + " Object Type "
                 + objType
                 + "is not recognized.");
-
-        return;
       }
-
-      // If completed
-      if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)) {
-
-        fireRule = processCompleted.fireRule(statement);
-
-        if (fireRule) {
-
-          // Process rule
-          processCompleted.processRule(person, statement);
-
-        } else {
-          log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
-        }
-
-        // If achieved
-      } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)) {
-
-        // If competency
-        if (objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)) {
-
-          fireRule = processCompetency.fireRule(statement);
-
-          if (fireRule) {
-
-            // Process rule
-            processCompetency.processRule(person, statement);
-
-          } else {
-            log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
-          }
-
-          // If credential
-        } else if (objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
-
-          fireRule = processCredential.fireRule(statement);
-
-          if (fireRule) {
-
-            // Process rule
-            processCredential.processRule(person, statement);
-
-          } else {
-            log.info("Verb " + statement.getVerb().getId() + " is not recognized.");
-          }
-        }
-      } // If achieved
 
     } catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
       log.error("Error processing Kafka message - " + e.getMessage());
@@ -183,6 +166,9 @@ public class ELRRMessageListener {
 
     Statement statement = null;
     Person person = null;
+    boolean fireCompletedRule = false;
+    boolean fireCompetencyRule = false;
+    boolean fireCredentialRule = false;
 
     try {
 
@@ -192,14 +178,15 @@ public class ELRRMessageListener {
       Activity obj = (Activity) statement.getObject();
       String objType = obj.getDefinition().getType();
 
-      // Process completed
-      boolean fireCompletedRule = processCompleted.fireRule(statement);
+      fireCompletedRule = processCompleted.fireRule(statement);
 
-      // Process competency
-      boolean fireCompetencyRule = processCompetency.fireRule(statement);
+      if (!fireCompletedRule) {
+        fireCompetencyRule = processCompetency.fireRule(statement);
+      }
 
-      // Process credential
-      boolean fireCredentialRule = processCredential.fireRule(statement);
+      if (!fireCompletedRule && !fireCompetencyRule) {
+        fireCredentialRule = processCredential.fireRule(statement);
+      }
 
       if (fireCompletedRule || fireCompetencyRule || fireCredentialRule) {
 

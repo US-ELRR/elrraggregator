@@ -11,4 +11,4 @@ COPY ./target/dependency/BOOT-INF/classes /app
 
 WORKDIR /
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","-Dcom.redhat.fips=false","-Dspring.profiles.active=${ENV}","-Djasypt.encryptor.algorithm=${ALGORITHM}","com.deloitte.elrr.elrrconsolidate.ElrrConsolidateApplication"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","-Dcom.redhat.fips=false","-Dspring.profiles.active=${ENV}","-Djasypt.encryptor.algorithm=${ALGORITHM}","com.deloitte.elrr.ElrrConsolidateApplication"]
