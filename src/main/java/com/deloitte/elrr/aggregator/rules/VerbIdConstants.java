@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.consumer;
+package com.deloitte.elrr.aggregator.rules;
 
 public final class VerbIdConstants {
   public static final String COMPLETED_VERB_ID = "http://adlnet.gov/expapi/verbs/completed";

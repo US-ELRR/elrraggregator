@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.consumer;
+package com.deloitte.elrr.aggregator.rules;
 
 public final class ObjectTypeConstants {
   public static final String COMPETENCY = "https://w3id.org/xapi/tla/activity-types/competency";

@@ -34,7 +34,7 @@ public class SanatizingFilter implements Filter {
     StringBuilder body = new StringBuilder();
     try {
       for (String line : request.getReader().lines().toList()) {
-        if (InputSanatizer.isValidInput(line)) {
+        if (InputSanitizer.isValidInput(line)) {
           body.append(line);
           body.append('\n');
 
@@ -64,7 +64,7 @@ public class SanatizingFilter implements Filter {
         .forEachRemaining(
             (param) -> {
               String paramVal = request.getParameter(param);
-              if (!InputSanatizer.isValidInput(paramVal)) {
+              if (!InputSanitizer.isValidInput(paramVal)) {
                 invalidParam = true;
                 log.error("Illegal Parameter Value " + paramVal);
               }
