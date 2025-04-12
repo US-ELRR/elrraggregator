@@ -9,6 +9,7 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCredential;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
@@ -69,7 +70,10 @@ public class ProcessCredential implements Rule {
         processPersonalCredential(activity, person, credential);
       }
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | NullPointerException
+        | RuntimeServiceException e) {
       throw e;
     }
   }
@@ -245,15 +249,21 @@ public class ProcessCredential implements Rule {
   private PersonalCredential updatePersonalCredential(
       PersonalCredential personalCredential, Person person, Credential credential) {
 
-    // TO DO
-    // personalCredentialService.update(personalCredential);
+    try {
 
-    /*log.info(
-    "Personal Credential for "
-        + person.getName()
-        + " - "
-        + credential.getFrameworkTitle()
-        + " updated.");*/
+      // TO DO
+      // personalCredentialService.update(personalCredential);
+
+      log.info(
+          "Personal Credential for "
+              + person.getName()
+              + " - "
+              + credential.getFrameworkTitle()
+              + " updated.");
+
+    } catch (RuntimeServiceException e) {
+      throw e;
+    }
 
     return personalCredential;
   }

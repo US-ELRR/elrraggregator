@@ -10,6 +10,7 @@ import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.LearningStatus;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Activity;
@@ -61,7 +62,10 @@ public class ProcessCompleted implements Rule {
         processLearningRecord(activity, person, statement.getResult(), learningResource);
       }
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | NullPointerException
+        | RuntimeServiceException e) {
       throw e;
     }
   }
@@ -149,20 +153,28 @@ public class ProcessCompleted implements Rule {
   private LearningRecord processLearningRecord(
       Activity activity, Person person, Result result, LearningResource learningResource) {
 
-    // Get LearningRecord
-    LearningRecord learningRecord =
-        learningRecordService.findByPersonIdAndLearningResourceId(
-            person.getId(), learningResource.getId());
+    LearningRecord learningRecord = null;
 
-    // If LearningRecord doesn't exist
-    if (learningRecord == null) {
+    try {
 
-      createLearningRecord(person, learningResource, result);
+      // Get LearningRecord
+      learningRecord =
+          learningRecordService.findByPersonIdAndLearningResourceId(
+              person.getId(), learningResource.getId());
 
-      // If learningRecord already exists
-    } else {
+      // If LearningRecord doesn't exist
+      if (learningRecord == null) {
 
-      updateLearningRecord(learningRecord, result);
+        createLearningRecord(person, learningResource, result);
+
+        // If learningRecord already exists
+      } else {
+
+        updateLearningRecord(learningRecord, result);
+      }
+
+    } catch (RuntimeServiceException e) {
+      throw e;
     }
 
     return learningRecord;
@@ -208,9 +220,15 @@ public class ProcessCompleted implements Rule {
    * @return LearningRecord
    */
   private LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
+
     log.info("Update learning record.");
-    learningRecord = setStatus(learningRecord, result);
-    learningRecordService.update(learningRecord);
+
+    try {
+      learningRecord = setStatus(learningRecord, result);
+      learningRecordService.update(learningRecord);
+    } catch (RuntimeServiceException e) {
+      throw e;
+    }
     return learningRecord;
   }
 

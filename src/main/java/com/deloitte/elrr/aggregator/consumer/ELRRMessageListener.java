@@ -49,7 +49,7 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("\n\n Received Messasge in group - group-id: " + message);
+    log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
     try {
 
@@ -75,7 +75,7 @@ public class ELRRMessageListener {
   @Transactional
   private void processMessage(final String payload) {
 
-    log.info("===============Process Kafka message.===============");
+    log.info(" \n\n ===============Process Kafka message===============");
 
     Statement statement = null;
     Person person = null;

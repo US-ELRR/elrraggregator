@@ -9,6 +9,7 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCompetency;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
@@ -69,7 +70,10 @@ public class ProcessCompetency implements Rule {
         processPersonalCompetency(activity, person, competency);
       }
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | NullPointerException
+        | RuntimeServiceException e) {
       throw e;
     }
   }
@@ -182,7 +186,10 @@ public class ProcessCompetency implements Rule {
       competencyService.update(competency);
       log.info("Competency " + activity.getId() + " updated.");
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+    } catch (AggregatorException
+        | ClassCastException
+        | NullPointerException
+        | RuntimeServiceException e) {
       log.error(e.getMessage());
       e.printStackTrace();
       throw e;
@@ -245,15 +252,21 @@ public class ProcessCompetency implements Rule {
   private PersonalCompetency updatePersonalCompetency(
       PersonalCompetency personalCompetency, Person person, Competency competency) {
 
-    // TO DO
-    // personalCompetencyService.update(personalCompetency);
+    try {
 
-    /*log.info(
-    "Personal Competency for "
-        + person.getName()
-        + " - "
-        + competency.getFrameworkTitle()
-        + " updated.");*/
+      // TO DO
+      // personalCompetencyService.update(personalCompetency);
+
+      log.info(
+          "Personal Competency for "
+              + person.getName()
+              + " - "
+              + competency.getFrameworkTitle()
+              + " updated.");
+
+    } catch (RuntimeServiceException e) {
+      throw e;
+    }
 
     return personalCompetency;
   }
