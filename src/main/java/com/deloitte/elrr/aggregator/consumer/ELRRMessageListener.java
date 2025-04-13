@@ -49,7 +49,8 @@ public class ELRRMessageListener {
   @KafkaListener(topics = "${kafka.topic}")
   public void listen(final String message) {
 
-    log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
+    log.info(
+        "\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
     try {
 
@@ -158,7 +159,7 @@ public class ELRRMessageListener {
    * @param payload
    * @return Statement
    */
-  public Statement getStatement(String payload) throws JsonProcessingException {
+  public Statement getStatement(final String payload) throws JsonProcessingException {
 
     Statement statement = null;
     ObjectMapper mapper = Mapper.getMapper();
