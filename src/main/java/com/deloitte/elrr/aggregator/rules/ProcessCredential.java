@@ -13,7 +13,6 @@ import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -121,12 +120,13 @@ public class ProcessCredential implements Rule {
     log.info("Creating new credential.");
 
     Credential credential = null;
+    String activityName = "";
+    String activityDescription = "";
 
     try {
 
-      String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      String activityDescription =
-          langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
       credential = new Credential();
       credential.setIdentifier(activity.getId());
@@ -152,24 +152,12 @@ public class ProcessCredential implements Rule {
 
     log.info("Updating credential.");
 
-    String nameLangCode = null;
-    String descLangCode = null;
-
     String activityName = "";
     String activityDescription = "";
-
-    LangMap nameLangMap = activity.getDefinition().getName();
-    LangMap descLangMap = activity.getDefinition().getDescription();
-
-    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
-
     try {
 
-      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
-      activityName = activity.getDefinition().getName().get(nameLangCode);
-
-      descLangCode = langMapUtil.getLangMapValue(descLangMap);
-      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
+      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
       credential.setFrameworkTitle(activityName);
       credential.setFrameworkDescription(activityDescription);

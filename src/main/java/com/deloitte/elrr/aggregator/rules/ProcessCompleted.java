@@ -109,12 +109,13 @@ public class ProcessCompleted implements Rule {
     log.info("Creating new learning resource.");
 
     LearningResource learningResource = null;
+    String activityName = "";
+    String activityDescription = "";
 
     try {
 
-      String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      String activityDescription =
-          langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
       learningResource = new LearningResource();
       learningResource.setIri(activity.getId());
