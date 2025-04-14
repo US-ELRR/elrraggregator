@@ -46,20 +46,39 @@ public class LangMapUtil {
 
       // If langCode not found
       if (langCode == null || langCode.length() == 0) {
+
         // Check for en-us
         if (langCodes.contains("en-us")) {
+
           langCode = "en-us";
-          // Check for en
+
+          // Check for begins with en
         } else if (langCodes.contains("en")) {
-          langCode = "en";
-          // Get 1st element
-        } else {
-          String firstElement = langCodes.stream().findFirst().orElse(null);
-          langCode = firstElement;
+
+          // Reset pointer
+          langCodesIterator = langCodes.iterator();
+
+          // Iterate and get 1st en*
+          while (langCodesIterator.hasNext()) {
+
+            String code = langCodesIterator.next();
+
+            if (code.startsWith("en")) {
+              langCode = code;
+              break;
+            }
+          }
         }
       }
 
-      return langCode;
+      // Get 1st element
+      if (langCode == null) {
+
+        String firstElement = langCodes.stream().findFirst().orElse(null);
+        langCode = firstElement;
+      }
+
+      return map.get(langCode);
 
     } catch (ClassCastException | NullPointerException e) {
       log.error("Error getting language codes - " + e.getMessage());

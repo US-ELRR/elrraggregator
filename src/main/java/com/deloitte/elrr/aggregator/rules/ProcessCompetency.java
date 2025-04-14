@@ -121,22 +121,12 @@ public class ProcessCompetency implements Rule {
     log.info("Creating new competency.");
 
     Competency competency = null;
-    String nameLangCode = null;
-    String descLangCode = null;
-
-    String activityName = "";
-    String activityDescription = "";
-
-    LangMap nameLangMap = activity.getDefinition().getName();
-    LangMap descLangMap = activity.getDefinition().getDescription();
 
     try {
 
-      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
-      activityName = activity.getDefinition().getName().get(nameLangCode);
-
-      descLangCode = langMapUtil.getLangMapValue(descLangMap);
-      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
+      String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+      String activityDescription =
+          langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
       competency = new Competency();
       competency.setIdentifier(activity.getId());

@@ -33,6 +33,7 @@ jobs:
       with:
         repository: US-ELRR/elrrserviceentities
         path: elrrserviceentities
+        ref: elrr-drools
     - name: Maven build Entities
       run: |
        cd elrrserviceentities

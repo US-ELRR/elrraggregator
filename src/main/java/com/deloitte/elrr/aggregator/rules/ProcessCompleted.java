@@ -14,7 +14,6 @@ import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Result;
 import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Statement;
@@ -110,22 +109,12 @@ public class ProcessCompleted implements Rule {
     log.info("Creating new learning resource.");
 
     LearningResource learningResource = null;
-    String nameLangCode = null;
-    String descLangCode = null;
-
-    String activityName = "";
-    String activityDescription = "";
-
-    LangMap nameLangMap = activity.getDefinition().getName();
-    LangMap descLangMap = activity.getDefinition().getDescription();
 
     try {
 
-      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
-      activityName = activity.getDefinition().getName().get(nameLangCode);
-
-      descLangCode = langMapUtil.getLangMapValue(descLangMap);
-      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
+      String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+      String activityDescription =
+          langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
       learningResource = new LearningResource();
       learningResource.setIri(activity.getId());
