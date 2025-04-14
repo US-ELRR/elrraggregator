@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.4.2</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.deloitte.elrr</groupId>
@@ -19,22 +19,38 @@
         <java.version>17</java.version>
         <docker.image.prefix>elrrexternalservices</docker.image.prefix>
         <jacoco.version>0.8.8</jacoco.version>
-        <start-class>com.deloitte.elrr.elrrconsolidate.ElrrConsolidateApplication</start-class>
+        <start-class>com.deloitte.elrr.ElrrConsolidateApplication</start-class>
         <jacoco.reportPath>${project.basedir}/../target/jacoco.exec</jacoco.reportPath>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>resuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sona.lauguage>java</sona.lauguage>
+        <drools.version>10.0.0</drools.version>
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.deloitte</groupId>
+            <artifactId>elrrserviceentities</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
             <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-json</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
@@ -162,37 +178,8 @@
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-60</artifactId>
-            <version>3.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>6.1.7.Final</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.0</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-engine</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.0</version>
-            <scope>test</scope>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>3.9.1</version>
         </dependency>
         <dependency>
             <groupId>gov.adlnet</groupId>
@@ -272,7 +259,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.0</version>
+           <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>org.xerial.snappy</groupId>
@@ -295,26 +282,11 @@
             <version>5.8.22</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.4.14</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.4.12</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
-            <version>5.8.25</version>
-            </dependency>
-        <dependency>
             <groupId>com.yetanalytics</groupId>
             <artifactId>xapi-tools</artifactId>
             <version>0.0.1</version>
         </dependency>
-    </dependencies>
+   </dependencies>
     <build>
         <resources>
             <resource>
