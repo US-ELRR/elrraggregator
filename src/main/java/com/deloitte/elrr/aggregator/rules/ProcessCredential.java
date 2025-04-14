@@ -29,7 +29,7 @@ public class ProcessCredential implements Rule {
   @Autowired private LangMapUtil langMapUtil;
 
   @Override
-  public boolean fireRule(Statement statement) {
+  public boolean fireRule(final Statement statement) {
 
     Boolean fireRule = false;
 
@@ -53,7 +53,7 @@ public class ProcessCredential implements Rule {
 
   @Override
   @Transactional
-  public void processRule(Person person, Statement statement) {
+  public void processRule(final Person person, final Statement statement) {
 
     try {
 
@@ -82,7 +82,7 @@ public class ProcessCredential implements Rule {
    * @param statement
    * @return credential
    */
-  private Credential processCredential(Activity activity) {
+  private Credential processCredential(final Activity activity) {
 
     Credential credential = null;
 
@@ -116,7 +116,7 @@ public class ProcessCredential implements Rule {
    * @param activity
    * @return credential
    */
-  private Credential createCredential(Activity activity) {
+  private Credential createCredential(final Activity activity) {
 
     log.info("Creating new credential.");
 
@@ -158,7 +158,7 @@ public class ProcessCredential implements Rule {
    * @param activity
    * @return credential
    */
-  private Credential updateCredential(Credential credential, Activity activity) {
+  private Credential updateCredential(Credential credential, final Activity activity) {
 
     log.info("Updating credential.");
 
@@ -202,7 +202,7 @@ public class ProcessCredential implements Rule {
    * @return PersonalCredential
    */
   private PersonalCredential processPersonalCredential(
-      Activity activity, Person person, Credential credential) {
+      final Activity activity, final Person person, final Credential credential) {
 
     // Get PersonalCredential
     PersonalCredential personalCredential =
@@ -226,7 +226,8 @@ public class ProcessCredential implements Rule {
    * @param Credential
    * @return PersonalCredential
    */
-  private PersonalCredential createPersonalCredential(Person person, Credential credential) {
+  private PersonalCredential createPersonalCredential(
+      final Person person, final Credential credential) {
 
     log.info("Creating new personal credential record.");
     PersonalCredential personalCredential = new PersonalCredential();
@@ -247,12 +248,12 @@ public class ProcessCredential implements Rule {
   }
 
   private PersonalCredential updatePersonalCredential(
-      PersonalCredential personalCredential, Person person, Credential credential) {
+      PersonalCredential personalCredential, final Person person, final Credential credential) {
 
     try {
 
       // TO DO
-      // personalCredentialService.update(personalCredential);
+      personalCredentialService.update(personalCredential);
 
       log.info(
           "Personal Credential for "

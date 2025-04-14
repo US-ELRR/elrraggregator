@@ -32,7 +32,7 @@ public class ProcessCompleted implements Rule {
   @Autowired private LangMapUtil langMapUtil;
 
   @Override
-  public boolean fireRule(Statement statement) {
+  public boolean fireRule(final Statement statement) {
 
     // Is Verb Id = completed and object = activity
     if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
@@ -45,7 +45,7 @@ public class ProcessCompleted implements Rule {
 
   @Override
   @Transactional
-  public void processRule(Person person, Statement statement) {
+  public void processRule(final Person person, final Statement statement) {
 
     try {
 
@@ -74,7 +74,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  private LearningResource processLearningResource(Activity activity) {
+  private LearningResource processLearningResource(final Activity activity) {
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -105,7 +105,7 @@ public class ProcessCompleted implements Rule {
    * @param activity
    * @return LearningResource
    */
-  private LearningResource createLearningResource(Activity activity) {
+  private LearningResource createLearningResource(final Activity activity) {
 
     log.info("Creating new learning resource.");
 
@@ -151,7 +151,10 @@ public class ProcessCompleted implements Rule {
    * @return LearningRccord
    */
   private LearningRecord processLearningRecord(
-      Activity activity, Person person, Result result, LearningResource learningResource) {
+      final Activity activity,
+      final Person person,
+      final Result result,
+      final LearningResource learningResource) {
 
     LearningRecord learningRecord = null;
 
@@ -187,7 +190,7 @@ public class ProcessCompleted implements Rule {
    * @return LearningRecord
    */
   private LearningRecord createLearningRecord(
-      Person person, LearningResource learningResource, Result result) {
+      final Person person, final LearningResource learningResource, final Result result) {
 
     log.info("Creating new learning record.");
     LearningRecord learningRecord = new LearningRecord();
@@ -219,7 +222,7 @@ public class ProcessCompleted implements Rule {
    * @param result
    * @return LearningRecord
    */
-  private LearningRecord updateLearningRecord(LearningRecord learningRecord, Result result) {
+  private LearningRecord updateLearningRecord(LearningRecord learningRecord, final Result result) {
 
     log.info("Update learning record.");
 
@@ -237,7 +240,7 @@ public class ProcessCompleted implements Rule {
    * @param result
    * @return learningRecord
    */
-  private LearningRecord setStatus(LearningRecord learningRecord, Result result) {
+  private LearningRecord setStatus(LearningRecord learningRecord, final Result result) {
 
     if (result != null) {
 

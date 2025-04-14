@@ -29,7 +29,7 @@ public class ProcessCompetency implements Rule {
   @Autowired private LangMapUtil langMapUtil;
 
   @Override
-  public boolean fireRule(Statement statement) {
+  public boolean fireRule(final Statement statement) {
 
     Boolean fireRule = false;
 
@@ -53,7 +53,7 @@ public class ProcessCompetency implements Rule {
 
   @Override
   @Transactional
-  public void processRule(Person person, Statement statement) {
+  public void processRule(final Person person, final Statement statement) {
 
     try {
 
@@ -82,7 +82,7 @@ public class ProcessCompetency implements Rule {
    * @param statement
    * @return competency
    */
-  private Competency processCompetency(Activity activity) {
+  private Competency processCompetency(final Activity activity) {
 
     Competency competency = null;
 
@@ -116,7 +116,7 @@ public class ProcessCompetency implements Rule {
    * @param activity
    * @return competency
    */
-  private Competency createCompetency(Activity activity) {
+  private Competency createCompetency(final Activity activity) {
 
     log.info("Creating new competency.");
 
@@ -158,7 +158,7 @@ public class ProcessCompetency implements Rule {
    * @param activity
    * @return competency
    */
-  private Competency updateCompetency(Competency competency, Activity activity) {
+  private Competency updateCompetency(Competency competency, final Activity activity) {
 
     log.info("Updating competency.");
 
@@ -205,7 +205,7 @@ public class ProcessCompetency implements Rule {
    * @return PersonalCompetency
    */
   private PersonalCompetency processPersonalCompetency(
-      Activity activity, Person person, Competency competency) {
+      final Activity activity, final Person person, final Competency competency) {
 
     // Get PersonalCompetency
     PersonalCompetency personalCompetency =
@@ -229,7 +229,8 @@ public class ProcessCompetency implements Rule {
    * @param Competency
    * @return PersonalCompetency
    */
-  private PersonalCompetency createPersonalCompetency(Person person, Competency competency) {
+  private PersonalCompetency createPersonalCompetency(
+      final Person person, final Competency competency) {
 
     log.info("Creating new personal competency record.");
     PersonalCompetency personalCompetency = new PersonalCompetency();
@@ -250,7 +251,7 @@ public class ProcessCompetency implements Rule {
   }
 
   private PersonalCompetency updatePersonalCompetency(
-      PersonalCompetency personalCompetency, Person person, Competency competency) {
+      PersonalCompetency personalCompetency, final Person person, final Competency competency) {
 
     try {
 
