@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.deloitte.elrr.elrrconsolidate;
+package com.deloitte.elrr.aggregator;
 
 import org.junit.jupiter.api.Test;
 
