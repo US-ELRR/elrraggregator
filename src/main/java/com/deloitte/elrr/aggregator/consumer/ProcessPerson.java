@@ -83,7 +83,9 @@ public class ProcessPerson {
     // If person already exists
     if (identity != null) {
       person = identity.getPerson();
-      log.info("Person " + person.getName() + " exists.");
+      if (person != null) {
+        log.info("Person " + person.getName() + " exists.");
+      }
     }
 
     return person;
