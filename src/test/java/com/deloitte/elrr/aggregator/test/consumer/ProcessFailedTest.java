@@ -12,10 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
-import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
+import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.jpa.svc.EmailSvc;
 import com.deloitte.elrr.jpa.svc.IdentitySvc;
@@ -42,6 +43,10 @@ class ProcessFailedTest {
   @Mock LearningResourceSvc learningResourceSvc;
 
   @Mock LearningRecordSvc learningRecordSvc;
+
+  @Mock LearningResourceUtil learningResourceUtil;
+
+  @Mock LearningRecordUtil learningRecordUtil;
 
   @InjectMocks ProcessPerson processPerson;
 

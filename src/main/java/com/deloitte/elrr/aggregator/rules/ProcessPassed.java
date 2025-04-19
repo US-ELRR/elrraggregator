@@ -4,18 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
+import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
-import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.entity.types.LearningStatus;
 import com.deloitte.elrr.exception.RuntimeServiceException;
-import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
-import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Result;
-import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class ProcessPassed implements Rule {
+	
+  @Autowired LearningResourceUtil learningResourceUtil;
 
-  @Autowired private LearningResourceSvc learningResourceService;
-
-  @Autowired private LearningRecordSvc learningRecordService;
-
-  @Autowired private LangMapUtil langMapUtil;
+  @Autowired LearningRecordUtil learningRecordUtil;
 
   @Override
   public boolean fireRule(final Statement statement) {
@@ -54,11 +47,12 @@ public class ProcessPassed implements Rule {
       Activity activity = (Activity) statement.getObject();
 
       // Process LearningResource
-      LearningResource learningResource = processLearningResource(activity);
+      LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
 
       // Process LearningRecord
       if (learningResource != null) {
-        processLearningRecord(activity, person, statement.getResult(), learningResource);
+        learningRecordUtil.processLearningRecord(
+            activity, person, statement.getVerb(), statement.getResult(), learningResource);
       }
 
     } catch (AggregatorException
@@ -67,189 +61,5 @@ public class ProcessPassed implements Rule {
         | RuntimeServiceException e) {
       throw e;
     }
-  }
-
-  /**
-   * @param activity
-   * @return LearningResource
-   */
-  private LearningResource processLearningResource(final Activity activity) {
-
-    // Get learningResource
-    LearningResource learningResource = learningResourceService.findByIri(activity.getId());
-
-    // If LearningResource already exists
-    if (learningResource != null) {
-
-      log.info("Learning resource " + learningResource.getTitle() + " exists.");
-
-    } else {
-
-      try {
-
-        learningResource = createLearningResource(activity);
-
-      } catch (AggregatorException | ClassCastException | NullPointerException e) {
-
-        log.error("Error processing learning resource - " + e.getMessage());
-        e.printStackTrace();
-        throw e;
-      }
-    }
-
-    return learningResource;
-  }
-
-  /**
-   * @param activity
-   * @return LearningResource
-   */
-  private LearningResource createLearningResource(final Activity activity) {
-
-    log.info("Creating new learning resource.");
-
-    LearningResource learningResource = null;
-    String activityName = "";
-    String activityDescription = "";
-
-    try {
-
-      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
-
-      learningResource = new LearningResource();
-      learningResource.setIri(activity.getId());
-      learningResource.setDescription(activityDescription);
-      learningResource.setTitle(activityName);
-      learningResourceService.save(learningResource);
-      log.info("Learning resource " + learningResource.getTitle() + " created.");
-
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
-      log.error(e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
-
-    return learningResource;
-  }
-
-  /**
-   * @param Activity
-   * @param Person
-   * @param Result
-   * @param LearningResource
-   * @return LearningRccord
-   */
-  private LearningRecord processLearningRecord(
-      final Activity activity,
-      final Person person,
-      final Result result,
-      final LearningResource learningResource) {
-
-    LearningRecord learningRecord = null;
-
-    try {
-
-      // Get LearningRecord
-      learningRecord =
-          learningRecordService.findByPersonIdAndLearningResourceId(
-              person.getId(), learningResource.getId());
-
-      // If LearningRecord doesn't exist
-      if (learningRecord == null) {
-
-        createLearningRecord(person, learningResource, result);
-
-        // If learningRecord already exists
-      } else {
-
-        updateLearningRecord(learningRecord, result);
-      }
-
-    } catch (RuntimeServiceException e) {
-      throw e;
-    }
-
-    return learningRecord;
-  }
-
-  /**
-   * @param Person
-   * @param learningResource
-   * @param Result
-   * @return LearningRecord
-   */
-  private LearningRecord createLearningRecord(
-      final Person person, final LearningResource learningResource, final Result result) {
-
-    log.info("Creating new learning record.");
-    LearningRecord learningRecord = new LearningRecord();
-
-    if (result != null) {
-      learningRecord = setStatus(learningRecord, result);
-    } else {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-    }
-
-    learningRecord.setLearningResource(learningResource);
-    learningRecord.setPerson(person);
-    learningRecordService.save(learningRecord);
-
-    log.info(
-        "Learning record for "
-            + person.getName()
-            + " - "
-            + learningResource.getTitle()
-            + " created.");
-
-    return learningRecord;
-  }
-
-  /**
-   * @param person
-   * @param learningRecord
-   * @param learningResource
-   * @param result
-   * @return LearningRecord
-   */
-  private LearningRecord updateLearningRecord(LearningRecord learningRecord, final Result result) {
-
-    log.info("Update learning record.");
-
-    try {
-      learningRecord = setStatus(learningRecord, result);
-      learningRecordService.update(learningRecord);
-    } catch (RuntimeServiceException e) {
-      throw e;
-    }
-    return learningRecord;
-  }
-
-  /**
-   * @param learningRecord
-   * @param result
-   * @return learningRecord
-   */
-  private LearningRecord setStatus(LearningRecord learningRecord, final Result result) {
-
-    if (result != null) {
-
-      // status
-      learningRecord.setRecordStatus(LearningStatus.PASSED);
-
-      // grade
-      Score score = result.getScore();
-
-      if (score != null) {
-        if (score.getScaled() != null) {
-          learningRecord.setAcademicGrade(score.getScaled().toString());
-        }
-      }
-
-    } else {
-      learningRecord.setRecordStatus(LearningStatus.PASSED);
-    }
-
-    return learningRecord;
   }
 }
