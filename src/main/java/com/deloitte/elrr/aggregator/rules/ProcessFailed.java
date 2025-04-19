@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ProcessCompleted implements Rule {
+public class ProcessFailed implements Rule {
 
   @Autowired private LearningResourceSvc learningResourceService;
 
@@ -33,8 +33,8 @@ public class ProcessCompleted implements Rule {
   @Override
   public boolean fireRule(final Statement statement) {
 
-    // Is Verb Id = completed and object = activity
-    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+    // Is Verb Id = failed and object = activity
+    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)
         && statement.getObject() instanceof Activity) {
       return true;
     } else {
@@ -48,7 +48,7 @@ public class ProcessCompleted implements Rule {
 
     try {
 
-      log.info("Process activity completed");
+      log.info("Process activity failed");
 
       // Get Activity
       Activity activity = (Activity) statement.getObject();
@@ -234,19 +234,8 @@ public class ProcessCompleted implements Rule {
 
     if (result != null) {
 
-      Boolean success = result.getSuccess();
-      Boolean completed = result.getCompletion();
-
       // status
-      if (completed && success == null) {
-        learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-      } else if (completed && success) {
-        learningRecord.setRecordStatus(LearningStatus.PASSED);
-      } else if (completed && !success) {
-        learningRecord.setRecordStatus(LearningStatus.FAILED);
-      } else {
-        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-      }
+      learningRecord.setRecordStatus(LearningStatus.FAILED);
 
       // grade
       Score score = result.getScore();
@@ -258,7 +247,7 @@ public class ProcessCompleted implements Rule {
       }
 
     } else {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+      learningRecord.setRecordStatus(LearningStatus.FAILED);
     }
 
     return learningRecord;

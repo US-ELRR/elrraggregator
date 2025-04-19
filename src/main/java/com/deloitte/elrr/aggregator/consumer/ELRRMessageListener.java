@@ -13,6 +13,7 @@ import com.deloitte.elrr.aggregator.rules.ObjectTypeConstants;
 import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
+import com.deloitte.elrr.aggregator.rules.ProcessFailed;
 import com.deloitte.elrr.aggregator.rules.VerbIdConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
@@ -36,6 +37,8 @@ public class ELRRMessageListener {
   @Autowired private ProcessCredential processCredential;
 
   @Autowired private ProcessPerson processPerson;
+
+  @Autowired private ProcessFailed processFailed;
 
   @Autowired KafkaTemplate<?, String> kafkaTemplate;
 
@@ -83,6 +86,7 @@ public class ELRRMessageListener {
     boolean fireCompletedRule = false;
     boolean fireCompetencyRule = false;
     boolean fireCredentialRule = false;
+    boolean fireFailedRule = false;
 
     try {
 
@@ -102,8 +106,12 @@ public class ELRRMessageListener {
         fireCredentialRule = processCredential.fireRule(statement);
       }
 
-      // If completed, achieved competency or achieved credential
-      if (fireCompletedRule || fireCompetencyRule || fireCredentialRule) {
+      if (!fireCompletedRule && !fireCompetencyRule && !fireCredentialRule) {
+        fireFailedRule = processFailed.fireRule(statement);
+      }
+
+      // If completed, achieved competency, achieved credential or Failed
+      if (fireCompletedRule || fireCompetencyRule || fireCredentialRule || fireFailedRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 
@@ -132,7 +140,13 @@ public class ELRRMessageListener {
 
           // Process rule
           processCredential.processRule(person, statement);
-        } // If achieved
+
+        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)
+            && fireFailedRule) {
+
+          // Process rule
+          processFailed.processRule(person, statement);
+        }
 
       } else {
 
