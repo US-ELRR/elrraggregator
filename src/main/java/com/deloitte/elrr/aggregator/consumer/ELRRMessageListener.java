@@ -14,6 +14,7 @@ import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
+import com.deloitte.elrr.aggregator.rules.ProcessPassed;
 import com.deloitte.elrr.aggregator.rules.VerbIdConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
@@ -37,6 +38,8 @@ public class ELRRMessageListener {
   @Autowired private ProcessCredential processCredential;
 
   @Autowired private ProcessPerson processPerson;
+
+  @Autowired private ProcessPassed processPassed;
 
   @Autowired private ProcessFailed processFailed;
 
@@ -83,9 +86,11 @@ public class ELRRMessageListener {
 
     Statement statement = null;
     Person person = null;
+
     boolean fireCompletedRule = false;
     boolean fireCompetencyRule = false;
     boolean fireCredentialRule = false;
+    boolean firePassedRule = false;
     boolean fireFailedRule = false;
 
     try {
@@ -97,21 +102,17 @@ public class ELRRMessageListener {
       String objType = obj.getDefinition().getType();
 
       fireCompletedRule = processCompleted.fireRule(statement);
+      fireCompetencyRule = processCompetency.fireRule(statement);
+      fireCredentialRule = processCredential.fireRule(statement);
+      firePassedRule = processPassed.fireRule(statement);
+      fireFailedRule = processFailed.fireRule(statement);
 
-      if (!fireCompletedRule) {
-        fireCompetencyRule = processCompetency.fireRule(statement);
-      }
-
-      if (!fireCompletedRule && !fireCompetencyRule) {
-        fireCredentialRule = processCredential.fireRule(statement);
-      }
-
-      if (!fireCompletedRule && !fireCompetencyRule && !fireCredentialRule) {
-        fireFailedRule = processFailed.fireRule(statement);
-      }
-
-      // If completed, achieved competency, achieved credential or Failed
-      if (fireCompletedRule || fireCompetencyRule || fireCredentialRule || fireFailedRule) {
+      // If completed, achieved competency, achieved credential, passed  or failed
+      if (fireCompletedRule
+          || fireCompetencyRule
+          || fireCredentialRule
+          || firePassedRule
+          || fireFailedRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 
@@ -141,6 +142,14 @@ public class ELRRMessageListener {
           // Process rule
           processCredential.processRule(person, statement);
 
+          // If passed
+        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)
+            && firePassedRule) {
+
+          // Process rule
+          processPassed.processRule(person, statement);
+
+          // If failed
         } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)
             && fireFailedRule) {
 

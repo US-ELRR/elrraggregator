@@ -1,0 +1,34 @@
+{
+    "id": "7ced3322-e1a5-411a-a67d-6a735c76f119",
+    "timestamp": "2015-12-18T12:17:00+00:00",
+    "actor": {
+      "objectType": "Agent",
+      "name": "Tom Brady",
+      "mbox": "mailto:brady.learner@adlnet.gov"
+    },
+    "verb": {
+      "id": "http://adlnet.gov/expapi/verbs/passed",
+      "display": {
+        "en": "passed"
+      }
+    },
+    "object": {
+      "id": "http://example.adlnet.gov/xapi/example/simpleCBT2",
+      "definition": {
+        "name": {
+          "en-US": "simple CBT 2 course"
+        },
+        "description": {
+          "en-US": "A fictitious example CBT 2 course."
+        }
+      }
+    },
+    "result": {
+      "score": {
+        "scaled": 0.90
+      },
+      "success": true,
+      "completion": true,
+      "duration": "PT1234S"
+    }
+}
