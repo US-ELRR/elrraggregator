@@ -132,6 +132,7 @@ public class LearningRecordUtil {
   private LearningRecord setStatus(
       LearningRecord learningRecord, final Verb verb, final Result result) {
 
+    // If result
     if (result != null) {
 
       Boolean success = result.getSuccess();
@@ -161,8 +162,14 @@ public class LearningRecordUtil {
         }
       }
 
+      // If no result
     } else {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+
+      if (verb.getId() == VerbIdConstants.PASSED_VERB_ID) {
+        learningRecord.setRecordStatus(LearningStatus.PASSED);
+      } else if (verb.getId() == VerbIdConstants.FAILED_VERB_ID) {
+        learningRecord.setRecordStatus(LearningStatus.FAILED);
+      }
     }
 
     return learningRecord;

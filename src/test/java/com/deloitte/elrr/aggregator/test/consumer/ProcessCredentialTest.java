@@ -49,10 +49,11 @@ class ProcessCredentialTest {
   @Test
   void test() {
 
-    File testFile = TestFileUtils.getJsonTestFile("credential");
     Person person = null;
 
     try {
+
+      File testFile = TestFileUtils.getJsonTestFile("credential.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertTrue(stmt != null);

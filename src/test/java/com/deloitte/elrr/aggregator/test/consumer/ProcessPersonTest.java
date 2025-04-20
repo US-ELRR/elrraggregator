@@ -37,10 +37,11 @@ class ProcessPersonTest {
   @Test
   void test() {
 
-    File testFile = TestFileUtils.getJsonTestFile("completed");
     Person person = null;
 
     try {
+
+      File testFile = TestFileUtils.getJsonTestFile("completed.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertTrue(stmt != null);
