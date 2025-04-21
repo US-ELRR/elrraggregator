@@ -67,7 +67,12 @@ class ProcessInitializedTest {
       person = processPerson.processPerson(stmt);
       assertTrue(person != null);
 
-      processInitialized.processRule(person, stmt);
+      boolean fireRule = processInitialized.fireRule(stmt);
+      assertTrue(fireRule);
+
+      if (fireRule) {
+        processInitialized.processRule(person, stmt);
+      }
 
     } catch (IOException e) {
       e.printStackTrace();

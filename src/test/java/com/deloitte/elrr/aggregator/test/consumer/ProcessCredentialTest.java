@@ -61,7 +61,12 @@ class ProcessCredentialTest {
       person = processPerson.processPerson(stmt);
       assertTrue(person != null);
 
-      processCredential.processRule(person, stmt);
+      boolean fireRule = processCredential.fireRule(stmt);
+      assertTrue(fireRule);
+
+      if (fireRule) {
+        processCredential.processRule(person, stmt);
+      }
 
     } catch (IOException e) {
       e.printStackTrace();

@@ -67,7 +67,12 @@ class ProcessFailedTest {
       person = processPerson.processPerson(stmt);
       assertTrue(person != null);
 
-      processFailed.processRule(person, stmt);
+      boolean fireRule = processFailed.fireRule(stmt);
+      assertTrue(fireRule);
+
+      if (fireRule) {
+        processFailed.processRule(person, stmt);
+      }
 
     } catch (IOException e) {
       e.printStackTrace();

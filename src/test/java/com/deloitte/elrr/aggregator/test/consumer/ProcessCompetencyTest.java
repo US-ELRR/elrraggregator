@@ -61,7 +61,12 @@ class ProcessCompetencyTest {
       person = processPerson.processPerson(stmt);
       assertTrue(person != null);
 
-      processCompetency.processRule(person, stmt);
+      boolean fireRule = processCompetency.fireRule(stmt);
+      assertTrue(fireRule);
+
+      if (fireRule) {
+        processCompetency.processRule(person, stmt);
+      }
 
     } catch (IOException e) {
       e.printStackTrace();
