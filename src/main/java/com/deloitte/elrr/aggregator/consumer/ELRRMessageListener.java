@@ -177,7 +177,7 @@ public class ELRRMessageListener {
                 + statement.getVerb().getId()
                 + " Object Type "
                 + objType
-                + "is not recognized.");
+                + " is not recognized.");
       }
 
     } catch (AggregatorException | ClassCastException | PersonNotFoundException e) {

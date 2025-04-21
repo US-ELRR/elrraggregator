@@ -1,5 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +55,10 @@ public class ProcessCredential implements Rule {
 
   @Override
   @Transactional
-  public void processRule(final Person person, final Statement statement) {
+  public Person processRule(final Person person, final Statement statement) {
+
+    Credential credential = null;
+    PersonalCredential personalCredential = null;
 
     try {
 
@@ -62,11 +68,17 @@ public class ProcessCredential implements Rule {
       Activity activity = (Activity) statement.getObject();
 
       // Process Credential
-      Credential credential = processCredential(activity);
+      credential = processCredential(activity);
 
       // Process PersonalCredential
       if (credential != null) {
-        processPersonalCredential(activity, person, credential);
+
+        personalCredential = processPersonalCredential(activity, person, credential);
+
+        Set<PersonalCredential> personalCredentials = new HashSet<PersonalCredential>();
+        personalCredentials.add(personalCredential);
+        person.setCredentials(personalCredentials);
+        person.getCredentials().add(personalCredential);
       }
 
     } catch (AggregatorException
@@ -75,6 +87,8 @@ public class ProcessCredential implements Rule {
         | RuntimeServiceException e) {
       throw e;
     }
+
+    return person;
   }
 
   /**
@@ -84,6 +98,7 @@ public class ProcessCredential implements Rule {
   private Credential processCredential(final Activity activity) {
 
     Credential credential = null;
+    PersonalCredential personalCredential = null;
 
     try {
 

@@ -1,5 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +55,10 @@ public class ProcessCompetency implements Rule {
 
   @Override
   @Transactional
-  public void processRule(final Person person, final Statement statement) {
+  public Person processRule(final Person person, final Statement statement) {
+
+    Competency competency = null;
+    PersonalCompetency personalCompetency;
 
     try {
 
@@ -62,11 +68,17 @@ public class ProcessCompetency implements Rule {
       Activity activity = (Activity) statement.getObject();
 
       // Process Competency
-      Competency competency = processCompetency(activity);
+      competency = processCompetency(activity);
 
       // Process PersonalCompetency
       if (competency != null) {
-        processPersonalCompetency(activity, person, competency);
+
+        personalCompetency = processPersonalCompetency(activity, person, competency);
+
+        Set<PersonalCompetency> personalCompetencies = new HashSet<PersonalCompetency>();
+        personalCompetencies.add(personalCompetency);
+        person.setCompetencies(personalCompetencies);
+        person.getCompetencies().add(personalCompetency);
       }
 
     } catch (AggregatorException
@@ -75,6 +87,8 @@ public class ProcessCompetency implements Rule {
         | RuntimeServiceException e) {
       throw e;
     }
+
+    return person;
   }
 
   /**
@@ -84,6 +98,7 @@ public class ProcessCompetency implements Rule {
   private Competency processCompetency(final Activity activity) {
 
     Competency competency = null;
+    PersonalCompetency personalCompetency = null;
 
     try {
 

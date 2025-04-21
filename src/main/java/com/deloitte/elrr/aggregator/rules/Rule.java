@@ -7,5 +7,5 @@ public interface Rule {
 
   boolean fireRule(Statement statement);
 
-  void processRule(Person person, Statement statement) throws Exception;
+  Person processRule(Person person, Statement statement) throws Exception;
 }
