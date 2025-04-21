@@ -18,12 +18,13 @@ public class LearningResourceUtil {
 
   @Autowired private LangMapUtil langMapUtil;
 
- 
   /**
    * @param activity
    * @return LearningResource
    */
   public LearningResource processLearningResource(final Activity activity) {
+
+    log.info("Process learning resource.");
 
     // Get learningResource
     LearningResource learningResource = learningResourceService.findByIri(activity.getId());
@@ -82,5 +83,4 @@ public class LearningResourceUtil {
 
     return learningResource;
   }
-
 }

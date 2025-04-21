@@ -14,6 +14,7 @@ import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
+import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
 import com.deloitte.elrr.aggregator.rules.ProcessPassed;
 import com.deloitte.elrr.aggregator.rules.VerbIdConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
@@ -42,6 +43,8 @@ public class ELRRMessageListener {
   @Autowired private ProcessPassed processPassed;
 
   @Autowired private ProcessFailed processFailed;
+
+  @Autowired private ProcessInitialized processInitialized;
 
   @Autowired KafkaTemplate<?, String> kafkaTemplate;
 
@@ -92,6 +95,7 @@ public class ELRRMessageListener {
     boolean fireCredentialRule = false;
     boolean firePassedRule = false;
     boolean fireFailedRule = false;
+    boolean fireInitializedRule = false;
 
     try {
 
@@ -106,13 +110,15 @@ public class ELRRMessageListener {
       fireCredentialRule = processCredential.fireRule(statement);
       firePassedRule = processPassed.fireRule(statement);
       fireFailedRule = processFailed.fireRule(statement);
+      fireInitializedRule = processInitialized.fireRule(statement);
 
       // If completed, achieved competency, achieved credential, passed  or failed
       if (fireCompletedRule
           || fireCompetencyRule
           || fireCredentialRule
           || firePassedRule
-          || fireFailedRule) {
+          || fireFailedRule
+          || fireInitializedRule) {
 
         log.info("Process verb " + statement.getVerb().getId());
 
@@ -155,6 +161,13 @@ public class ELRRMessageListener {
 
           // Process rule
           processFailed.processRule(person, statement);
+
+          // If initialized
+        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID)
+            && fireInitializedRule) {
+
+          // Process rule
+          processInitialized.processRule(person, statement);
         }
 
       } else {

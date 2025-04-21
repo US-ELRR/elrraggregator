@@ -42,6 +42,8 @@ public class LearningRecordUtil {
 
     try {
 
+      log.info("Process learning record.");
+
       // Get LearningRecord
       learningRecord =
           learningRecordService.findByPersonIdAndLearningResourceId(
@@ -81,11 +83,7 @@ public class LearningRecordUtil {
     log.info("Creating new learning record.");
     LearningRecord learningRecord = new LearningRecord();
 
-    if (result != null) {
-      learningRecord = setStatus(learningRecord, verb, result);
-    } else {
-      learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
-    }
+    learningRecord = setStatus(learningRecord, verb, result);
 
     learningRecord.setLearningResource(learningResource);
     learningRecord.setPerson(person);
@@ -140,16 +138,30 @@ public class LearningRecordUtil {
 
       // status
       if (verb.getId() == VerbIdConstants.PASSED_VERB_ID) {
+
         learningRecord.setRecordStatus(LearningStatus.PASSED);
+
       } else if (verb.getId() == VerbIdConstants.FAILED_VERB_ID) {
+
         learningRecord.setRecordStatus(LearningStatus.FAILED);
+
+      } else if (verb.getId() == VerbIdConstants.INITIALIZED_VERB_ID) {
+
+        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+
       } else if (completed && success == null) {
+
         learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+
       } else if (completed && success) {
+
         learningRecord.setRecordStatus(LearningStatus.PASSED);
+
       } else if (completed && !success) {
         learningRecord.setRecordStatus(LearningStatus.FAILED);
+
       } else {
+
         learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
       }
 
@@ -166,9 +178,20 @@ public class LearningRecordUtil {
     } else {
 
       if (verb.getId() == VerbIdConstants.PASSED_VERB_ID) {
+
         learningRecord.setRecordStatus(LearningStatus.PASSED);
+
       } else if (verb.getId() == VerbIdConstants.FAILED_VERB_ID) {
+
         learningRecord.setRecordStatus(LearningStatus.FAILED);
+
+      } else if (verb.getId() == VerbIdConstants.INITIALIZED_VERB_ID) {
+
+        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
+
+      } else {
+
+        learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
       }
     }
 

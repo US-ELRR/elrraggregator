@@ -1,0 +1,27 @@
+{
+    "id": "9ded3322-e1a5-411a-a67d-6a735c76f119",
+    "timestamp": "2016-12-18T12:17:00+00:00",
+    "actor": {
+        "objectType": "Agent",
+        "name": "Robert Engle",
+        "mbox": "mailto:engle.learner@adlnet.gov"
+    },
+    "verb": {
+        "id": "http://adlnet.gov/expapi/verbs/initialized",
+        "display": {
+            "en-US": "initialized"
+        }
+    },
+    "object": {
+        "id": "http://adlnet.gov/expapi/activities/example10",
+        "definition": {
+            "name": {
+                "en-US": "Example Activity 10"
+            },
+            "description": {
+                "en-US": "Example activity 10 description"
+            }
+        },
+        "objectType": "Activity"
+    }
+}
