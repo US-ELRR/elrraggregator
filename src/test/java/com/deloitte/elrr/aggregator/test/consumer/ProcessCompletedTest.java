@@ -71,7 +71,8 @@ class ProcessCompletedTest {
       assertTrue(fireRule);
 
       if (fireRule) {
-        processCompleted.processRule(person, stmt);
+        Person personResult = processCompleted.processRule(person, stmt);
+        assertTrue(personResult.getName().equalsIgnoreCase("test"));
       }
 
     } catch (IOException e) {

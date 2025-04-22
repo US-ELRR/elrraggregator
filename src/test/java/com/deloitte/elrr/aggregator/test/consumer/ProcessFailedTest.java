@@ -71,7 +71,8 @@ class ProcessFailedTest {
       assertTrue(fireRule);
 
       if (fireRule) {
-        processFailed.processRule(person, stmt);
+        person = processFailed.processRule(person, stmt);
+        assertTrue(person.getName().equalsIgnoreCase("Example Learner"));
       }
 
     } catch (IOException e) {

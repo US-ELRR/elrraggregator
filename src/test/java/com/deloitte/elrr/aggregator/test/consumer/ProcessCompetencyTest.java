@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +67,10 @@ class ProcessCompetencyTest {
       assertTrue(fireRule);
 
       if (fireRule) {
-        processCompetency.processRule(person, stmt);
+        Person personResult = processCompetency.processRule(person, stmt);
+        Set competancies = new HashSet();
+        competancies = personResult.getCompetencies();
+        assertTrue(competancies != null && !competancies.isEmpty());
       }
 
     } catch (IOException e) {

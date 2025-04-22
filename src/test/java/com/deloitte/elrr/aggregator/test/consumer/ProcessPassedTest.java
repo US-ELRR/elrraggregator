@@ -72,6 +72,7 @@ class ProcessPassedTest {
 
       if (fireRule) {
         processPassed.processRule(person, stmt);
+        assertTrue(person.getName().equalsIgnoreCase("Tom Brady"));
       }
 
     } catch (IOException e) {

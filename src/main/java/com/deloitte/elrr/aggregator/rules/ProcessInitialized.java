@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,9 +62,7 @@ public class ProcessInitialized implements Rule {
             learningRecordUtil.processLearningRecord(
                 activity, person, statement.getVerb(), statement.getResult(), learningResource);
 
-        Set<LearningRecord> learningRecords = new HashSet<LearningRecord>();
-        learningRecords.add(learningRecord);
-        person.setLearningRecords(learningRecords);
+        person.setLearningRecords(new HashSet<LearningRecord>());
         person.getLearningRecords().add(learningRecord);
       }
 
