@@ -72,6 +72,7 @@ class ProcessInitializedTest {
 
       if (fireRule) {
         processInitialized.processRule(person, stmt);
+        assertTrue(person.getName().equalsIgnoreCase("Robert Engle"));
       }
 
     } catch (IOException e) {
