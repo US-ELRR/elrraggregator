@@ -52,12 +52,12 @@ public class LearningRecordUtil {
       // If LearningRecord doesn't exist
       if (learningRecord == null) {
 
-        createLearningRecord(person, learningResource, verb, result);
+        learningRecord = createLearningRecord(person, learningResource, verb, result);
 
         // If learningRecord already exists
       } else {
 
-        updateLearningRecord(learningRecord, verb, result);
+        learningRecord = updateLearningRecord(learningRecord, verb, result);
       }
 
     } catch (RuntimeServiceException e) {

@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.test.consumer;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
@@ -48,7 +49,7 @@ class ProcessPersonTest {
       File testFile = TestFileUtils.getJsonTestFile("completed.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertTrue(stmt != null);
+      assertNotNull(stmt);
 
       Email email = new Email();
       email.setId(UUID.randomUUID());
@@ -70,8 +71,8 @@ class ProcessPersonTest {
       Mockito.doReturn(identity).when(identitySvc).getByIfi("mbox::mailto:test@gmail.com");
 
       person = processPerson.processPerson(stmt);
-      assertTrue(person != null);
-      assertTrue(person.getName().equalsIgnoreCase("test"));
+      assertNotNull(person);
+      assertEquals(person.getName(), "test");
 
     } catch (IOException e) {
       e.printStackTrace();

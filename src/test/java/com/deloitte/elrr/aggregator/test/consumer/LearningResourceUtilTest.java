@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.test.consumer;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,19 +42,16 @@ class LearningResourceUtilTest {
       File testFile = TestFileUtils.getJsonTestFile("completed.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertTrue(stmt != null);
+      assertNotNull(stmt);
 
       Activity activity = (Activity) stmt.getObject();
-      assertTrue(activity != null);
+      assertNotNull(activity);
 
       LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
-      assertTrue(learningResource != null);
-      assertTrue(
-          learningResource
-              .getIri()
-              .equalsIgnoreCase("http://example.edlm/activities/activityTest"));
-      assertTrue(learningResource.getTitle().equalsIgnoreCase("Activity 1"));
-      assertTrue(learningResource.getDescription().equalsIgnoreCase("Example Activity Test"));
+      assertNotNull(learningResource);
+      assertEquals(learningResource.getIri(), "http://example.edlm/activities/activityTest");
+      assertEquals(learningResource.getTitle(), "Activity 1");
+      assertEquals(learningResource.getDescription(), "Example Activity Test");
 
     } catch (IOException e) {
       e.printStackTrace();

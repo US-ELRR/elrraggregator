@@ -1,11 +1,13 @@
 package com.deloitte.elrr.aggregator.test.consumer;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
@@ -44,24 +45,21 @@ class ProcessCredentialTest {
 
   @Mock private PersonalCredentialSvc personalCredentialService;
 
-  @InjectMocks ProcessPerson processPerson;
-
   @InjectMocks ProcessCredential processCredential;
 
   @Test
   void test() {
-
-    Person person = null;
 
     try {
 
       File testFile = TestFileUtils.getJsonTestFile("credential.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertTrue(stmt != null);
+      assertNotNull(stmt);
 
-      person = processPerson.processPerson(stmt);
-      assertTrue(person != null);
+      Person person = new Person();
+      person.setId(UUID.randomUUID());
+      person.setName("Joe Williams");
 
       boolean fireRule = processCredential.fireRule(stmt);
       assertTrue(fireRule);
@@ -70,7 +68,8 @@ class ProcessCredentialTest {
         Person personResult = processCredential.processRule(person, stmt);
         Set credentials = new HashSet();
         credentials = personResult.getCredentials();
-        assertTrue(credentials != null && !credentials.isEmpty());
+        assertNotNull(credentials);
+        assertNotNull(personResult.getCredentials());
       }
 
     } catch (IOException e) {

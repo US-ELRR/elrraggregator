@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,9 +74,7 @@ public class ProcessCompetency implements Rule {
 
         personalCompetency = processPersonalCompetency(activity, person, competency);
 
-        Set<PersonalCompetency> personalCompetencies = new HashSet<PersonalCompetency>();
-        personalCompetencies.add(personalCompetency);
-        person.setCompetencies(personalCompetencies);
+        person.setCompetencies(new HashSet<PersonalCompetency>());
         person.getCompetencies().add(personalCompetency);
       }
 

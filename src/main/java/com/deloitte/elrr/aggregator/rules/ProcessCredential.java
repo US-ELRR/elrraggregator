@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,9 +74,7 @@ public class ProcessCredential implements Rule {
 
         personalCredential = processPersonalCredential(activity, person, credential);
 
-        Set<PersonalCredential> personalCredentials = new HashSet<PersonalCredential>();
-        personalCredentials.add(personalCredential);
-        person.setCredentials(personalCredentials);
+        person.setCredentials(new HashSet<PersonalCredential>());
         person.getCredentials().add(personalCredential);
       }
 
