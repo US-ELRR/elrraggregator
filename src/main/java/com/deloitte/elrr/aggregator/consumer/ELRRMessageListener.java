@@ -9,14 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.rules.ObjectTypeConstants;
 import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
 import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
 import com.deloitte.elrr.aggregator.rules.ProcessPassed;
-import com.deloitte.elrr.aggregator.rules.VerbIdConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -32,186 +30,157 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-  @Autowired private ProcessCompleted processCompleted;
+	@Autowired
+	private ProcessCompleted processCompleted;
 
-  @Autowired private ProcessCompetency processCompetency;
+	@Autowired
+	private ProcessCompetency processCompetency;
 
-  @Autowired private ProcessCredential processCredential;
+	@Autowired
+	private ProcessCredential processCredential;
 
-  @Autowired private ProcessPerson processPerson;
+	@Autowired
+	private ProcessPerson processPerson;
 
-  @Autowired private ProcessPassed processPassed;
+	@Autowired
+	private ProcessPassed processPassed;
 
-  @Autowired private ProcessFailed processFailed;
+	@Autowired
+	private ProcessFailed processFailed;
 
-  @Autowired private ProcessInitialized processInitialized;
+	@Autowired
+	private ProcessInitialized processInitialized;
 
-  @Autowired KafkaTemplate<?, String> kafkaTemplate;
+	@Autowired
+	KafkaTemplate<?, String> kafkaTemplate;
 
-  @Value("${kafka.dead.letter.topic}")
-  private String deadLetterTopic;
+	@Value("${kafka.dead.letter.topic}")
+	private String deadLetterTopic;
 
-  /**
-   * @param message
-   */
-  @Transactional
-  @KafkaListener(topics = "${kafka.topic}")
-  public void listen(final String message) {
+	/**
+	 * @param message
+	 */
+	@Transactional
+	@KafkaListener(topics = "${kafka.topic}")
+	public void listen(final String message) {
 
-    log.info(
-        "\n\n ===============Received Messasge in group - group-id=============== \n" + message);
+		log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
-    try {
+		try {
 
-      if (InputSanitizer.isValidInput(message)) {
-        processMessage(message);
-      } else {
-        log.error("Invalid message did not pass whitelist check - " + message);
-        // Send to dead letter queue
-        kafkaTemplate.send(deadLetterTopic, message);
-      }
+			if (InputSanitizer.isValidInput(message)) {
+				processMessage(message);
+			} else {
+				log.error("Invalid message did not pass whitelist check - " + message);
+				// Send to dead letter queue
+				kafkaTemplate.send(deadLetterTopic, message);
+			}
 
-    } catch (AggregatorException e) {
-      // Send to dead letter queue
-      kafkaTemplate.send(deadLetterTopic, message);
-      throw e;
-    }
-  }
+		} catch (AggregatorException e) {
+			// Send to dead letter queue
+			kafkaTemplate.send(deadLetterTopic, message);
+			throw e;
+		}
+	}
 
-  /**
-   * @param statement
-   * @throws AggregatorException
-   */
-  @Transactional
-  private void processMessage(final String payload) {
+	/**
+	 * @param statement
+	 * @throws AggregatorException
+	 */
+	@Transactional
+	private void processMessage(final String payload) {
 
-    log.info(" \n\n ===============Process Kafka message===============");
+		log.info(" \n\n ===============Process Kafka message===============");
 
-    Statement statement = null;
-    Person person = null;
+		Statement statement = null;
+		Person person = null;
 
-    boolean fireCompletedRule = false;
-    boolean fireCompetencyRule = false;
-    boolean fireCredentialRule = false;
-    boolean firePassedRule = false;
-    boolean fireFailedRule = false;
-    boolean fireInitializedRule = false;
+		try {
 
-    try {
+			// Get Statement
+			statement = getStatement(payload);
 
-      // Get Statement
-      statement = getStatement(payload);
+			Activity obj = (Activity) statement.getObject();
+			String objType = obj.getDefinition().getType();
 
-      Activity obj = (Activity) statement.getObject();
-      String objType = obj.getDefinition().getType();
+			log.info("Process verb " + statement.getVerb().getId());
 
-      fireCompletedRule = processCompleted.fireRule(statement);
-      fireCompetencyRule = processCompetency.fireRule(statement);
-      fireCredentialRule = processCredential.fireRule(statement);
-      firePassedRule = processPassed.fireRule(statement);
-      fireFailedRule = processFailed.fireRule(statement);
-      fireInitializedRule = processInitialized.fireRule(statement);
+			// Process Person
+			person = processPerson.processPerson(statement);
 
-      // If completed, achieved competency, achieved credential, passed  or failed
-      if (fireCompletedRule
-          || fireCompetencyRule
-          || fireCredentialRule
-          || firePassedRule
-          || fireFailedRule
-          || fireInitializedRule) {
+			// If completed
+			if (processCompleted.fireRule(statement)) {
 
-        log.info("Process verb " + statement.getVerb().getId());
+				// Process rule
+				processCompleted.processRule(person, statement);
 
-        // Process Person
-        person = processPerson.processPerson(statement);
+				// If achieved competency
+			} else if (processCompetency.fireRule(statement)) {
 
-        // If completed
-        if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
-            && fireCompletedRule) {
+				// Process rule
+				processCompetency.processRule(person, statement);
 
-          // Process rule
-          processCompleted.processRule(person, statement);
+				// If achieved credential
+			} else if (processCredential.fireRule(statement)) {
 
-          // If achieved competency
-        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-            && objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)
-            && fireCompetencyRule) {
+				// Process rule
+				processCredential.processRule(person, statement);
 
-          // Process rule
-          processCompetency.processRule(person, statement);
+				// If passed
+			} else if (processPassed.fireRule(statement)) {
 
-          // If achieved credential
-        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-            && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)
-            && fireCredentialRule) {
+				// Process rule
+				processPassed.processRule(person, statement);
 
-          // Process rule
-          processCredential.processRule(person, statement);
+				// If failed
+			} else if (processFailed.fireRule(statement)) {
 
-          // If passed
-        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)
-            && firePassedRule) {
+				// Process rule
+				processFailed.processRule(person, statement);
 
-          // Process rule
-          processPassed.processRule(person, statement);
+				// If initialized
+			} else if (processInitialized.fireRule(statement)) {
 
-          // If failed
-        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)
-            && fireFailedRule) {
+				// Process rule
+				processInitialized.processRule(person, statement);
 
-          // Process rule
-          processFailed.processRule(person, statement);
+			} else {
 
-          // If initialized
-        } else if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID)
-            && fireInitializedRule) {
+				log.info("Verb " + statement.getVerb().getId() + " Object Type " + objType + " is not recognized.");
+			}
 
-          // Process rule
-          processInitialized.processRule(person, statement);
-        }
+		} catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
+			log.error("Error processing Kafka message - " + e.getMessage());
+			e.printStackTrace();
+			throw e;
 
-      } else {
+		} catch (JsonProcessingException e) {
+			log.error("Error processing Kafka message - " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 
-        log.info(
-            "Verb "
-                + statement.getVerb().getId()
-                + " Object Type "
-                + objType
-                + " is not recognized.");
-      }
+	/**
+	 * @param payload
+	 * @return Statement
+	 */
+	public Statement getStatement(final String payload) throws JsonProcessingException {
 
-    } catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
-      log.error("Error processing Kafka message - " + e.getMessage());
-      e.printStackTrace();
-      throw e;
+		Statement statement = null;
+		ObjectMapper mapper = Mapper.getMapper();
+		MessageVO messageVo;
 
-    } catch (JsonProcessingException e) {
-      log.error("Error processing Kafka message - " + e.getMessage());
-      e.printStackTrace();
-    }
-  }
+		try {
 
-  /**
-   * @param payload
-   * @return Statement
-   */
-  public Statement getStatement(final String payload) throws JsonProcessingException {
+			messageVo = mapper.readValue(payload, MessageVO.class);
+			statement = messageVo.getStatement();
 
-    Statement statement = null;
-    ObjectMapper mapper = Mapper.getMapper();
-    MessageVO messageVo;
+		} catch (JsonProcessingException e) {
+			log.error("Error getting statement - " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-    try {
-
-      messageVo = mapper.readValue(payload, MessageVO.class);
-      statement = messageVo.getStatement();
-
-    } catch (JsonProcessingException e) {
-      log.error("Error getting statement - " + e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
-
-    return statement;
-  }
+		return statement;
+	}
 }

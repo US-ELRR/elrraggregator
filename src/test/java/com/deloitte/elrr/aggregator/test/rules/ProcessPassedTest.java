@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.consumer;
+package com.deloitte.elrr.aggregator.test.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.rules.ProcessFailed;
+import com.deloitte.elrr.aggregator.rules.ProcessPassed;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
@@ -35,32 +35,22 @@ import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ProcessFailedTest {
-
-  @Mock private EmailSvc emailSvc;
-
-  @Mock private IdentitySvc identitySvc;
-
-  @Mock private PersonSvc personSvc;
+class ProcessPassedTest {
 
   @Mock private LangMapUtil langMapUtil;
-
-  @Mock LearningResourceSvc learningResourceSvc;
-
-  @Mock LearningRecordSvc learningRecordSvc;
 
   @Mock LearningResourceUtil learningResourceUtil;
 
   @Mock LearningRecordUtil learningRecordUtil;
 
-  @InjectMocks ProcessFailed processFailed;
+  @InjectMocks ProcessPassed processPassed;
 
   @Test
   void test() {
 
     try {
 
-      File testFile = TestFileUtils.getJsonTestFile("failed.json");
+      File testFile = TestFileUtils.getJsonTestFile("passed.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
@@ -81,11 +71,11 @@ class ProcessFailedTest {
       identity.setId(identityUUID);
       identity.setMbox("mailto:test@gmail.com");
 
-      boolean fireRule = processFailed.fireRule(stmt);
+      boolean fireRule = processPassed.fireRule(stmt);
       assertTrue(fireRule);
 
       if (fireRule) {
-        person = processFailed.processRule(person, stmt);
+        processPassed.processRule(person, stmt);
         assertEquals(person.getName(), "test");
       }
 

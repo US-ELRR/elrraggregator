@@ -22,57 +22,55 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessPassed implements Rule {
 
-  @Autowired LearningResourceUtil learningResourceUtil;
+	@Autowired
+	LearningResourceUtil learningResourceUtil;
 
-  @Autowired LearningRecordUtil learningRecordUtil;
+	@Autowired
+	LearningRecordUtil learningRecordUtil;
 
-  @Override
-  public boolean fireRule(final Statement statement) {
+	@Override
+	public boolean fireRule(final Statement statement) {
 
-    // Is Verb Id = passed and object = activity
-    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)
-        && statement.getObject() instanceof Activity) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+		// Is Verb Id = passed and object = activity
+		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)
+				&& statement.getObject() instanceof Activity);
 
-  @Override
-  @Transactional
-  public Person processRule(final Person person, final Statement statement) {
+	}
 
-    LearningResource learningResource = null;
-    LearningRecord learningRecord = null;
+	@Override
+	@Transactional
+	public Person processRule(final Person person, final Statement statement) {
 
-    try {
+		LearningResource learningResource = null;
+		LearningRecord learningRecord = null;
 
-      log.info("Process activity passed");
+		try {
 
-      // Get Activity
-      Activity activity = (Activity) statement.getObject();
+			log.info("Process activity passed");
 
-      // Process LearningResource
-      learningResource = learningResourceUtil.processLearningResource(activity);
+			// Get Activity
+			Activity activity = (Activity) statement.getObject();
 
-      // Process LearningRecord
-      if (learningResource != null) {
+			// Process LearningResource
+			learningResource = learningResourceUtil.processLearningResource(activity);
 
-        learningRecord =
-            learningRecordUtil.processLearningRecord(
-                activity, person, statement.getVerb(), statement.getResult(), learningResource);
+			// Process LearningRecord
+			if (learningResource != null) {
 
-        person.setLearningRecords(new HashSet<LearningRecord>());
-        person.getLearningRecords().add(learningRecord);
-      }
+				learningRecord = learningRecordUtil.processLearningRecord(activity, person, statement.getVerb(),
+						statement.getResult(), learningResource);
 
-    } catch (AggregatorException
-        | ClassCastException
-        | NullPointerException
-        | RuntimeServiceException e) {
-      throw e;
-    }
+				if (person.getLearningRecords() == null) {
+					person.setLearningRecords(new HashSet<LearningRecord>());
+				}
 
-    return person;
-  }
+				person.getLearningRecords().add(learningRecord);
+			}
+
+		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+			throw e;
+		}
+
+		return person;
+	}
 }

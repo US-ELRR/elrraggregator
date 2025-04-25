@@ -23,239 +23,223 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessCredential implements Rule {
 
-  @Autowired private CredentialSvc credentialService;
+	@Autowired
+	private CredentialSvc credentialService;
 
-  @Autowired private PersonalCredentialSvc personalCredentialService;
+	@Autowired
+	private PersonalCredentialSvc personalCredentialService;
 
-  @Autowired private LangMapUtil langMapUtil;
+	@Autowired
+	private LangMapUtil langMapUtil;
 
-  @Override
-  public boolean fireRule(final Statement statement) {
+	@Override
+	public boolean fireRule(final Statement statement) {
 
-    Boolean fireRule = false;
+		// Is Verb Id = achieved and object = activity
+		Activity obj = (Activity) statement.getObject();
+		String objType = obj.getDefinition().getType();
 
-    // Is Verb Id = achieved and object = activity
-    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-        && statement.getObject() instanceof Activity) {
+		// Is Verb Id = achieved, object = activity and object type = competency
+		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+				&& statement.getObject() instanceof Activity && objType != null
+				&& objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
-      Activity obj = (Activity) statement.getObject();
-      String objType = obj.getDefinition().getType();
+	}
 
-      // If no object type
-      if (objType == null) {
-        fireRule = false;
-        // If object type = credential
-      } else if (objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL)) {
-        fireRule = true;
-      }
-    }
-    return fireRule;
-  }
+	@Override
+	@Transactional
+	public Person processRule(final Person person, final Statement statement) {
 
-  @Override
-  @Transactional
-  public Person processRule(final Person person, final Statement statement) {
+		Credential credential = null;
+		PersonalCredential personalCredential = null;
 
-    Credential credential = null;
-    PersonalCredential personalCredential = null;
+		try {
 
-    try {
+			log.info("Process credential.");
 
-      log.info("Process credential.");
+			// Get Activity
+			Activity activity = (Activity) statement.getObject();
 
-      // Get Activity
-      Activity activity = (Activity) statement.getObject();
+			// Process Credential
+			credential = processCredential(activity);
 
-      // Process Credential
-      credential = processCredential(activity);
+			// Process PersonalCredential
+			if (credential != null) {
 
-      // Process PersonalCredential
-      if (credential != null) {
+				personalCredential = processPersonalCredential(activity, person, credential);
 
-        personalCredential = processPersonalCredential(activity, person, credential);
+				if (person.getCredentials() == null) {
+					person.setCredentials(new HashSet<PersonalCredential>());
+				}
 
-        person.setCredentials(new HashSet<PersonalCredential>());
-        person.getCredentials().add(personalCredential);
-      }
+				person.getCredentials().add(personalCredential);
+			}
 
-    } catch (AggregatorException
-        | ClassCastException
-        | NullPointerException
-        | RuntimeServiceException e) {
-      throw e;
-    }
+		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+			throw e;
+		}
 
-    return person;
-  }
+		return person;
+	}
 
-  /**
-   * @param statement
-   * @return credential
-   */
-  private Credential processCredential(final Activity activity) {
+	/**
+	 * @param statement
+	 * @return credential
+	 */
+	private Credential processCredential(final Activity activity) {
 
-    Credential credential = null;
-    PersonalCredential personalCredential = null;
+		Credential credential = null;
+		PersonalCredential personalCredential = null;
 
-    try {
+		try {
 
-      // Get credential
-      credential = credentialService.findByIdentifier(activity.getId());
+			// Get credential
+			credential = credentialService.findByIdentifier(activity.getId());
 
-      // If credential doesn't exist
-      if (credential == null) {
+			// If credential doesn't exist
+			if (credential == null) {
 
-        credential = createCredential(activity);
+				credential = createCredential(activity);
 
-      } else {
+			} else {
 
-        log.info("Credential " + activity.getId() + " exists.");
-        credential = updateCredential(credential, activity);
-      }
+				log.info("Credential " + activity.getId() + " exists.");
+				credential = updateCredential(credential, activity);
+			}
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 
-      log.error("Error processing competency - " + e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+			log.error("Error processing competency - " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-    return credential;
-  }
+		return credential;
+	}
 
-  /**
-   * @param activity
-   * @return credential
-   */
-  private Credential createCredential(final Activity activity) {
+	/**
+	 * @param activity
+	 * @return credential
+	 */
+	private Credential createCredential(final Activity activity) {
 
-    log.info("Creating new credential.");
+		log.info("Creating new credential.");
 
-    Credential credential = null;
-    String activityName = "";
-    String activityDescription = "";
+		Credential credential = null;
+		String activityName = "";
+		String activityDescription = "";
 
-    try {
+		try {
 
-      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-      credential = new Credential();
-      credential.setIdentifier(activity.getId());
-      credential.setFrameworkTitle(activityName);
-      credential.setFrameworkDescription(activityDescription);
-      credentialService.save(credential);
-      log.info("Credential " + activity.getId() + " created.");
+			credential = new Credential();
+			credential.setIdentifier(activity.getId());
+			credential.setFrameworkTitle(activityName);
+			credential.setFrameworkDescription(activityDescription);
+			credentialService.save(credential);
+			log.info("Credential " + activity.getId() + " created.");
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
-      log.error(e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+		} catch (AggregatorException | ClassCastException | NullPointerException e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-    return credential;
-  }
+		return credential;
+	}
 
-  /**
-   * @param activity
-   * @return credential
-   */
-  private Credential updateCredential(Credential credential, final Activity activity) {
+	/**
+	 * @param activity
+	 * @return credential
+	 */
+	private Credential updateCredential(Credential credential, final Activity activity) {
 
-    log.info("Updating credential.");
+		log.info("Updating credential.");
 
-    String activityName = "";
-    String activityDescription = "";
-    try {
+		String activityName = "";
+		String activityDescription = "";
+		try {
 
-      activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-      credential.setFrameworkTitle(activityName);
-      credential.setFrameworkDescription(activityDescription);
-      credentialService.update(credential);
-      log.info("Credential " + activity.getId() + " updated.");
+			credential.setFrameworkTitle(activityName);
+			credential.setFrameworkDescription(activityDescription);
+			credentialService.update(credential);
+			log.info("Credential " + activity.getId() + " updated.");
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
-      log.error(e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+		} catch (AggregatorException | ClassCastException | NullPointerException e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-    return credential;
-  }
+		return credential;
+	}
 
-  /**
-   * @param Activity
-   * @param Person
-   * @param Credential
-   * @return PersonalCredential
-   */
-  private PersonalCredential processPersonalCredential(
-      final Activity activity, final Person person, final Credential credential) {
+	/**
+	 * @param Activity
+	 * @param Person
+	 * @param Credential
+	 * @return PersonalCredential
+	 */
+	private PersonalCredential processPersonalCredential(final Activity activity, final Person person,
+			final Credential credential) {
 
-    // Get PersonalCredential
-    PersonalCredential personalCredential =
-        personalCredentialService.findByPersonIdAndCredentialId(person.getId(), credential.getId());
+		// Get PersonalCredential
+		PersonalCredential personalCredential = personalCredentialService.findByPersonIdAndCredentialId(person.getId(),
+				credential.getId());
 
-    // If PersonalCredential doesn't exist
-    if (personalCredential == null) {
+		// If PersonalCredential doesn't exist
+		if (personalCredential == null) {
 
-      createPersonalCredential(person, credential);
+			createPersonalCredential(person, credential);
 
-    } else {
+		} else {
 
-      updatePersonalCredential(personalCredential, person, credential);
-    }
+			updatePersonalCredential(personalCredential, person, credential);
+		}
 
-    return personalCredential;
-  }
+		return personalCredential;
+	}
 
-  /**
-   * @param Person
-   * @param Credential
-   * @return PersonalCredential
-   */
-  private PersonalCredential createPersonalCredential(
-      final Person person, final Credential credential) {
+	/**
+	 * @param Person
+	 * @param Credential
+	 * @return PersonalCredential
+	 */
+	private PersonalCredential createPersonalCredential(final Person person, final Credential credential) {
 
-    log.info("Creating new personal credential record.");
-    PersonalCredential personalCredential = new PersonalCredential();
+		log.info("Creating new personal credential record.");
+		PersonalCredential personalCredential = new PersonalCredential();
 
-    personalCredential.setPerson(person);
-    personalCredential.setCredential(credential);
-    personalCredential.setHasRecord(true);
-    personalCredentialService.save(personalCredential);
+		personalCredential.setPerson(person);
+		personalCredential.setCredential(credential);
+		personalCredential.setHasRecord(true);
+		personalCredentialService.save(personalCredential);
 
-    log.info(
-        "Personal Credential for "
-            + person.getName()
-            + " - "
-            + credential.getFrameworkTitle()
-            + " created.");
+		log.info("Personal Credential for " + person.getName() + " - " + credential.getFrameworkTitle() + " created.");
 
-    return personalCredential;
-  }
+		return personalCredential;
+	}
 
-  private PersonalCredential updatePersonalCredential(
-      PersonalCredential personalCredential, final Person person, final Credential credential) {
+	private PersonalCredential updatePersonalCredential(PersonalCredential personalCredential, final Person person,
+			final Credential credential) {
 
-    try {
+		try {
 
-      // TO DO
-      personalCredentialService.update(personalCredential);
+			// TO DO
+			personalCredentialService.update(personalCredential);
 
-      log.info(
-          "Personal Credential for "
-              + person.getName()
-              + " - "
-              + credential.getFrameworkTitle()
-              + " updated.");
+			log.info("Personal Credential for " + person.getName() + " - " + credential.getFrameworkTitle()
+					+ " updated.");
 
-    } catch (RuntimeServiceException e) {
-      throw e;
-    }
+		} catch (RuntimeServiceException e) {
+			throw e;
+		}
 
-    return personalCredential;
-  }
+		return personalCredential;
+	}
 }

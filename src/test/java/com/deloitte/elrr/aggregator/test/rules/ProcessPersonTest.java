@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.consumer;
+package com.deloitte.elrr.aggregator.test.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
