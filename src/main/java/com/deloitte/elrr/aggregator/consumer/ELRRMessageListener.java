@@ -1,5 +1,8 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +18,7 @@ import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
 import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
 import com.deloitte.elrr.aggregator.rules.ProcessPassed;
+import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -100,54 +104,31 @@ public class ELRRMessageListener {
 			// Get Statement
 			statement = getStatement(payload);
 
-			Activity obj = (Activity) statement.getObject();
-			String objType = obj.getDefinition().getType();
-
 			log.info("Process verb " + statement.getVerb().getId());
 
-			// Process Person
-			person = processPerson.processPerson(statement);
+			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
+					processInitialized, processPassed);
 
-			// If completed
-			if (processCompleted.fireRule(statement)) {
+			for (Rule rule : classList) {
 
-				// Process rule
-				processCompleted.processRule(person, statement);
+				log.info("Process verb " + statement.getVerb().getId());
 
-				// If achieved competency
-			} else if (processCompetency.fireRule(statement)) {
+				if (rule.fireRule(statement)) {
 
-				// Process rule
-				processCompetency.processRule(person, statement);
-
-				// If achieved credential
-			} else if (processCredential.fireRule(statement)) {
-
-				// Process rule
-				processCredential.processRule(person, statement);
-
-				// If passed
-			} else if (processPassed.fireRule(statement)) {
-
-				// Process rule
-				processPassed.processRule(person, statement);
-
-				// If failed
-			} else if (processFailed.fireRule(statement)) {
-
-				// Process rule
-				processFailed.processRule(person, statement);
-
-				// If initialized
-			} else if (processInitialized.fireRule(statement)) {
-
-				// Process rule
-				processInitialized.processRule(person, statement);
-
-			} else {
-
-				log.info("Verb " + statement.getVerb().getId() + " Object Type " + objType + " is not recognized.");
+					try {
+						
+						// Process Person
+						person = processPerson.processPerson(statement);
+						
+						// Process Rule
+						rule.processRule(person, statement);
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
+
 
 		} catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
 			log.error("Error processing Kafka message - " + e.getMessage());
