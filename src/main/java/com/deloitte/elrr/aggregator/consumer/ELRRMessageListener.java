@@ -106,6 +106,9 @@ public class ELRRMessageListener {
 
 			log.info("Process verb " + statement.getVerb().getId());
 
+			// Process Person
+			person = processPerson.processPerson(statement);
+
 			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
 					processInitialized, processPassed);
 
@@ -116,9 +119,6 @@ public class ELRRMessageListener {
 				if (rule.fireRule(statement)) {
 
 					try {
-						
-						// Process Person
-						person = processPerson.processPerson(statement);
 						
 						// Process Rule
 						rule.processRule(person, statement);
