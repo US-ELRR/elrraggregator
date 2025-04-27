@@ -111,7 +111,7 @@ public class ELRRMessageListener {
 			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
 					processInitialized, processPassed);
 
-			for (Rule rule : classList) {
+			outerloop: for (Rule rule : classList) {
 
 				log.info("Process verb " + statement.getVerb().getId());
 
@@ -121,6 +121,7 @@ public class ELRRMessageListener {
 
 						// Process Rule
 						rule.processRule(person, statement);
+						break outerloop;
 
 					} catch (Exception e) {
 						e.printStackTrace();
