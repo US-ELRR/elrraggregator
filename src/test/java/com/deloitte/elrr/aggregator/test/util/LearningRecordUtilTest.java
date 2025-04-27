@@ -156,7 +156,7 @@ class LearningRecordUtilTest {
 			assertNotNull(learningRecord);
 			assertNotNull(learningRecord.getPerson());
 			assertNotNull(learningRecord.getLearningResource());
-			// assertEquals(learningRecord.getRecordStatus(), LearningStatus.FAILED);
+			assertEquals(learningRecord.getRecordStatus(), LearningStatus.FAILED);
 			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT course");
 			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT course.");
 

@@ -12,16 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
-import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
-import com.deloitte.elrr.aggregator.rules.ProcessCredential;
-import com.deloitte.elrr.aggregator.rules.ProcessFailed;
-import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
-import com.deloitte.elrr.aggregator.rules.ProcessPassed;
 import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
@@ -34,25 +29,25 @@ import lombok.extern.slf4j.Slf4j;
 public class ELRRMessageListener {
 
 	@Autowired
-	private ProcessCompleted processCompleted;
+	private Rule processCompleted;
 
 	@Autowired
-	private ProcessCompetency processCompetency;
+	private Rule processCompetency;
 
 	@Autowired
-	private ProcessCredential processCredential;
+	private Rule processCredential;
 
 	@Autowired
 	private ProcessPerson processPerson;
 
 	@Autowired
-	private ProcessPassed processPassed;
+	private Rule processPassed;
 
 	@Autowired
-	private ProcessFailed processFailed;
+	private Rule processFailed;
 
 	@Autowired
-	private ProcessInitialized processInitialized;
+	private Rule processInitialized;
 
 	@Autowired
 	KafkaTemplate<?, String> kafkaTemplate;
@@ -62,10 +57,11 @@ public class ELRRMessageListener {
 
 	/**
 	 * @param message
+	 * @throws JsonProcessingException 
 	 */
 	@Transactional
 	@KafkaListener(topics = "${kafka.topic}")
-	public void listen(final String message) {
+	public void listen(final String message) throws JsonProcessingException {
 
 		log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
@@ -79,7 +75,7 @@ public class ELRRMessageListener {
 				kafkaTemplate.send(deadLetterTopic, message);
 			}
 
-		} catch (AggregatorException e) {
+		} catch (AggregatorException | JsonProcessingException e) {
 			// Send to dead letter queue
 			kafkaTemplate.send(deadLetterTopic, message);
 			throw e;
@@ -88,10 +84,11 @@ public class ELRRMessageListener {
 
 	/**
 	 * @param statement
+	 * @throws JsonProcessingException 
 	 * @throws AggregatorException
 	 */
 	@Transactional
-	private void processMessage(final String payload) {
+	private void processMessage(final String payload) throws JsonProcessingException {
 
 		log.info(" \n\n ===============Process Kafka message===============");
 
@@ -117,26 +114,18 @@ public class ELRRMessageListener {
 
 				if (rule.fireRule(statement)) {
 
-					try {
+					// Process Rule
+					rule.processRule(person, statement);
+					break outerloop;
 
-						// Process Rule
-						rule.processRule(person, statement);
-						break outerloop;
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
 				}
 			}
 
-		} catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
+		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
+				| PersonNotFoundException  |JsonProcessingException e) {
 			log.error("Error processing Kafka message - " + e.getMessage());
-			e.printStackTrace();
 			throw e;
 
-		} catch (JsonProcessingException e) {
-			log.error("Error processing Kafka message - " + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 

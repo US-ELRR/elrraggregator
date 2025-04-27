@@ -145,15 +145,15 @@ public class LearningRecordUtil {
 
 		log.info("Verb = " + verb.getId());
 
-		if (verb.getId() == VerbIdConstants.PASSED_VERB_ID) {
+		if (verb.getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)) {
 
 			return LearningStatus.PASSED;
 
-		} else if (verb.getId() == VerbIdConstants.FAILED_VERB_ID) {
+		} else if (verb.getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)) {
 
 			return LearningStatus.FAILED;
 
-		} else if (verb.getId() == VerbIdConstants.INITIALIZED_VERB_ID) {
+		} else if (verb.getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID)) {
 
 			return LearningStatus.ATTEMPTED;
 		}
@@ -165,20 +165,7 @@ public class LearningRecordUtil {
 		Boolean success = result.getSuccess();
 		Boolean completed = result.getCompletion();
 
-		// status
-		if (verb.getId() == VerbIdConstants.PASSED_VERB_ID) {
-
-			return LearningStatus.PASSED;
-
-		} else if (verb.getId() == VerbIdConstants.FAILED_VERB_ID) {
-
-			return LearningStatus.FAILED;
-
-		} else if (verb.getId() == VerbIdConstants.INITIALIZED_VERB_ID) {
-
-			return LearningStatus.ATTEMPTED;
-
-		} else if (completed && success == null) {
+		if (completed && success == null) {
 
 			return LearningStatus.COMPLETED;
 
