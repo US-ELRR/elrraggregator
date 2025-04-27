@@ -24,7 +24,6 @@ import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -72,11 +71,11 @@ public class ELRRMessageListener {
 
 		try {
 
+			// If valid message process otherwise send to dead letter queue
 			if (InputSanitizer.isValidInput(message)) {
 				processMessage(message);
 			} else {
 				log.error("Invalid message did not pass whitelist check - " + message);
-				// Send to dead letter queue
 				kafkaTemplate.send(deadLetterTopic, message);
 			}
 
@@ -119,16 +118,15 @@ public class ELRRMessageListener {
 				if (rule.fireRule(statement)) {
 
 					try {
-						
+
 						// Process Rule
 						rule.processRule(person, statement);
-						
+
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			}
-
 
 		} catch (AggregatorException | ClassCastException | PersonNotFoundException e) {
 			log.error("Error processing Kafka message - " + e.getMessage());
