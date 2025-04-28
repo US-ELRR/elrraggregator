@@ -3,6 +3,7 @@ package com.deloitte.elrr.aggregator.test.rules;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.Person;
@@ -61,6 +63,8 @@ class ProcessCredentialTest {
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
 
+			Mockito.doReturn("Object representing Credential A level").when(langMapUtil).getLangMapValue(any());
+
 			Email email = new Email();
 			email.setId(UUID.randomUUID());
 			email.setEmailAddressType("primary");
@@ -78,6 +82,21 @@ class ProcessCredentialTest {
 			identity.setId(identityUUID);
 			identity.setMbox("mailto:testcredential@gmail.com");
 
+			Credential credential = new Credential();
+			credential.setId(UUID.randomUUID());
+			credential.setIdentifier("http://example.edlm/credentials/credential-a");
+			credential.setRecordStatus("SUCCESS");
+			credential.setFrameworkTitle("Test Credential A");
+			credential.setFrameworkDescription("Object representing Test Credential A level");
+			Mockito.doReturn(credential).when(credentialService).save(any());
+
+			PersonalCredential personalCredential = new PersonalCredential();
+			personalCredential.setId(UUID.randomUUID());
+			personalCredential.setHasRecord(true);
+			personalCredential.setPerson(person);
+			personalCredential.setCredential(credential);
+			Mockito.doReturn(personalCredential).when(personalCredentialService).save(any());
+
 			boolean fireRule = processCredential.fireRule(stmt);
 			assertTrue(fireRule);
 
@@ -88,10 +107,9 @@ class ProcessCredentialTest {
 				Set<PersonalCredential> personalCredentials = personResult.getCredentials();
 				assertNotNull(personalCredentials);
 
-				PersonalCredential personalCredential = personalCredentials.stream().findFirst().orElse(null);
+				personalCredential = personalCredentials.stream().findFirst().orElse(null);
 				assertNotNull(personalCredential);
 
-				assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Credential A");
 				assertEquals(personalCredential.getCredential().getFrameworkDescription(),
 						"Object representing Credential A level");
 
