@@ -13,6 +13,7 @@ import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCompetency;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
@@ -32,6 +33,11 @@ public class ProcessCompetency implements Rule {
 	@Autowired
 	private LangMapUtil langMapUtil;
 
+	@Autowired
+	PersonSvc personService;
+
+	public static final String COMPLETED = "COMPLETED";
+
 	@Override
 	public boolean fireRule(final Statement statement) {
 
@@ -49,9 +55,6 @@ public class ProcessCompetency implements Rule {
 	@Transactional
 	public Person processRule(final Person person, final Statement statement) {
 
-		Competency competency = null;
-		PersonalCompetency personalCompetency;
-
 		try {
 
 			log.info("Process competency.");
@@ -60,19 +63,10 @@ public class ProcessCompetency implements Rule {
 			Activity activity = (Activity) statement.getObject();
 
 			// Process Competency
-			competency = processCompetency(activity);
+			Competency competency = processCompetency(activity);
 
 			// Process PersonalCompetency
-			if (competency != null) {
-
-				personalCompetency = processPersonalCompetency(activity, person, competency);
-
-				if (person.getCompetencies() == null) {
-					person.setCompetencies(new HashSet<PersonalCompetency>());
-				}
-
-				person.getCompetencies().add(personalCompetency);
-			}
+			PersonalCompetency personalCompetency = processPersonalCompetency(activity, person, competency);
 
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
 			throw e;
@@ -135,6 +129,7 @@ public class ProcessCompetency implements Rule {
 
 			competency = new Competency();
 			competency.setIdentifier(activity.getId());
+			competency.setRecordStatus(COMPLETED);
 			competency.setFrameworkTitle(activityName);
 			competency.setFrameworkDescription(activityDescription);
 			competencyService.save(competency);
@@ -165,6 +160,7 @@ public class ProcessCompetency implements Rule {
 			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
 			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
+			competency.setRecordStatus(COMPLETED);
 			competency.setFrameworkTitle(activityName);
 			competency.setFrameworkDescription(activityDescription);
 			competencyService.update(competency);
@@ -185,7 +181,7 @@ public class ProcessCompetency implements Rule {
 	 * @param Competency
 	 * @return PersonalCompetency
 	 */
-	private PersonalCompetency processPersonalCompetency(final Activity activity, final Person person,
+	private PersonalCompetency processPersonalCompetency(final Activity activity, Person person,
 			final Competency competency) {
 
 		// Get PersonalCompetency
@@ -195,11 +191,18 @@ public class ProcessCompetency implements Rule {
 		// If PersonalCompetancy doesn't exist
 		if (personalCompetency == null) {
 
-			createPersonalCompetency(person, competency);
+			personalCompetency = createPersonalCompetency(person, competency);
+
+			if (person.getCompetencies() == null) {
+				person.setCompetencies(new HashSet<PersonalCompetency>());
+			}
+
+			person.getCompetencies().add(personalCompetency);
+			personService.save(person);
 
 		} else {
 
-			updatePersonalCompetency(personalCompetency, person, competency);
+			personalCompetency = updatePersonalCompetency(personalCompetency, person, competency);
 		}
 
 		return personalCompetency;

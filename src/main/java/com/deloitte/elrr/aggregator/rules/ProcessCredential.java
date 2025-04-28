@@ -13,6 +13,7 @@ import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCredential;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
@@ -32,6 +33,11 @@ public class ProcessCredential implements Rule {
 	@Autowired
 	private LangMapUtil langMapUtil;
 
+	@Autowired
+	PersonSvc personService;
+
+	public static final String COMPLETED = "COMPLETED";
+
 	@Override
 	public boolean fireRule(final Statement statement) {
 
@@ -50,9 +56,6 @@ public class ProcessCredential implements Rule {
 	@Transactional
 	public Person processRule(final Person person, final Statement statement) {
 
-		Credential credential = null;
-		PersonalCredential personalCredential = null;
-
 		try {
 
 			log.info("Process credential.");
@@ -61,19 +64,10 @@ public class ProcessCredential implements Rule {
 			Activity activity = (Activity) statement.getObject();
 
 			// Process Credential
-			credential = processCredential(activity);
+			Credential credential = processCredential(activity);
 
 			// Process PersonalCredential
-			if (credential != null) {
-
-				personalCredential = processPersonalCredential(activity, person, credential);
-
-				if (person.getCredentials() == null) {
-					person.setCredentials(new HashSet<PersonalCredential>());
-				}
-
-				person.getCredentials().add(personalCredential);
-			}
+			PersonalCredential personalCredential = processPersonalCredential(activity, person, credential);
 
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
 			throw e;
@@ -136,6 +130,7 @@ public class ProcessCredential implements Rule {
 
 			credential = new Credential();
 			credential.setIdentifier(activity.getId());
+			credential.setRecordStatus(COMPLETED);
 			credential.setFrameworkTitle(activityName);
 			credential.setFrameworkDescription(activityDescription);
 			credentialService.save(credential);
@@ -165,6 +160,7 @@ public class ProcessCredential implements Rule {
 			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
 			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
+			credential.setRecordStatus(COMPLETED);
 			credential.setFrameworkTitle(activityName);
 			credential.setFrameworkDescription(activityDescription);
 			credentialService.update(credential);
@@ -185,7 +181,7 @@ public class ProcessCredential implements Rule {
 	 * @param Credential
 	 * @return PersonalCredential
 	 */
-	private PersonalCredential processPersonalCredential(final Activity activity, final Person person,
+	private PersonalCredential processPersonalCredential(final Activity activity, Person person,
 			final Credential credential) {
 
 		// Get PersonalCredential
@@ -195,11 +191,18 @@ public class ProcessCredential implements Rule {
 		// If PersonalCredential doesn't exist
 		if (personalCredential == null) {
 
-			createPersonalCredential(person, credential);
+			personalCredential = createPersonalCredential(person, credential);
+
+			if (person.getCredentials() == null) {
+				person.setCredentials(new HashSet<PersonalCredential>());
+			}
+
+			person.getCredentials().add(personalCredential);
+			personService.save(person);
 
 		} else {
 
-			updatePersonalCredential(personalCredential, person, credential);
+			personalCredential = updatePersonalCredential(personalCredential, person, credential);
 		}
 
 		return personalCredential;

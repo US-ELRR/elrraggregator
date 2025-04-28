@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.test.rules;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,13 +14,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.entity.Competency;
+import com.deloitte.elrr.entity.Email;
+import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.entity.PersonalCompetency;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
@@ -32,6 +39,9 @@ class ProcessCompetencyTest {
 
 	@Mock
 	private LangMapUtil langMapUtil;
+
+	@Mock
+	PersonSvc personService;
 
 	@Mock
 	CompetencySvc competencySvc;
@@ -52,19 +62,55 @@ class ProcessCompetencyTest {
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
 
+			Email email = new Email();
+			email.setId(UUID.randomUUID());
+			email.setEmailAddressType("primary");
+			email.setEmailAddress("mailto:testcompetency@gmail.com");
+
 			Person person = new Person();
 			person.setId(UUID.randomUUID());
-			person.setName("Joe Williams");
+			person.setName("Test Competency");
+			person.setEmailAddresses(new HashSet<Email>());
+			person.getEmailAddresses().add(email);
+			Mockito.doReturn(person).when(personService).save(person);
+
+			UUID identityUUID = UUID.randomUUID();
+			Identity identity = new Identity();
+			identity.setId(UUID.randomUUID());
+			identity.setMbox("mailto:testcompetency@gmail.com");
+
+			Competency competency = new Competency();
+			competency.setId(UUID.randomUUID());
+			competency.setIdentifier("http://example.edlm/credentials/credential-a");
+			competency.setRecordStatus("SUCCESS");
+			competency.setFrameworkTitle("Competency A");
+			competency.setFrameworkDescription("Object representing Competency A level");
+			Mockito.doReturn(competency).when(competencySvc).save(competency);
+
+			PersonalCompetency personalCompetency = new PersonalCompetency();
+			personalCompetency.setId(UUID.randomUUID());
+			personalCompetency.setHasRecord(true);
+			personalCompetency.setPerson(person);
+			personalCompetency.setCompetency(competency);
+			Mockito.doReturn(personalCompetency).when(personalCompetencySvc).save(personalCompetency);
 
 			boolean fireRule = processCompetency.fireRule(stmt);
 			assertTrue(fireRule);
 
 			if (fireRule) {
+
 				Person personResult = processCompetency.processRule(person, stmt);
-				Set competancies = new HashSet();
-				competancies = personResult.getCompetencies();
-				assertNotNull(competancies);
-				assertNotNull(personResult.getCompetencies());
+
+				Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
+				assertNotNull(personalCompetencies);
+
+				PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
+				assertNotNull(personalCompetencyResult);
+
+				assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
+				assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
+						"Object representing Competency A level");
+
 			}
 
 		} catch (IOException e) {

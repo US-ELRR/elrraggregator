@@ -57,7 +57,7 @@ public class ELRRMessageListener {
 
 	/**
 	 * @param message
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
 	@Transactional
 	@KafkaListener(topics = "${kafka.topic}")
@@ -84,7 +84,7 @@ public class ELRRMessageListener {
 
 	/**
 	 * @param statement
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 * @throws AggregatorException
 	 */
 	@Transactional
@@ -94,11 +94,15 @@ public class ELRRMessageListener {
 
 		Statement statement = null;
 		Person person = null;
+		MessageVO messageVo;
 
 		try {
 
+			ObjectMapper mapper = Mapper.getMapper();
+
 			// Get Statement
-			statement = getStatement(payload);
+			messageVo = mapper.readValue(payload, MessageVO.class);
+			statement = messageVo.getStatement();
 
 			log.info("Process verb " + statement.getVerb().getId());
 
@@ -122,34 +126,13 @@ public class ELRRMessageListener {
 			}
 
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
-				| PersonNotFoundException  |JsonProcessingException e) {
+				| PersonNotFoundException | JsonProcessingException e) {
+
 			log.error("Error processing Kafka message - " + e.getMessage());
 			throw e;
 
 		}
+
 	}
 
-	/**
-	 * @param payload
-	 * @return Statement
-	 */
-	public Statement getStatement(final String payload) throws JsonProcessingException {
-
-		Statement statement = null;
-		ObjectMapper mapper = Mapper.getMapper();
-		MessageVO messageVo;
-
-		try {
-
-			messageVo = mapper.readValue(payload, MessageVO.class);
-			statement = messageVo.getStatement();
-
-		} catch (JsonProcessingException e) {
-			log.error("Error getting statement - " + e.getMessage());
-			e.printStackTrace();
-			throw e;
-		}
-
-		return statement;
-	}
 }

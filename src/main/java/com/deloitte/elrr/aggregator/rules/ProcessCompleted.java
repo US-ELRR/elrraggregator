@@ -13,6 +13,7 @@ import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.exception.RuntimeServiceException;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 
@@ -28,6 +29,9 @@ public class ProcessCompleted implements Rule {
 	@Autowired
 	LearningRecordUtil learningRecordUtil;
 
+	@Autowired
+	PersonSvc personService;
+
 	@Override
 	public boolean fireRule(final Statement statement) {
 
@@ -39,10 +43,7 @@ public class ProcessCompleted implements Rule {
 
 	@Override
 	@Transactional
-	public Person processRule(final Person person, final Statement statement) {
-
-		LearningResource learningResource = null;
-		LearningRecord learningRecord = null;
+	public Person processRule(Person person, final Statement statement) {
 
 		try {
 
@@ -52,21 +53,19 @@ public class ProcessCompleted implements Rule {
 			Activity activity = (Activity) statement.getObject();
 
 			// Process LearningResource
-			learningResource = learningResourceUtil.processLearningResource(activity);
+			LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
 
 			// Process LearningRecord
-			if (learningResource != null) {
 
-				// Process LearningRecord
-				learningRecord = learningRecordUtil.processLearningRecord(activity, person, statement.getVerb(),
-						statement.getResult(), learningResource);
+			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person,
+					statement.getVerb(), statement.getResult(), learningResource);
 
-				if (person.getLearningRecords() == null) {
-					person.setLearningRecords(new HashSet<LearningRecord>());
-				}
-
-				person.getLearningRecords().add(learningRecord);
+			if (person.getLearningRecords() == null) {
+				person.setLearningRecords(new HashSet<LearningRecord>());
 			}
+
+			person.getLearningRecords().add(learningRecord);
+			personService.save(person);
 
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
 			throw e;

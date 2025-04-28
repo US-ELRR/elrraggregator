@@ -2,18 +2,15 @@ package com.deloitte.elrr.aggregator.test.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
@@ -33,49 +30,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessPersonTest {
 
-  @Mock private EmailSvc emailSvc;
+	@Mock
+	private EmailSvc emailSvc;
 
-  @Mock private IdentitySvc identitySvc;
+	@Mock
+	private IdentitySvc identitySvc;
 
-  @Mock private PersonSvc personSvc;
+	@Mock
+	private PersonSvc personSvc;
 
-  @InjectMocks private ProcessPerson processPerson;
+	@InjectMocks
+	private ProcessPerson processPerson;
 
-  @Test
-  void test() {
+	@Test
+	void test() {
 
-    try {
+		try {
 
-      File testFile = TestFileUtils.getJsonTestFile("completed.json");
+			File testFile = TestFileUtils.getJsonTestFile("completed.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertNotNull(stmt);
+			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+			assertNotNull(stmt);
 
-      Email email = new Email();
-      email.setId(UUID.randomUUID());
-      email.setEmailAddressType("primary");
-      email.setEmailAddress("mailto:test@gmail.com");
-      Mockito.doReturn(email).when(emailSvc).save(any());
+			Person person = processPerson.processPerson(stmt);
+			assertNotNull(person);
+			assertEquals(person.getName(), "test");
 
-      Person person = new Person();
-      person.setId(UUID.randomUUID());
-      person.setName("test");
-      person.setEmailAddresses(new HashSet<Email>()); // Populate person_email
-      person.getEmailAddresses().add(email);
-      Mockito.doReturn(person).when(personSvc).save(any());
+			Set<Email> emails = person.getEmailAddresses();
+			assertNotNull(emails);
+			Email email = emails.stream().findFirst().orElse(null);
+			assertEquals(email.getEmailAddress(), "mailto:test@gmail.com");
 
-      UUID identityUUID = UUID.randomUUID();
-      Identity identity = new Identity();
-      identity.setId(identityUUID);
-      identity.setMbox("mailto:test@gmail.com");
-      Mockito.doReturn(identity).when(identitySvc).getByIfi("mbox::mailto:test@gmail.com");
+			Set<Identity> identities = person.getIdentities();
+			assertNotNull(identities);
+			Identity identity = identities.stream().findFirst().orElse(null);
+			assertEquals(identity.getMbox(), "mailto:test@gmail.com");
 
-      person = processPerson.processPerson(stmt);
-      assertNotNull(person);
-      assertEquals(person.getName(), "test");
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

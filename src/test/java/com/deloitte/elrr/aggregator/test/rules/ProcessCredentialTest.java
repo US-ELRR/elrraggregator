@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.test.rules;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,13 +14,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.rules.ProcessCredential;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.entity.Email;
+import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.entity.PersonalCredential;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
@@ -32,6 +38,9 @@ class ProcessCredentialTest {
 
 	@Mock
 	private LangMapUtil langMapUtil;
+
+	@Mock
+	PersonSvc personService;
 
 	@Mock
 	private CredentialSvc credentialService;
@@ -52,19 +61,40 @@ class ProcessCredentialTest {
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
 
+			Email email = new Email();
+			email.setId(UUID.randomUUID());
+			email.setEmailAddressType("primary");
+			email.setEmailAddress("mailto:testcredential@gmail.com");
+
 			Person person = new Person();
 			person.setId(UUID.randomUUID());
-			person.setName("Joe Williams");
+			person.setName("Test Credential");
+			person.setEmailAddresses(new HashSet<Email>());
+			person.getEmailAddresses().add(email);
+			Mockito.doReturn(person).when(personService).save(person);
+
+			UUID identityUUID = UUID.randomUUID();
+			Identity identity = new Identity();
+			identity.setId(identityUUID);
+			identity.setMbox("mailto:testcredential@gmail.com");
 
 			boolean fireRule = processCredential.fireRule(stmt);
 			assertTrue(fireRule);
 
 			if (fireRule) {
+
 				Person personResult = processCredential.processRule(person, stmt);
-				Set credentials = new HashSet();
-				credentials = personResult.getCredentials();
-				assertNotNull(credentials);
-				assertNotNull(personResult.getCredentials());
+
+				Set<PersonalCredential> personalCredentials = personResult.getCredentials();
+				assertNotNull(personalCredentials);
+
+				PersonalCredential personalCredential = personalCredentials.stream().findFirst().orElse(null);
+				assertNotNull(personalCredential);
+
+				assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Credential A");
+				assertEquals(personalCredential.getCredential().getFrameworkDescription(),
+						"Object representing Credential A level");
+
 			}
 
 		} catch (IOException e) {
