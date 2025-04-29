@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ProcessCompleted implements Rule {
+public class ProcessFailed implements Rule {
 
 	@Autowired
 	LearningResourceUtil learningResourceUtil;
@@ -35,19 +35,19 @@ public class ProcessCompleted implements Rule {
 	@Override
 	public boolean fireRule(final Statement statement) {
 
-		// Is Verb Id = completed and object = activity
-		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
+		// Is Verb Id = failed and object = activity
+		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)
 				&& statement.getObject() instanceof Activity);
 
 	}
 
 	@Override
 	@Transactional
-	public Person processRule(Person person, final Statement statement) {
+	public Person processRule(final Person person, final Statement statement) {
 
 		try {
 
-			log.info("Process activity completed");
+			log.info("Process activity failed");
 
 			// Get Activity
 			Activity activity = (Activity) statement.getObject();
@@ -56,7 +56,6 @@ public class ProcessCompleted implements Rule {
 			LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
 
 			// Process LearningRecord
-
 			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person,
 					statement.getVerb(), statement.getResult(), learningResource);
 

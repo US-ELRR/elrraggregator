@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class SanatizingFilter implements Filter {
+public class SanitizingFilter implements Filter {
 
   private boolean invalidParam;
 

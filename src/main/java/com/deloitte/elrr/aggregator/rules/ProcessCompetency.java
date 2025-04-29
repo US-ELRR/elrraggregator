@@ -1,5 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.util.HashSet;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +13,9 @@ import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCompetency;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
+import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.LangMap;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,243 +24,224 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessCompetency implements Rule {
 
-  @Autowired private CompetencySvc competencyService;
+	@Autowired
+	private CompetencySvc competencyService;
 
-  @Autowired private PersonalCompetencySvc personalCompetencyService;
+	@Autowired
+	private PersonalCompetencySvc personalCompetencyService;
 
-  @Autowired private LangMapUtil langMapUtil;
+	@Autowired
+	private LangMapUtil langMapUtil;
 
-  @Override
-  public boolean fireRule(final Statement statement) {
+	@Autowired
+	PersonSvc personService;
 
-    Boolean fireRule = false;
+	public static final String COMPLETED = "COMPLETED";
 
-    // Is Verb Id = achieved and object = activity
-    if (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-        && statement.getObject() instanceof Activity) {
+	@Override
+	public boolean fireRule(final Statement statement) {
 
-      Activity obj = (Activity) statement.getObject();
-      String objType = obj.getDefinition().getType();
+		Activity obj = (Activity) statement.getObject();
+		String objType = obj.getDefinition().getType();
 
-      // If no object type
-      if (objType == null) {
-        fireRule = false;
-        // If object type = competency
-      } else if (objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY)) {
-        fireRule = true;
-      }
-    }
-    return fireRule;
-  }
+		// Is Verb Id = achieved, object = activity and object type != credential
+		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+				&& statement.getObject() instanceof Activity
+				&& !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
+	}
 
-  @Override
-  @Transactional
-  public void processRule(final Person person, final Statement statement) {
+	@Override
+	@Transactional
+	public Person processRule(final Person person, final Statement statement) {
 
-    try {
+		try {
 
-      log.info("Process competency.");
+			log.info("Process competency.");
 
-      // Get Activity
-      Activity activity = (Activity) statement.getObject();
+			// Get Activity
+			Activity activity = (Activity) statement.getObject();
 
-      // Process Competency
-      Competency competency = processCompetency(activity);
+			// Process Competency
+			Competency competency = processCompetency(activity);
 
-      // Process PersonalCompetency
-      if (competency != null) {
-        processPersonalCompetency(activity, person, competency);
-      }
+			// Process PersonalCompetency
+			PersonalCompetency personalCompetency = processPersonalCompetency(activity, person, competency);
 
-    } catch (AggregatorException
-        | ClassCastException
-        | NullPointerException
-        | RuntimeServiceException e) {
-      throw e;
-    }
-  }
+		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+			throw e;
+		}
 
-  /**
-   * @param statement
-   * @return competency
-   */
-  private Competency processCompetency(final Activity activity) {
+		return person;
+	}
 
-    Competency competency = null;
+	/**
+	 * @param statement
+	 * @return competency
+	 */
+	private Competency processCompetency(final Activity activity) {
 
-    try {
+		Competency competency = null;
+		PersonalCompetency personalCompetency = null;
 
-      // Get competency
-      competency = competencyService.findByIdentifier(activity.getId());
+		try {
 
-      // If competency doesn't exist
-      if (competency == null) {
+			// Get competency
+			competency = competencyService.findByIdentifier(activity.getId());
 
-        competency = createCompetency(activity);
+			// If competency doesn't exist
+			if (competency == null) {
 
-      } else {
+				competency = createCompetency(activity);
 
-        log.info("Competency " + activity.getId() + " exists.");
-        competency = updateCompetency(competency, activity);
-      }
+			} else {
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
+				log.info("Competency " + activity.getId() + " exists.");
+				competency = updateCompetency(competency, activity);
+			}
 
-      log.error("Error processing competency - " + e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 
-    return competency;
-  }
+			log.error("Error processing competency - " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-  /**
-   * @param activity
-   * @return competency
-   */
-  private Competency createCompetency(final Activity activity) {
+		return competency;
+	}
 
-    log.info("Creating new competency.");
+	/**
+	 * @param activity
+	 * @return competency
+	 */
+	private Competency createCompetency(final Activity activity) {
 
-    Competency competency = null;
+		log.info("Creating new competency.");
 
-    try {
+		Competency competency = null;
+		String activityName = "";
+		String activityDescription = "";
 
-      String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-      String activityDescription =
-          langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+		try {
 
-      competency = new Competency();
-      competency.setIdentifier(activity.getId());
-      competency.setFrameworkTitle(activityName);
-      competency.setFrameworkDescription(activityDescription);
-      competencyService.save(competency);
-      log.info("Competency " + activity.getId() + " created.");
+			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-    } catch (AggregatorException | ClassCastException | NullPointerException e) {
-      log.error(e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+			competency = new Competency();
+			competency.setIdentifier(activity.getId());
+			competency.setRecordStatus(COMPLETED);
+			competency.setFrameworkTitle(activityName);
+			competency.setFrameworkDescription(activityDescription);
+			competencyService.save(competency);
+			log.info("Competency " + activity.getId() + " created.");
 
-    return competency;
-  }
+		} catch (AggregatorException | ClassCastException | NullPointerException e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-  /**
-   * @param activity
-   * @return competency
-   */
-  private Competency updateCompetency(Competency competency, final Activity activity) {
+		return competency;
+	}
 
-    log.info("Updating competency.");
+	/**
+	 * @param activity
+	 * @return competency
+	 */
+	private Competency updateCompetency(Competency competency, final Activity activity) {
 
-    String nameLangCode = null;
-    String descLangCode = null;
+		log.info("Updating competency.");
 
-    String activityName = "";
-    String activityDescription = "";
+		String activityName = "";
+		String activityDescription = "";
 
-    LangMap nameLangMap = activity.getDefinition().getName();
-    LangMap descLangMap = activity.getDefinition().getDescription();
+		try {
 
-    log.info("nameLangMap = " + nameLangMap.getLanguageCodes());
+			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-    try {
+			competency.setRecordStatus(COMPLETED);
+			competency.setFrameworkTitle(activityName);
+			competency.setFrameworkDescription(activityDescription);
+			competencyService.update(competency);
+			log.info("Competency " + activity.getId() + " updated.");
 
-      nameLangCode = langMapUtil.getLangMapValue(nameLangMap);
-      activityName = activity.getDefinition().getName().get(nameLangCode);
+		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-      descLangCode = langMapUtil.getLangMapValue(descLangMap);
-      activityDescription = activity.getDefinition().getDescription().get(descLangCode);
+		return competency;
+	}
 
-      competency.setFrameworkTitle(activityName);
-      competency.setFrameworkDescription(activityDescription);
-      competencyService.update(competency);
-      log.info("Competency " + activity.getId() + " updated.");
+	/**
+	 * @param Activity
+	 * @param Person
+	 * @param Competency
+	 * @return PersonalCompetency
+	 */
+	private PersonalCompetency processPersonalCompetency(final Activity activity, Person person,
+			final Competency competency) {
 
-    } catch (AggregatorException
-        | ClassCastException
-        | NullPointerException
-        | RuntimeServiceException e) {
-      log.error(e.getMessage());
-      e.printStackTrace();
-      throw e;
-    }
+		// Get PersonalCompetency
+		PersonalCompetency personalCompetency = personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(),
+				competency.getId());
 
-    return competency;
-  }
+		// If PersonalCompetancy doesn't exist
+		if (personalCompetency == null) {
 
-  /**
-   * @param Activity
-   * @param Person
-   * @param Competency
-   * @return PersonalCompetency
-   */
-  private PersonalCompetency processPersonalCompetency(
-      final Activity activity, final Person person, final Competency competency) {
+			personalCompetency = createPersonalCompetency(person, competency);
 
-    // Get PersonalCompetency
-    PersonalCompetency personalCompetency =
-        personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(), competency.getId());
+			if (person.getCompetencies() == null) {
+				person.setCompetencies(new HashSet<PersonalCompetency>());
+			}
 
-    // If PersonalCompetancy doesn't exist
-    if (personalCompetency == null) {
+			person.getCompetencies().add(personalCompetency);
+			personService.save(person);
 
-      createPersonalCompetency(person, competency);
+		} else {
 
-    } else {
+			personalCompetency = updatePersonalCompetency(personalCompetency, person, competency);
+		}
 
-      updatePersonalCompetency(personalCompetency, person, competency);
-    }
+		return personalCompetency;
+	}
 
-    return personalCompetency;
-  }
+	/**
+	 * @param Person
+	 * @param Competency
+	 * @return PersonalCompetency
+	 */
+	private PersonalCompetency createPersonalCompetency(final Person person, final Competency competency) {
 
-  /**
-   * @param Person
-   * @param Competency
-   * @return PersonalCompetency
-   */
-  private PersonalCompetency createPersonalCompetency(
-      final Person person, final Competency competency) {
+		log.info("Creating new personal competency record.");
+		PersonalCompetency personalCompetency = new PersonalCompetency();
 
-    log.info("Creating new personal competency record.");
-    PersonalCompetency personalCompetency = new PersonalCompetency();
+		personalCompetency.setPerson(person);
+		personalCompetency.setCompetency(competency);
+		personalCompetency.setHasRecord(true);
+		personalCompetencyService.save(personalCompetency);
 
-    personalCompetency.setPerson(person);
-    personalCompetency.setCompetency(competency);
-    personalCompetency.setHasRecord(true);
-    personalCompetencyService.save(personalCompetency);
+		log.info("Personal Competency for " + person.getName() + " - " + competency.getFrameworkTitle() + " created.");
 
-    log.info(
-        "Personal Competency for "
-            + person.getName()
-            + " - "
-            + competency.getFrameworkTitle()
-            + " created.");
+		return personalCompetency;
+	}
 
-    return personalCompetency;
-  }
+	private PersonalCompetency updatePersonalCompetency(PersonalCompetency personalCompetency, final Person person,
+			final Competency competency) {
 
-  private PersonalCompetency updatePersonalCompetency(
-      PersonalCompetency personalCompetency, final Person person, final Competency competency) {
+		try {
 
-    try {
+			// TO DO
+			// personalCompetencyService.update(personalCompetency);
 
-      // TO DO
-      // personalCompetencyService.update(personalCompetency);
+			log.info("Personal Competency for " + person.getName() + " - " + competency.getFrameworkTitle()
+					+ " updated.");
 
-      log.info(
-          "Personal Competency for "
-              + person.getName()
-              + " - "
-              + competency.getFrameworkTitle()
-              + " updated.");
+		} catch (RuntimeServiceException e) {
+			throw e;
+		}
 
-    } catch (RuntimeServiceException e) {
-      throw e;
-    }
-
-    return personalCompetency;
-  }
+		return personalCompetency;
+	}
 }
