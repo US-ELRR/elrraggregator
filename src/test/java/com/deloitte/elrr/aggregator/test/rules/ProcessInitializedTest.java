@@ -15,12 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
 import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
-import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Email;
@@ -29,7 +27,6 @@ import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.LearningStatus;
-import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Result;
@@ -44,15 +41,9 @@ import lombok.extern.slf4j.Slf4j;
 class ProcessInitializedTest {
 
 	@Mock
-	private LangMapUtil langMapUtil;
-
-	@Mock
-	LearningResourceSvc learningResourceService;
-
-	@Mock
 	PersonSvc personService;
 
-	@Spy
+	@Mock
 	LearningResourceUtil learningResourceUtil;
 
 	@Mock
@@ -88,7 +79,6 @@ class ProcessInitializedTest {
 			person.setName("test");
 			person.setEmailAddresses(new HashSet<Email>());
 			person.getEmailAddresses().add(email);
-			Mockito.doReturn(person).when(personService).save(person);
 
 			UUID identityUUID = UUID.randomUUID();
 			Identity identity = new Identity();
@@ -112,23 +102,19 @@ class ProcessInitializedTest {
 			boolean fireRule = processInitialized.fireRule(stmt);
 			assertTrue(fireRule);
 
-			if (fireRule) {
+			Person personResult = processInitialized.processRule(person, stmt);
+			assertEquals(personResult.getName(), "test");
 
-				Person personResult = processInitialized.processRule(person, stmt);
-				assertEquals(personResult.getName(), "test");
+			Set<LearningRecord> learningRecords = personResult.getLearningRecords();
+			assertNotNull(learningRecords);
+			learningRecord = learningRecords.stream().findFirst().orElse(null);
 
-				Set<LearningRecord> learningRecords = personResult.getLearningRecords();
-				assertNotNull(learningRecords);
-				learningRecord = learningRecords.stream().findFirst().orElse(null);
-
-				assertNotNull(learningRecord);
-				assertNotNull(learningRecord.getPerson());
-				assertNotNull(learningRecord.getLearningResource());
-				assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-				assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
-				assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
-
-			}
+			assertNotNull(learningRecord);
+			assertNotNull(learningRecord.getPerson());
+			assertNotNull(learningRecord.getLearningResource());
+			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
+			assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
+			assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
 
 		} catch (IOException e) {
 			e.printStackTrace();

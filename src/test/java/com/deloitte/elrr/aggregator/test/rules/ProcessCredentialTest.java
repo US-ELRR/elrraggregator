@@ -101,21 +101,17 @@ class ProcessCredentialTest {
 			boolean fireRule = processCredential.fireRule(stmt);
 			assertTrue(fireRule);
 
-			if (fireRule) {
+			Person personResult = processCredential.processRule(person, stmt);
 
-				Person personResult = processCredential.processRule(person, stmt);
+			Set<PersonalCredential> personalCredentials = personResult.getCredentials();
+			assertNotNull(personalCredentials);
 
-				Set<PersonalCredential> personalCredentials = personResult.getCredentials();
-				assertNotNull(personalCredentials);
+			personalCredential = personalCredentials.stream().findFirst().orElse(null);
+			assertNotNull(personalCredential);
 
-				personalCredential = personalCredentials.stream().findFirst().orElse(null);
-				assertNotNull(personalCredential);
-
-				assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Test Credential A");
-				assertEquals(personalCredential.getCredential().getFrameworkDescription(),
-						"Object representing Credential A level");
-
-			}
+			assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Test Credential A");
+			assertEquals(personalCredential.getCredential().getFrameworkDescription(),
+					"Object representing Credential A level");
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -16,74 +16,78 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LangMapUtil {
 
-  @Value("${lang.codes}")
-  ArrayList<String> languageCodes = new ArrayList<String>();
+	@Value("${lang.codes}")
+	ArrayList<String> languageCodes = new ArrayList<String>();
 
-  /**
-   * @param map
-   * @return langCode
-   * @throws AggregatorException
-   */
-  public String getLangMapValue(LangMap map) {
+	public LangMapUtil() {
+		this.languageCodes.add("en-us");
+	}
 
-    String langCode = null;
-    Set<String> langCodes = map.getLanguageCodes();
+	/**
+	 * @param map
+	 * @return langCode
+	 * @throws AggregatorException
+	 */
+	public String getLangMapValue(LangMap map) {
 
-    try {
+		String langCode = null;
+		Set<String> langCodes = map.getLanguageCodes();
 
-      Iterator<String> langCodesIterator = langCodes.iterator();
+		try {
 
-      // Iterate and compare to lang.codes in .properties
-      while (langCodesIterator.hasNext()) {
+			Iterator<String> langCodesIterator = langCodes.iterator();
 
-        String code = langCodesIterator.next();
+			// Iterate and compare to lang.codes in .properties
+			while (langCodesIterator.hasNext()) {
 
-        if (languageCodes.contains(code)) {
-          langCode = code;
-          break;
-        }
-      }
+				String code = langCodesIterator.next();
 
-      // If langCode not found
-      if (langCode == null || langCode.length() == 0) {
+				if (languageCodes.contains(code)) {
+					langCode = code;
+					break;
+				}
+			}
 
-        // Check for en-us
-        if (langCodes.contains("en-us")) {
+			// If langCode not found
+			if (langCode == null || langCode.length() == 0) {
 
-          langCode = "en-us";
+				// Check for en-us
+				if (langCodes.contains("en-us")) {
 
-          // Check for begins with en
-        } else if (langCodes.contains("en")) {
+					langCode = "en-us";
 
-          // Reset pointer
-          langCodesIterator = langCodes.iterator();
+					// Check for begins with en
+				} else if (langCodes.contains("en")) {
 
-          // Iterate and get 1st en*
-          while (langCodesIterator.hasNext()) {
+					// Reset pointer
+					langCodesIterator = langCodes.iterator();
 
-            String code = langCodesIterator.next();
+					// Iterate and get 1st en*
+					while (langCodesIterator.hasNext()) {
 
-            if (code.startsWith("en")) {
-              langCode = code;
-              break;
-            }
-          }
-        }
-      }
+						String code = langCodesIterator.next();
 
-      // Get 1st element
-      if (langCode == null) {
+						if (code.startsWith("en")) {
+							langCode = code;
+							break;
+						}
+					}
+				}
+			}
 
-        String firstElement = langCodes.stream().findFirst().orElse(null);
-        langCode = firstElement;
-      }
+			// Get 1st element
+			if (langCode == null) {
 
-      return map.get(langCode);
+				String firstElement = langCodes.stream().findFirst().orElse(null);
+				langCode = firstElement;
+			}
 
-    } catch (ClassCastException | NullPointerException e) {
-      log.error("Error getting language codes - " + e.getMessage());
-      e.printStackTrace();
-      throw new AggregatorException("Error getting language code - " + e.getMessage());
-    }
-  }
+			return map.get(langCode);
+
+		} catch (ClassCastException | NullPointerException e) {
+			log.error("Error getting language codes - " + e.getMessage());
+			e.printStackTrace();
+			throw new AggregatorException("Error getting language code - " + e.getMessage());
+		}
+	}
 }

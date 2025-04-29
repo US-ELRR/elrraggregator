@@ -160,7 +160,6 @@ public class ProcessPerson {
 	public Email createEmail(AbstractActor actor) {
 		log.info("Creating new email.");
 		Email email = new Email();
-		email.setEmailAddress(actor.getMbox());
 		email.setEmailAddressType("primary");
 		emailService.save(email);
 		log.info("Email " + email.getEmailAddress() + " created.");

@@ -44,11 +44,10 @@ public class ProcessCompetency implements Rule {
 		Activity obj = (Activity) statement.getObject();
 		String objType = obj.getDefinition().getType();
 
-		// Is Verb Id = achieved, object = activity and object type = competency
+		// Is Verb Id = achieved, object = activity and object type != credential
 		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-				&& statement.getObject() instanceof Activity && objType != null
-				&& objType.equalsIgnoreCase(ObjectTypeConstants.COMPETENCY));
-
+				&& statement.getObject() instanceof Activity
+				&& !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
 	}
 
 	@Override

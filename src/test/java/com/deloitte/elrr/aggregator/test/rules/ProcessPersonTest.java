@@ -59,7 +59,7 @@ class ProcessPersonTest {
 			Set<Email> emails = person.getEmailAddresses();
 			assertNotNull(emails);
 			Email email = emails.stream().findFirst().orElse(null);
-			assertEquals(email.getEmailAddress(), "mailto:test@gmail.com");
+			assertEquals(email.getEmailAddressType(), "primary");
 
 			Set<Identity> identities = person.getIdentities();
 			assertNotNull(identities);

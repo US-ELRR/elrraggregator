@@ -101,21 +101,17 @@ class ProcessCompetencyTest {
 			boolean fireRule = processCompetency.fireRule(stmt);
 			assertTrue(fireRule);
 
-			if (fireRule) {
+			Person personResult = processCompetency.processRule(person, stmt);
 
-				Person personResult = processCompetency.processRule(person, stmt);
+			Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
+			assertNotNull(personalCompetencies);
 
-				Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
-				assertNotNull(personalCompetencies);
+			PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
+			assertNotNull(personalCompetencyResult);
 
-				PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
-				assertNotNull(personalCompetencyResult);
-
-				assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
-				assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
-						"Object representing Competency A level");
-
-			}
+			assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
+			assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
+					"Object representing Competency A level");
 
 		} catch (IOException e) {
 			e.printStackTrace();
