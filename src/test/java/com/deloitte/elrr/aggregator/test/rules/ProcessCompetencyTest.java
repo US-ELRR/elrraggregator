@@ -78,7 +78,6 @@ class ProcessCompetencyTest {
 			person.getEmailAddresses().add(email);
 			Mockito.doReturn(person).when(personService).save(person);
 
-			UUID identityUUID = UUID.randomUUID();
 			Identity identity = new Identity();
 			identity.setId(UUID.randomUUID());
 			identity.setMbox("mailto:testcompetency@gmail.com");
