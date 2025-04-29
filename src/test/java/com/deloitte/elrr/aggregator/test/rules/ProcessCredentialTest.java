@@ -63,7 +63,8 @@ class ProcessCredentialTest {
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
 
-			Mockito.doReturn("Object representing Credential A level").when(langMapUtil).getLangMapValue(any());
+			Mockito.doReturn("Test Credential A").doReturn("Object representing Credential A level").when(langMapUtil)
+					.getLangMapValue(any());
 
 			Email email = new Email();
 			email.setId(UUID.randomUUID());
@@ -110,6 +111,7 @@ class ProcessCredentialTest {
 				personalCredential = personalCredentials.stream().findFirst().orElse(null);
 				assertNotNull(personalCredential);
 
+				assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Test Credential A");
 				assertEquals(personalCredential.getCredential().getFrameworkDescription(),
 						"Object representing Credential A level");
 

@@ -63,7 +63,8 @@ class ProcessCompetencyTest {
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
 
-			Mockito.doReturn("Object representing Competency A level").when(langMapUtil).getLangMapValue(any());
+			Mockito.doReturn("Competency A").doReturn("Object representing Competency A level").when(langMapUtil)
+					.getLangMapValue(any());
 
 			Email email = new Email();
 			email.setId(UUID.randomUUID());
@@ -110,6 +111,7 @@ class ProcessCompetencyTest {
 				PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
 				assertNotNull(personalCompetencyResult);
 
+				assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
 				assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
 						"Object representing Competency A level");
 
