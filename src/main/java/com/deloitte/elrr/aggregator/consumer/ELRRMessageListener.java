@@ -113,7 +113,7 @@ public class ELRRMessageListener {
 
 			outerloop: for (Rule rule : classList) {
 
-				log.info("Process verb " + statement.getVerb().getId());
+				log.info("Process verb " + statement.getVerb().getId() + " by " + rule);
 
 				if (rule.fireRule(statement)) {
 
