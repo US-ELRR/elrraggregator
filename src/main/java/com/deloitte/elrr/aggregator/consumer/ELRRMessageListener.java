@@ -94,7 +94,7 @@ public class ELRRMessageListener {
 
 		Statement statement = null;
 		Person person = null;
-		MessageVO messageVo;
+		MessageVO messageVo = null;
 
 		try {
 
@@ -104,11 +104,10 @@ public class ELRRMessageListener {
 			messageVo = mapper.readValue(payload, MessageVO.class);
 			statement = messageVo.getStatement();
 
-			log.info("Process verb " + statement.getVerb().getId());
-
 			// Process Person
 			person = processPerson.processPerson(statement);
 
+			// *** ADD NEW RULES HERE ***
 			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
 					processInitialized, processPassed);
 

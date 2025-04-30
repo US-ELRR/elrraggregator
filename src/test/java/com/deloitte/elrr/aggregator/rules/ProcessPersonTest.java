@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.rules;
+package com.deloitte.elrr.aggregator.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
-import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
+import com.deloitte.elrr.aggregator.util.TestFileUtils;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.Person;

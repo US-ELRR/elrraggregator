@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.util;
+package com.deloitte.elrr.aggregator.util;
 
 import java.io.File;
 import java.io.IOException;

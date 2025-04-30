@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.rules;
+package com.deloitte.elrr.aggregator.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,8 +17,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
-import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
+import com.deloitte.elrr.aggregator.rules.ProcessCompleted;
+import com.deloitte.elrr.aggregator.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Email;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ProcessInitializedTest {
+class ProcessCompletedTest {
 
 	@Mock
 	PersonSvc personService;
@@ -50,14 +50,14 @@ class ProcessInitializedTest {
 	LearningRecordUtil learningRecordUtil;
 
 	@InjectMocks
-	ProcessInitialized processInitialized;
+	ProcessCompleted processCompleted;
 
 	@Test
 	void test() {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("initialized.json");
+			File testFile = TestFileUtils.getJsonTestFile("completed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -87,8 +87,8 @@ class ProcessInitializedTest {
 
 			LearningResource learningResource = new LearningResource();
 			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("Example Activity 10");
-			learningResource.setDescription("Example activity 10 description");
+			learningResource.setTitle("Activity 1");
+			learningResource.setDescription("Example Activity Test");
 			Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
 
 			LearningRecord learningRecord = new LearningRecord();
@@ -99,10 +99,10 @@ class ProcessInitializedTest {
 			Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
 					result, learningResource);
 
-			boolean fireRule = processInitialized.fireRule(stmt);
+			boolean fireRule = processCompleted.fireRule(stmt);
 			assertTrue(fireRule);
 
-			Person personResult = processInitialized.processRule(person, stmt);
+			Person personResult = processCompleted.processRule(person, stmt);
 			assertEquals(personResult.getName(), "test");
 
 			Set<LearningRecord> learningRecords = personResult.getLearningRecords();
@@ -113,8 +113,8 @@ class ProcessInitializedTest {
 			assertNotNull(learningRecord.getPerson());
 			assertNotNull(learningRecord.getLearningResource());
 			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
+			assertEquals(learningRecord.getLearningResource().getTitle(), "Activity 1");
+			assertEquals(learningRecord.getLearningResource().getDescription(), "Example Activity Test");
 
 		} catch (IOException e) {
 			e.printStackTrace();
