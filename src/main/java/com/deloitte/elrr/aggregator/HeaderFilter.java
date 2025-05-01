@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.utils.ArrayToString;
-
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,8 +40,8 @@ public class HeaderFilter implements Filter {
 				}
 			}
 		} catch (IOException | ServletException e) {
-			String[] strings = { "Error - ", e.getMessage() };
-			log.error(ArrayToString.convertArrayToString(strings));
+			String[] strings = { "Error -", e.getMessage() };
+			log.error(String.join(" ", strings));
 			e.printStackTrace();
 			return;
 		}

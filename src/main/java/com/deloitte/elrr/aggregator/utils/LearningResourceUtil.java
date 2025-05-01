@@ -34,8 +34,8 @@ public class LearningResourceUtil {
 		// If LearningResource already exists
 		if (learningResource != null) {
 
-			String[] strings = { "Learning resource  ", learningResource.getTitle(), " exists." };
-			log.info(ArrayToString.convertArrayToString(strings));
+			String[] strings = { "Learning resource", learningResource.getTitle(), "exists." };
+			log.info(String.join(" ", strings));
 
 		} else {
 
@@ -45,8 +45,8 @@ public class LearningResourceUtil {
 
 			} catch (AggregatorException | ClassCastException | NullPointerException e) {
 
-				String[] strings = { "Error processing learning resource - ", e.getMessage() };
-				log.error(ArrayToString.convertArrayToString(strings));
+				String[] strings = { "Error processing learning resource -", e.getMessage() };
+				log.error(String.join(" ", strings));
 				e.printStackTrace();
 				throw e;
 			}
@@ -76,8 +76,8 @@ public class LearningResourceUtil {
 			learningResource.setTitle(activityName);
 			learningResourceService.save(learningResource);
 
-			String[] strings = { "Learning resource  ", learningResource.getTitle(), " created." };
-			log.info(ArrayToString.convertArrayToString(strings));
+			String[] strings = { "Learning resource", learningResource.getTitle(), "created." };
+			log.info(String.join(" ", strings));
 
 		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 			log.error(e.getMessage());

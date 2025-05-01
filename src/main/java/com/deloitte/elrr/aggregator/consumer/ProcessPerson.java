@@ -5,7 +5,6 @@ import java.util.HashSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
@@ -87,8 +86,8 @@ public class ProcessPerson {
 		if (identity != null) {
 			person = identity.getPerson();
 			if (person != null) {
-				String[] strings = { "Person ", person.getName(), " exists." };
-				log.info(ArrayToString.convertArrayToString(strings));
+				String[] strings = { "Person", person.getName(), "exists." };
+				log.info(String.join(" ", strings));
 			}
 		}
 
@@ -128,8 +127,8 @@ public class ProcessPerson {
 
 		personService.save(person);
 
-		String[] strings = { "Person ", person.getName(), " created." };
-		log.info(ArrayToString.convertArrayToString(strings));
+		String[] strings = { "Person", person.getName(), "created." };
+		log.info(String.join(" ", strings));
 
 		return person;
 	}
@@ -152,8 +151,8 @@ public class ProcessPerson {
 			identity.setName(account.getName());
 		}
 		identityService.save(identity);
-		String[] strings = { "Identity ", identity.getIfi(), " created." };
-		log.info(ArrayToString.convertArrayToString(strings));
+		String[] strings = { "Identity", identity.getIfi(), "created." };
+		log.info(String.join(" ", strings));
 		return identity;
 	}
 
@@ -167,8 +166,8 @@ public class ProcessPerson {
 		email.setEmailAddress(emailAddress);
 		email.setEmailAddressType("primary");
 		emailService.save(email);
-		String[] strings = { "Email ", emailAddress, " created." };
-		log.info(ArrayToString.convertArrayToString(strings));
+		String[] strings = { "Email", emailAddress, "created." };
+		log.info(String.join(" ", strings));
 		return email;
 	}
 }

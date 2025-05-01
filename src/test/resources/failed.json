@@ -8,9 +8,7 @@
     },
     "verb": {
       "id": "http://adlnet.gov/expapi/verbs/failed",
-      "display": {
-        "en": "failed"
-      }
+      "display": { "en-us": "Failed" }    
     },
     "object": {
       "id": "http://example.adlnet.gov/xapi/example/simpleCBT",

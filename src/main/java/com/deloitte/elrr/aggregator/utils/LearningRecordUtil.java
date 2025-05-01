@@ -94,9 +94,8 @@ public class LearningRecordUtil {
 
 		learningRecordService.save(learningRecord);
 
-		String[] strings = { "Learning record for  ", person.getName(), " - ", learningResource.getTitle(),
-				" created." };
-		log.info(ArrayToString.convertArrayToString(strings));
+		String[] strings = { "Learning record for", person.getName(), "-", learningResource.getTitle(), " created." };
+		log.info(String.join(" ", strings));
 
 		return learningRecord;
 	}
@@ -144,7 +143,8 @@ public class LearningRecordUtil {
 	 */
 	private LearningStatus getStatus(LearningRecord learningRecord, final Verb verb, final Result result) {
 
-		log.info("Verb = " + verb.getId());
+		String[] strings = { "Verb =", verb.getId() };
+		log.info(String.join(" ", strings));
 
 		if (verb.getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)) {
 

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
-import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -51,6 +50,9 @@ public class ELRRMessageListener {
 	private Rule processInitialized;
 
 	@Autowired
+	private Rule processSatisfied;
+
+	@Autowired
 	KafkaTemplate<?, String> kafkaTemplate;
 
 	@Value("${kafka.dead.letter.topic}")
@@ -72,8 +74,8 @@ public class ELRRMessageListener {
 			if (InputSanitizer.isValidInput(message)) {
 				processMessage(message);
 			} else {
-				String[] strings = { "Invalid message did not pass whitelist check - ", message };
-				log.error(ArrayToString.convertArrayToString(strings));
+				String[] strings = { "Invalid message did not pass whitelist check -", message };
+				log.error(String.join(" ", strings));
 				kafkaTemplate.send(deadLetterTopic, message);
 			}
 
@@ -111,13 +113,12 @@ public class ELRRMessageListener {
 
 			// *** ADD NEW RULES HERE ***
 			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
-					processInitialized, processPassed);
+					processInitialized, processPassed, processSatisfied);
 
 			outerloop: for (Rule rule : classList) {
 
-				String[] strings = { "Process verb ", statement.getVerb().getId(), " by ",
-						ruleToString(rule.toString()) };
-				log.info(ArrayToString.convertArrayToString(strings));
+				String[] strings = { "Process verb", statement.getVerb().getId(), "by", ruleToString(rule.toString()) };
+				log.info(String.join(" ", strings));
 
 				if (rule.fireRule(statement)) {
 
@@ -131,8 +132,8 @@ public class ELRRMessageListener {
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
 				| PersonNotFoundException | JsonProcessingException e) {
 
-			String[] strings = { "Error processing Kafka message - ", e.getMessage() };
-			log.error(ArrayToString.convertArrayToString(strings));
+			String[] strings = { "Error processing Kafka message -", e.getMessage() };
+			log.error(String.join(" ", strings));
 			throw e;
 
 		}
