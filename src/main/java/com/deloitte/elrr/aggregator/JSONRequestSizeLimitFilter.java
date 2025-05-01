@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.deloitte.elrr.aggregator.utils.ArrayToString;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +37,8 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request size exceeds the limit.");
 			}
 		} catch (IOException | ServletException e) {
-			log.error("Error: " + e.getMessage());
+			String[] strings = { "Error - ", e.getMessage() };
+			log.error(ArrayToString.convertArrayToString(strings));
 			e.printStackTrace();
 			return;
 		}

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Credential;
@@ -134,7 +135,8 @@ public class ProcessCredential implements Rule {
 			credential.setFrameworkTitle(activityName);
 			credential.setFrameworkDescription(activityDescription);
 			credentialService.save(credential);
-			log.info("Credential " + activity.getId() + " created.");
+			String[] strings = { "Credential ", activity.getId(), " created." };
+			log.info(ArrayToString.convertArrayToString(strings));
 
 		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 			log.error(e.getMessage());
@@ -164,7 +166,8 @@ public class ProcessCredential implements Rule {
 			credential.setFrameworkTitle(activityName);
 			credential.setFrameworkDescription(activityDescription);
 			credentialService.update(credential);
-			log.info("Credential " + activity.getId() + " updated.");
+			String[] strings = { "Credential ", activity.getId(), " updated." };
+			log.info(ArrayToString.convertArrayToString(strings));
 
 		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 			log.error(e.getMessage());
@@ -223,7 +226,9 @@ public class ProcessCredential implements Rule {
 		personalCredential.setHasRecord(true);
 		personalCredentialService.save(personalCredential);
 
-		log.info("Personal Credential for " + person.getName() + " - " + credential.getFrameworkTitle() + " created.");
+		String[] strings = { "Personal Credential ", person.getName(), " - ", credential.getFrameworkTitle(),
+				" created." };
+		log.info(ArrayToString.convertArrayToString(strings));
 
 		return personalCredential;
 	}
@@ -236,8 +241,9 @@ public class ProcessCredential implements Rule {
 			// TO DO
 			personalCredentialService.update(personalCredential);
 
-			log.info("Personal Credential for " + person.getName() + " - " + credential.getFrameworkTitle()
-					+ " updated.");
+			String[] strings = { "Personal Credential ", person.getName(), " - ", credential.getFrameworkTitle(),
+					" updated." };
+			log.info(ArrayToString.convertArrayToString(strings));
 
 		} catch (RuntimeServiceException e) {
 			throw e;

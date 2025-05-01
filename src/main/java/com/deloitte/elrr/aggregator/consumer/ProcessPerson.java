@@ -5,6 +5,7 @@ import java.util.HashSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
@@ -86,7 +87,8 @@ public class ProcessPerson {
 		if (identity != null) {
 			person = identity.getPerson();
 			if (person != null) {
-				log.info("Person " + person.getName() + " exists.");
+				String[] strings = { "Person ", person.getName(), " exists." };
+				log.info(ArrayToString.convertArrayToString(strings));
 			}
 		}
 
@@ -106,7 +108,7 @@ public class ProcessPerson {
 
 		// If email
 		if (actor.getMbox() != null && actor.getMbox().length() > 0) {
-			email = createEmail(actor);
+			email = createEmail(actor.getMbox());
 		}
 
 		Person person = new Person();
@@ -126,7 +128,8 @@ public class ProcessPerson {
 
 		personService.save(person);
 
-		log.info("Person " + person.getName() + " created.");
+		String[] strings = { "Person ", person.getName(), " created." };
+		log.info(ArrayToString.convertArrayToString(strings));
 
 		return person;
 	}
@@ -149,20 +152,23 @@ public class ProcessPerson {
 			identity.setName(account.getName());
 		}
 		identityService.save(identity);
-		log.info("Identity " + identity.getIfi() + " created.");
+		String[] strings = { "Identity ", identity.getIfi(), " created." };
+		log.info(ArrayToString.convertArrayToString(strings));
 		return identity;
 	}
 
 	/**
-	 * @param actor
+	 * @param emailAddrress
 	 * @return Email
 	 */
-	public Email createEmail(AbstractActor actor) {
+	public Email createEmail(String emailAddress) {
 		log.info("Creating new email.");
 		Email email = new Email();
+		email.setEmailAddress(emailAddress);
 		email.setEmailAddressType("primary");
 		emailService.save(email);
-		log.info("Email " + email.getEmailAddress() + " created.");
+		String[] strings = { "Email ", emailAddress, " created." };
+		log.info(ArrayToString.convertArrayToString(strings));
 		return email;
 	}
 }

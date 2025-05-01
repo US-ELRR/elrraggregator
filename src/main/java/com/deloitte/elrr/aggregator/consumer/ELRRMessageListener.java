@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -71,7 +72,8 @@ public class ELRRMessageListener {
 			if (InputSanitizer.isValidInput(message)) {
 				processMessage(message);
 			} else {
-				log.error("Invalid message did not pass whitelist check - " + message);
+				String[] strings = { "Invalid message did not pass whitelist check - ", message };
+				log.error(ArrayToString.convertArrayToString(strings));
 				kafkaTemplate.send(deadLetterTopic, message);
 			}
 
@@ -88,7 +90,7 @@ public class ELRRMessageListener {
 	 * @throws AggregatorException
 	 */
 	@Transactional
-	private void processMessage(final String payload) throws JsonProcessingException {
+	public void processMessage(final String payload) throws JsonProcessingException {
 
 		log.info(" \n\n ===============Process Kafka message===============");
 
@@ -113,7 +115,9 @@ public class ELRRMessageListener {
 
 			outerloop: for (Rule rule : classList) {
 
-				log.info("Process verb " + statement.getVerb().getId() + " by " + rule);
+				String[] strings = { "Process verb ", statement.getVerb().getId(), " by ",
+						ruleToString(rule.toString()) };
+				log.info(ArrayToString.convertArrayToString(strings));
 
 				if (rule.fireRule(statement)) {
 
@@ -127,11 +131,21 @@ public class ELRRMessageListener {
 		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
 				| PersonNotFoundException | JsonProcessingException e) {
 
-			log.error("Error processing Kafka message - " + e.getMessage());
+			String[] strings = { "Error processing Kafka message - ", e.getMessage() };
+			log.error(ArrayToString.convertArrayToString(strings));
 			throw e;
 
 		}
 
 	}
 
+	/**
+	 * @param rule
+	 * @return String
+	 */
+	private String ruleToString(String rule) {
+		int indx = rule.indexOf("Process");
+		int indx2 = rule.indexOf("@");
+		return rule.substring(indx, indx2);
+	}
 }

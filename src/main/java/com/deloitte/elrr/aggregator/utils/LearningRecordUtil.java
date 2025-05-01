@@ -94,7 +94,9 @@ public class LearningRecordUtil {
 
 		learningRecordService.save(learningRecord);
 
-		log.info("Learning record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
+		String[] strings = { "Learning record for  ", person.getName(), " - ", learningResource.getTitle(),
+				" created." };
+		log.info(ArrayToString.convertArrayToString(strings));
 
 		return learningRecord;
 	}
@@ -102,7 +104,6 @@ public class LearningRecordUtil {
 	/**
 	 * @param person
 	 * @param learningRecord
-	 * @param learningResource
 	 * @param verb
 	 * @param result
 	 * @return LearningRecord

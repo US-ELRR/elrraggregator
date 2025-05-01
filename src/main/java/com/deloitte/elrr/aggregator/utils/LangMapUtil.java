@@ -85,9 +85,11 @@ public class LangMapUtil {
 			return map.get(langCode);
 
 		} catch (ClassCastException | NullPointerException e) {
+			String[] strings = { "Error getting language codes - ", e.getMessage() };
+			log.error(ArrayToString.convertArrayToString(strings));
 			log.error("Error getting language codes - " + e.getMessage());
 			e.printStackTrace();
-			throw new AggregatorException("Error getting language code - " + e.getMessage());
+			throw new AggregatorException(ArrayToString.convertArrayToString(strings));
 		}
 	}
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deloitte.elrr.aggregator.utils.ArrayToString;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
@@ -95,13 +96,16 @@ public class ProcessCompetency implements Rule {
 
 			} else {
 
-				log.info("Competency " + activity.getId() + " exists.");
+				String[] strings = { "Competency ", activity.getId(), " exists." };
+				log.info(ArrayToString.convertArrayToString(strings));
 				competency = updateCompetency(competency, activity);
+
 			}
 
 		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 
-			log.error("Error processing competency - " + e.getMessage());
+			String[] strings = { "Error processing competency - ", e.getMessage() };
+			log.info(ArrayToString.convertArrayToString(strings));
 			e.printStackTrace();
 			throw e;
 		}
@@ -132,7 +136,8 @@ public class ProcessCompetency implements Rule {
 			competency.setFrameworkTitle(activityName);
 			competency.setFrameworkDescription(activityDescription);
 			competencyService.save(competency);
-			log.info("Competency " + activity.getId() + " created.");
+			String[] strings = { "Competency ", activity.getId(), " created." };
+			log.info(ArrayToString.convertArrayToString(strings));
 
 		} catch (AggregatorException | ClassCastException | NullPointerException e) {
 			log.error(e.getMessage());
