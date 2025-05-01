@@ -37,7 +37,7 @@ public class HeaderFilter implements Filter {
 					chain.doFilter(request, response);
 				} else {
 					log.error("Not a HTTPS request.");
-					((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST,
+					((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN,
 							"Not a HTTPS request.");
 				}
 			}
