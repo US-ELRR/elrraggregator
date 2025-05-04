@@ -13,8 +13,8 @@
         "definition": {
             "name": { "en-us": "Test Competency A" },
             "description": { "en-us": "Object representing Test Competency A level"},
-            "type": "https://w3id.org/xapi/tla/activity-types/competency"
-
+            "type": "https://w3id.org/xapi/tla/activity-types/competency",
+            "extensions": {"https://w3id.org/xapi/comp/contextextensions/expires": "2026-03-07"}
         }
     },
     "timestamp": "2025-03-07T09:15:12-05:00"
