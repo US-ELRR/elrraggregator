@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +18,7 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 
@@ -65,11 +65,15 @@ public class ProcessCompetency implements Rule {
             // Get Activity
             Activity activity = (Activity) statement.getObject();
 
+            // Get Extensions
+            Context context = statement.getContext();
+            Extensions extensions = context.getExtensions();
+
             // Process Competency
             Competency competency = processCompetency(activity);
 
             // Process PersonalCompetency
-            PersonalCompetency personalCompetency = processPersonalCompetency(activity, person, competency);
+            PersonalCompetency personalCompetency = processPersonalCompetency(activity, person, competency, extensions);
 
         } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
             throw e;
@@ -186,10 +190,11 @@ public class ProcessCompetency implements Rule {
      * @param Activity
      * @param Person
      * @param Competency
+     * @param Extensions
      * @return PersonalCompetency
      */
     private PersonalCompetency processPersonalCompetency(final Activity activity, Person person,
-            final Competency competency) {
+            final Competency competency, final Extensions extensions) {
 
         LocalDate expires = null;
 
@@ -197,13 +202,15 @@ public class ProcessCompetency implements Rule {
         PersonalCompetency personalCompetency = personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(),
                 competency.getId());
 
-        // Get Extensions
-        Extensions extensions = activity.getDefinition().getExtensions();
-
         if (extensions != null) {
+
             Map extensionMap = extensions.getMap();
-            String strExpires = (String) extensionMap.get("https://w3id.org/xapi/comp/contextextensions/expires");
-            expires = LocalDate.parse(strExpires);
+            String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+            if (strExpires != null) {
+                expires = LocalDate.parse(strExpires);
+            }
+
         }
 
         // If PersonalCompetancy doesn't exist
@@ -241,11 +248,11 @@ public class ProcessCompetency implements Rule {
         personalCompetency.setPerson(person);
         personalCompetency.setCompetency(competency);
         personalCompetency.setHasRecord(true);
-        
+
         if (expires != null) {
             personalCompetency.setExpires(expires);
         }
-        
+
         personalCompetencyService.save(personalCompetency);
 
         log.info("Personal Competency for " + person.getName() + " - " + competency.getFrameworkTitle() + " created.");
@@ -253,16 +260,28 @@ public class ProcessCompetency implements Rule {
         return personalCompetency;
     }
 
+    /**
+     * @param personalCompetency
+     * @param person
+     * @param competency
+     * @param expires
+     * @return
+     */
     private PersonalCompetency updatePersonalCompetency(PersonalCompetency personalCompetency, final Person person,
             final Competency competency, LocalDate expires) {
 
         try {
 
-            personalCompetency.setExpires(expires);
-            personalCompetencyService.update(personalCompetency);
+            if (expires != null) {
 
-            log.info("Personal Competency for " + person.getName() + " - " + competency.getFrameworkTitle()
-                    + " updated.");
+                personalCompetency.setExpires(expires);
+                personalCompetencyService.update(personalCompetency);
+
+                String[] strings = { "Personal Credential", person.getName(), "-",
+                        personalCompetency.getCompetency().getFrameworkTitle(), " updated." };
+                log.info(String.join(" ", strings));
+
+            }
 
         } catch (RuntimeServiceException e) {
             throw e;
