@@ -40,8 +40,6 @@ public class ProcessCredential implements Rule {
     @Autowired
     PersonSvc personService;
 
-    public static final String COMPLETED = "COMPLETED";
-
     @Override
     public boolean fireRule(final Statement statement) {
 
@@ -60,6 +58,8 @@ public class ProcessCredential implements Rule {
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
 
+        Extensions extensions = null;
+
         try {
 
             log.info("Process credential.");
@@ -69,7 +69,10 @@ public class ProcessCredential implements Rule {
 
             // Get Extensions
             Context context = statement.getContext();
-            Extensions extensions = context.getExtensions();
+
+            if (context != null) {
+                extensions = context.getExtensions();
+            }
 
             // Process Credential
             Credential credential = processCredential(activity);
@@ -138,7 +141,7 @@ public class ProcessCredential implements Rule {
 
             credential = new Credential();
             credential.setIdentifier(activity.getId());
-            credential.setRecordStatus(COMPLETED);
+            credential.setRecordStatus(StatusConstants.COMPLETED);
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);
@@ -169,7 +172,7 @@ public class ProcessCredential implements Rule {
             activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-            credential.setRecordStatus(COMPLETED);
+            credential.setRecordStatus(StatusConstants.COMPLETED);
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.update(credential);
@@ -239,7 +242,7 @@ public class ProcessCredential implements Rule {
      * @return PersonalCredential
      */
     private PersonalCredential createPersonalCredential(final Person person, final Credential credential,
-            LocalDate expires) {
+            final LocalDate expires) {
 
         log.info("Creating new personal credential record.");
         PersonalCredential personalCredential = new PersonalCredential();
@@ -269,14 +272,13 @@ public class ProcessCredential implements Rule {
      * @return
      */
     private PersonalCredential updatePersonalCredential(PersonalCredential personalCredential, final Person person,
-            final Credential credential, LocalDate expires) {
+            final Credential credential, final LocalDate expires) {
 
         try {
 
             if (expires != null) {
 
                 personalCredential.setExpires(expires);
-
                 personalCredentialService.update(personalCredential);
 
                 String[] strings = { "Personal Credential", person.getName(), "-", credential.getFrameworkTitle(),

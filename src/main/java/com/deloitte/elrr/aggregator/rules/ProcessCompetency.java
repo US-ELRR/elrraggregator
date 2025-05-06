@@ -40,8 +40,6 @@ public class ProcessCompetency implements Rule {
     @Autowired
     PersonSvc personService;
 
-    public static final String COMPLETED = "COMPLETED";
-
     @Override
     public boolean fireRule(final Statement statement) {
 
@@ -58,6 +56,8 @@ public class ProcessCompetency implements Rule {
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
 
+        Extensions extensions = null;
+
         try {
 
             log.info("Process competency.");
@@ -67,7 +67,10 @@ public class ProcessCompetency implements Rule {
 
             // Get Extensions
             Context context = statement.getContext();
-            Extensions extensions = context.getExtensions();
+
+            if (context != null) {
+                extensions = context.getExtensions();
+            }
 
             // Process Competency
             Competency competency = processCompetency(activity);
@@ -139,7 +142,7 @@ public class ProcessCompetency implements Rule {
 
             competency = new Competency();
             competency.setIdentifier(activity.getId());
-            competency.setRecordStatus(COMPLETED);
+            competency.setRecordStatus(StatusConstants.COMPLETED);
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.save(competency);
@@ -171,7 +174,7 @@ public class ProcessCompetency implements Rule {
             activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-            competency.setRecordStatus(COMPLETED);
+            competency.setRecordStatus(StatusConstants.COMPLETED);
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.update(competency);
@@ -240,7 +243,7 @@ public class ProcessCompetency implements Rule {
      * @return PersonalCompetency
      */
     private PersonalCompetency createPersonalCompetency(final Person person, final Competency competency,
-            LocalDate expires) {
+            final LocalDate expires) {
 
         log.info("Creating new personal competency record.");
         PersonalCompetency personalCompetency = new PersonalCompetency();
@@ -268,7 +271,7 @@ public class ProcessCompetency implements Rule {
      * @return
      */
     private PersonalCompetency updatePersonalCompetency(PersonalCompetency personalCompetency, final Person person,
-            final Competency competency, LocalDate expires) {
+            final Competency competency, final LocalDate expires) {
 
         try {
 
