@@ -28,125 +28,128 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-	@Autowired
-	private Rule processCompleted;
+    @Autowired
+    private Rule processCompleted;
 
-	@Autowired
-	private Rule processCompetency;
+    @Autowired
+    private Rule processCompetency;
 
-	@Autowired
-	private Rule processCredential;
+    @Autowired
+    private Rule processCredential;
 
-	@Autowired
-	private ProcessPerson processPerson;
+    @Autowired
+    private ProcessPerson processPerson;
 
-	@Autowired
-	private Rule processPassed;
+    @Autowired
+    private Rule processPassed;
 
-	@Autowired
-	private Rule processFailed;
+    @Autowired
+    private Rule processFailed;
 
-	@Autowired
-	private Rule processInitialized;
+    @Autowired
+    private Rule processInitialized;
 
-	@Autowired
-	private Rule processSatisfied;
+    @Autowired
+    private Rule processSatisfied;
 
-	@Autowired
-	KafkaTemplate<?, String> kafkaTemplate;
+    @Autowired
+    private Rule processRegistered;
 
-	@Value("${kafka.dead.letter.topic}")
-	private String deadLetterTopic;
+    @Autowired
+    KafkaTemplate<?, String> kafkaTemplate;
 
-	/**
-	 * @param message
-	 * @throws JsonProcessingException
-	 */
-	@Transactional
-	@KafkaListener(topics = "${kafka.topic}")
-	public void listen(final String message) throws JsonProcessingException {
+    @Value("${kafka.dead.letter.topic}")
+    private String deadLetterTopic;
 
-		log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
+    /**
+     * @param message
+     * @throws JsonProcessingException
+     */
+    @Transactional
+    @KafkaListener(topics = "${kafka.topic}")
+    public void listen(final String message) throws JsonProcessingException {
 
-		try {
+        log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
-			// If valid message process otherwise send to dead letter queue
-			if (InputSanitizer.isValidInput(message)) {
-				processMessage(message);
-			} else {
-				String[] strings = { "Invalid message did not pass whitelist check -", message };
-				log.error(String.join(" ", strings));
-				kafkaTemplate.send(deadLetterTopic, message);
-			}
+        try {
 
-		} catch (AggregatorException | JsonProcessingException e) {
-			// Send to dead letter queue
-			kafkaTemplate.send(deadLetterTopic, message);
-			throw e;
-		}
-	}
+            // If valid message process otherwise send to dead letter queue
+            if (InputSanitizer.isValidInput(message)) {
+                processMessage(message);
+            } else {
+                String[] strings = { "Invalid message did not pass whitelist check -", message };
+                log.error(String.join(" ", strings));
+                kafkaTemplate.send(deadLetterTopic, message);
+            }
 
-	/**
-	 * @param statement
-	 * @throws JsonProcessingException
-	 * @throws AggregatorException
-	 */
-	@Transactional
-	public void processMessage(final String payload) throws JsonProcessingException {
+        } catch (AggregatorException | JsonProcessingException e) {
+            // Send to dead letter queue
+            kafkaTemplate.send(deadLetterTopic, message);
+            throw e;
+        }
+    }
 
-		log.info(" \n\n ===============Process Kafka message===============");
+    /**
+     * @param statement
+     * @throws JsonProcessingException
+     * @throws AggregatorException
+     */
+    @Transactional
+    public void processMessage(final String payload) throws JsonProcessingException {
 
-		Statement statement = null;
-		Person person = null;
-		MessageVO messageVo = null;
+        log.info(" \n\n ===============Process Kafka message===============");
 
-		try {
+        Statement statement = null;
+        Person person = null;
+        MessageVO messageVo = null;
 
-			ObjectMapper mapper = Mapper.getMapper();
+        try {
 
-			// Get Statement
-			messageVo = mapper.readValue(payload, MessageVO.class);
-			statement = messageVo.getStatement();
+            ObjectMapper mapper = Mapper.getMapper();
 
-			// Process Person
-			person = processPerson.processPerson(statement);
+            // Get Statement
+            messageVo = mapper.readValue(payload, MessageVO.class);
+            statement = messageVo.getStatement();
 
-			// *** ADD NEW RULES HERE ***
-			List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
-					processInitialized, processPassed, processSatisfied);
+            // Process Person
+            person = processPerson.processPerson(statement);
 
-			outerloop: for (Rule rule : classList) {
+            // *** ADD NEW RULES HERE ***
+            List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
+                    processInitialized, processPassed, processSatisfied, processRegistered);
 
-				String[] strings = { "Process verb", statement.getVerb().getId(), "by", ruleToString(rule.toString()) };
-				log.info(String.join(" ", strings));
+            outerloop: for (Rule rule : classList) {
 
-				if (rule.fireRule(statement)) {
+                String[] strings = { "Process verb", statement.getVerb().getId(), "by", ruleToString(rule.toString()) };
+                log.info(String.join(" ", strings));
 
-					// Process Rule
-					rule.processRule(person, statement);
-					break outerloop;
+                if (rule.fireRule(statement)) {
 
-				}
-			}
+                    // Process Rule
+                    rule.processRule(person, statement);
+                    break outerloop;
 
-		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
-				| PersonNotFoundException | JsonProcessingException e) {
+                }
+            }
 
-			String[] strings = { "Error processing Kafka message -", e.getMessage() };
-			log.error(String.join(" ", strings));
-			throw e;
+        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
+                | PersonNotFoundException | JsonProcessingException e) {
 
-		}
+            String[] strings = { "Error processing Kafka message -", e.getMessage() };
+            log.error(String.join(" ", strings));
+            throw e;
 
-	}
+        }
 
-	/**
-	 * @param rule
-	 * @return String
-	 */
-	private String ruleToString(String rule) {
-		int indx = rule.indexOf("Process");
-		int indx2 = rule.indexOf("@");
-		return rule.substring(indx, indx2);
-	}
+    }
+
+    /**
+     * @param rule
+     * @return String
+     */
+    private String ruleToString(String rule) {
+        int indx = rule.indexOf("Process");
+        int indx2 = rule.indexOf("@");
+        return rule.substring(indx, indx2);
+    }
 }
