@@ -12,7 +12,6 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
@@ -23,53 +22,62 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessSatisfied implements Rule {
 
-	@Autowired
-	LearningResourceUtil learningResourceUtil;
+    @Autowired
+    LearningResourceUtil learningResourceUtil;
 
-	@Autowired
-	LearningRecordUtil learningRecordUtil;
+    @Autowired
+    LearningRecordUtil learningRecordUtil;
 
-	@Autowired
-	PersonSvc personService;
+    @Autowired
+    PersonSvc personService;
 
-	@Override
-	public boolean fireRule(final Statement statement) {
+    /**
+     * @param Statement
+     * @return boolean
+     */
+    @Override
+    public boolean fireRule(final Statement statement) {
 
-		// Is Verb Id = satisfied and object = activity
-		return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID)
-				&& statement.getObject() instanceof Activity);
+        // Is Verb Id = satisfied and object = activity
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID)
+                && statement.getObject() instanceof Activity);
 
-	}
+    }
 
-	@Override
-	@Transactional
-	public Person processRule(final Person person, final Statement statement) {
+    /**
+     * @param Person
+     * @param Statement
+     * @throws AggregatorException
+     */
+    @Override
+    @Transactional
+    public Person processRule(final Person person, final Statement statement) {
 
-		try {
+        try {
 
-			log.info("Process activity satisfied");
+            log.info("Process activity satisfied");
 
-			// Get Activity
-			Activity activity = (Activity) statement.getObject();
+            // Get Activity
+            Activity activity = (Activity) statement.getObject();
 
-			// Process LearningResource
-			LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
+            // Process LearningResource
+            LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
 
-			// Process LearningRecord
-			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person,
-					statement.getVerb(), statement.getResult(), learningResource);
+            // Process LearningRecord
+            LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person,
+                    statement.getVerb(), statement.getResult(), learningResource);
 
-			if (person.getLearningRecords() == null) {
-				person.setLearningRecords(new HashSet<LearningRecord>());
-			}
+            if (person.getLearningRecords() == null) {
+                person.setLearningRecords(new HashSet<LearningRecord>());
+            }
 
-			person.getLearningRecords().add(learningRecord);
-			personService.save(person);
+            person.getLearningRecords().add(learningRecord);
+            personService.save(person);
 
-		} catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
-			throw e;
-		}
+        } catch (AggregatorException e) {
+            throw e;
+        }
 
-		return person;
-	}
+        return person;
+    }
 }

@@ -18,37 +18,36 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
 
-	@Value("${json.max.size.limit}")
-	private long MAX_SIZE_LIMIT;
+    @Value("${json.max.size.limit}")
+    private long MAX_SIZE_LIMIT;
 
-	@Value("${check.media.type.json}")
-	private boolean checkMediaTypeJson;
+    @Value("${check.media.type.json}")
+    private boolean checkMediaTypeJson;
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		try {
-			if (isApplicationJson(request) && request.getContentLengthLong() < MAX_SIZE_LIMIT) {
-				filterChain.doFilter(request, response);
-			} else {
-				log.error("Request size exceeds the limit.");
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request size exceeds the limit.");
-			}
-		} catch (IOException | ServletException e) {
-			String[] strings = { "Error -", e.getMessage() };
-			log.error(String.join(" ", strings));
-			e.printStackTrace();
-			return;
-		}
-	}
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        try {
+            if (isApplicationJson(request) && request.getContentLengthLong() < MAX_SIZE_LIMIT) {
+                filterChain.doFilter(request, response);
+            } else {
+                log.error("Request size exceeds the limit.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request size exceeds the limit.");
+            }
+        } catch (IOException | ServletException e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+    }
 
-	private boolean isApplicationJson(HttpServletRequest httpRequest) {
+    private boolean isApplicationJson(HttpServletRequest httpRequest) {
 
-		if (!checkMediaTypeJson) {
-			return true;
-		} else {
-			return (MediaType.APPLICATION_JSON
-					.isCompatibleWith(MediaType.parseMediaType(httpRequest.getHeader(HttpHeaders.CONTENT_TYPE))));
-		}
-	}
+        if (!checkMediaTypeJson) {
+            return true;
+        } else {
+            return (MediaType.APPLICATION_JSON
+                    .isCompatibleWith(MediaType.parseMediaType(httpRequest.getHeader(HttpHeaders.CONTENT_TYPE))));
+        }
+    }
 }

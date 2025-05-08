@@ -31,6 +31,7 @@ public class LearningRecordUtil {
      * @param Result
      * @param LearningResource
      * @return LearningRccord
+     * @throws RuntimeServiceException
      */
     public LearningRecord processLearningRecord(final Activity activity, final Person person, final Verb verb,
             final Result result, final LearningResource learningResource) {
@@ -53,7 +54,7 @@ public class LearningRecordUtil {
                 // If learningRecord already exists
             } else {
 
-                learningRecord = updateLearningRecord(learningRecord, verb, result);
+                learningRecord = updateLearningRecord(person, learningRecord, verb, result);
             }
 
         } catch (RuntimeServiceException e) {
@@ -94,20 +95,21 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        String[] strings = { "Learning record for", person.getName(), "-", learningResource.getTitle(), " created." };
-        log.info(String.join(" ", strings));
+        log.info("Learning Record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
 
         return learningRecord;
     }
 
     /**
-     * @param person
-     * @param learningRecord
-     * @param verb
-     * @param result
+     * @param Person
+     * @param LearningRecord
+     * @param Verb
+     * @param Result
      * @return LearningRecord
+     * @throws RuntimeServiceException
      */
-    private LearningRecord updateLearningRecord(LearningRecord learningRecord, final Verb verb, final Result result) {
+    private LearningRecord updateLearningRecord(Person person, LearningRecord learningRecord, final Verb verb,
+            final Result result) {
 
         log.info("Update learning record.");
 
@@ -129,6 +131,9 @@ public class LearningRecordUtil {
 
             learningRecordService.update(learningRecord);
 
+            log.info("Learning Record for " + person.getName() + " - " + learningRecord.getLearningResource().getTitle()
+                    + " updated.");
+
         } catch (RuntimeServiceException e) {
             throw e;
         }
@@ -142,8 +147,7 @@ public class LearningRecordUtil {
      */
     private LearningStatus getStatus(final Verb verb, final Result result) {
 
-        String[] strings = { "Verb =", verb.getId() };
-        log.info(String.join(" ", strings));
+        log.info("Verb = " + verb.getId());
 
         if (verb.getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)) {
 

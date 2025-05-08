@@ -14,77 +14,75 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LearningResourceUtil {
 
-	@Autowired
-	private LearningResourceSvc learningResourceService;
+    @Autowired
+    private LearningResourceSvc learningResourceService;
 
-	@Autowired
-	private LangMapUtil langMapUtil;
+    @Autowired
+    private LangMapUtil langMapUtil;
 
-	/**
-	 * @param activity
-	 * @return LearningResource
-	 */
-	public LearningResource processLearningResource(final Activity activity) {
+    /**
+     * @param activity
+     * @return LearningResource
+     * @throws AggregatorException
+     */
+    public LearningResource processLearningResource(final Activity activity) {
 
-		log.info("Process learning resource.");
+        log.info("Process learning resource.");
 
-		// Get learningResource
-		LearningResource learningResource = learningResourceService.findByIri(activity.getId());
+        // Get learningResource
+        LearningResource learningResource = learningResourceService.findByIri(activity.getId());
 
-		// If LearningResource already exists
-		if (learningResource != null) {
+        // If LearningResource already exists
+        if (learningResource != null) {
 
-			String[] strings = { "Learning resource", learningResource.getTitle(), "exists." };
-			log.info(String.join(" ", strings));
+            log.info("Learning Resource " + learningResource.getTitle() + " exists.");
 
-		} else {
+        } else {
 
-			try {
+            try {
 
-				learningResource = createLearningResource(activity);
+                learningResource = createLearningResource(activity);
 
-			} catch (AggregatorException | ClassCastException | NullPointerException e) {
+            } catch (AggregatorException e) {
+                log.error("Error processing learning resource", e);
+                e.printStackTrace();
+                throw e;
+            }
+        }
 
-				String[] strings = { "Error processing learning resource -", e.getMessage() };
-				log.error(String.join(" ", strings));
-				e.printStackTrace();
-				throw e;
-			}
-		}
+        return learningResource;
+    }
 
-		return learningResource;
-	}
+    /**
+     * @param Activity
+     * @return LearningResource
+     * @throws AggregatorException
+     */
+    private LearningResource createLearningResource(final Activity activity) {
 
-	/**
-	 * @param activity
-	 * @return LearningResource
-	 */
-	private LearningResource createLearningResource(final Activity activity) {
+        log.info("Creating new learning resource.");
 
-		log.info("Creating new learning resource.");
+        LearningResource learningResource = null;
 
-		LearningResource learningResource = null;
+        try {
 
-		try {
+            String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+            String activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-			String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-			String activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            learningResource = new LearningResource();
+            learningResource.setIri(activity.getId());
+            learningResource.setDescription(activityDescription);
+            learningResource.setTitle(activityName);
+            learningResourceService.save(learningResource);
 
-			learningResource = new LearningResource();
-			learningResource.setIri(activity.getId());
-			learningResource.setDescription(activityDescription);
-			learningResource.setTitle(activityName);
-			learningResourceService.save(learningResource);
+            log.info("Learning Resource " + learningResource.getTitle() + " created.");
 
-			String[] strings = { "Learning resource", learningResource.getTitle(), "created." };
-			log.info(String.join(" ", strings));
+        } catch (AggregatorException e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
 
-		} catch (AggregatorException | ClassCastException | NullPointerException e) {
-			log.error(e.getMessage());
-			e.printStackTrace();
-			throw e;
-		}
-
-		return learningResource;
-	}
+        return learningResource;
+    }
 }

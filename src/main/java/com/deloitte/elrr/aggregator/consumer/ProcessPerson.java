@@ -22,152 +22,153 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessPerson {
 
-	@Autowired
-	private EmailSvc emailService;
+    @Autowired
+    private EmailSvc emailService;
 
-	@Autowired
-	private IdentitySvc identityService;
+    @Autowired
+    private IdentitySvc identityService;
 
-	@Autowired
-	private PersonSvc personService;
+    @Autowired
+    private PersonSvc personService;
 
-	public Person processPerson(Statement statement) {
+    /**
+     * @param statement
+     * @return Person
+     * @throws PersonNotFoundException
+     */
+    public Person processPerson(Statement statement) {
 
-		AbstractActor actor = null;
-		Person person = null;
-		Account account = null;
+        AbstractActor actor = null;
+        Person person = null;
+        Account account = null;
 
-		// Get Actor and account
-		if (statement.getActor() instanceof AbstractActor) {
+        // Get Actor and account
+        if (statement.getActor() instanceof AbstractActor) {
 
-			actor = (AbstractActor) statement.getActor();
-			account = actor.getAccount();
+            actor = (AbstractActor) statement.getActor();
+            account = actor.getAccount();
 
-		} else {
+        } else {
 
-			log.error("Actor not found.");
-			throw new PersonNotFoundException("Actor not found.");
+            log.error("Actor not found.");
+            throw new PersonNotFoundException("Actor not found.");
 
-		}
+        }
 
-		log.info("Process person.");
+        log.info("Process person.");
 
-		// Get Person
-		person = getPerson(actor, account);
+        // Get Person
+        person = getPerson(actor, account);
 
-		// If Person doesn't exist
-		if (person == null) {
-			person = createPerson(actor, account);
-		}
+        // If Person doesn't exist
+        if (person == null) {
+            person = createPerson(actor, account);
+        }
 
-		// If error creating Person
-		if (person == null) {
-			throw new PersonNotFoundException("Person not found.");
-		}
+        // If error creating Person
+        if (person == null) {
+            throw new PersonNotFoundException("Person not found.");
+        }
 
-		return person;
-	}
+        return person;
+    }
 
-	/**
-	 * @param actor
-	 * @param Person
-	 */
-	public Person getPerson(AbstractActor actor, Account account) {
+    /**
+     * @param actor
+     * @param Person
+     */
+    public Person getPerson(AbstractActor actor, Account account) {
 
-		Person person = null;
+        Person person = null;
 
-		// Does person exist
-		String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(), actor.getOpenid(),
-				(account != null) ? account.getHomePage() : null, (account != null) ? account.getName() : null);
+        // Does person exist
+        String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(), actor.getOpenid(),
+                (account != null) ? account.getHomePage() : null, (account != null) ? account.getName() : null);
 
-		Identity identity = identityService.getByIfi(ifi);
+        Identity identity = identityService.getByIfi(ifi);
 
-		// If person already exists
-		if (identity != null) {
-			person = identity.getPerson();
-			if (person != null) {
-				String[] strings = { "Person", person.getName(), "exists." };
-				log.info(String.join(" ", strings));
-			}
-		}
+        // If person already exists
+        if (identity != null) {
+            person = identity.getPerson();
+            if (person != null) {
+                log.info("Person " + person.getName() + " exists.");
+            }
+        }
 
-		return person;
-	}
+        return person;
+    }
 
-	/**
-	 * @param actor
-	 * @param account
-	 * @return Person
-	 */
-	public Person createPerson(AbstractActor actor, Account account) {
+    /**
+     * @param actor
+     * @param account
+     * @return Person
+     */
+    public Person createPerson(AbstractActor actor, Account account) {
 
-		log.info("Creating new person.");
+        log.info("Creating new person.");
 
-		Email email = null;
+        Email email = null;
 
-		// If email
-		if (actor.getMbox() != null && actor.getMbox().length() > 0) {
-			email = createEmail(actor.getMbox());
-		}
+        // If email
+        if (actor.getMbox() != null && actor.getMbox().length() > 0) {
+            email = createEmail(actor.getMbox());
+        }
 
-		Person person = new Person();
-		person.setName(actor.getName());
-		personService.save(person);
+        Person person = new Person();
+        person.setName(actor.getName());
+        personService.save(person);
 
-		// If email
-		if (email != null) {
-			person.setEmailAddresses(new HashSet<Email>());
-			person.getEmailAddresses().add(email);
-		}
+        // If email
+        if (email != null) {
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+        }
 
-		Identity identity = createIdentity(person, actor, account);
+        Identity identity = createIdentity(person, actor, account);
 
-		person.setIdentities(new HashSet<Identity>());
-		person.getIdentities().add(identity);
+        person.setIdentities(new HashSet<Identity>());
+        person.getIdentities().add(identity);
 
-		personService.save(person);
+        personService.save(person);
 
-		String[] strings = { "Person", person.getName(), "created." };
-		log.info(String.join(" ", strings));
+        log.info("Person " + person.getName() + " created.");
 
-		return person;
-	}
+        return person;
+    }
 
-	/**
-	 * @param person
-	 * @param actor
-	 * @param account
-	 * @return Identity
-	 */
-	public Identity createIdentity(Person person, AbstractActor actor, Account account) {
-		log.info("Creating new identity.");
-		Identity identity = new Identity();
-		identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-		identity.setMbox(actor.getMbox());
-		identity.setOpenid(actor.getOpenid());
-		identity.setPerson(person);
-		if (account != null) {
-			identity.setHomePage(account.getHomePage());
-			identity.setName(account.getName());
-		}
-		identityService.save(identity);
-		String[] strings = { "Identity", identity.getIfi(), "created." };
-		log.info(String.join(" ", strings));
-		return identity;
-	}
+    /**
+     * @param person
+     * @param actor
+     * @param account
+     * @return Identity
+     */
+    public Identity createIdentity(Person person, AbstractActor actor, Account account) {
+        log.info("Creating new identity.");
+        Identity identity = new Identity();
+        identity.setMboxSha1Sum(actor.getMbox_sha1sum());
+        identity.setMbox(actor.getMbox());
+        identity.setOpenid(actor.getOpenid());
+        identity.setPerson(person);
+        if (account != null) {
+            identity.setHomePage(account.getHomePage());
+            identity.setName(account.getName());
+        }
+        identityService.save(identity);
+        log.info("Identity " + identity.getIfi() + " created.");
+        return identity;
+    }
 
-	/**
-	 * @param emailAddrress
-	 * @return Email
-	 */
-	public Email createEmail(String emailAddress) {
-		log.info("Creating new email.");
-		Email email = new Email();
-		email.setEmailAddress(emailAddress);
-		email.setEmailAddressType("primary");
-		emailService.save(email);
-		String[] strings = { "Email", emailAddress, "created." };
-		log.info(String.join(" ", strings));
-		return email;
-	}
+    /**
+     * @param emailAddrress
+     * @return Email
+     */
+    public Email createEmail(String emailAddress) {
+        log.info("Creating new email.");
+        Email email = new Email();
+        email.setEmailAddress(emailAddress);
+        email.setEmailAddressType("primary");
+        emailService.save(email);
+        log.info("Email " + emailAddress + " created.");
+        return email;
+    }
 }

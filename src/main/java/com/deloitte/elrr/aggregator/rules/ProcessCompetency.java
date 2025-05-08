@@ -40,6 +40,10 @@ public class ProcessCompetency implements Rule {
     @Autowired
     PersonSvc personService;
 
+    /**
+     * @param Statement
+     * @return boolean
+     */
     @Override
     public boolean fireRule(final Statement statement) {
 
@@ -52,6 +56,12 @@ public class ProcessCompetency implements Rule {
                 && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
     }
 
+    /**
+     * @param Person
+     * @param Statement
+     * @return Person
+     * @throws AggregatorException
+     */
     @Override
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
@@ -78,7 +88,7 @@ public class ProcessCompetency implements Rule {
             // Process PersonalCompetency
             PersonalCompetency personalCompetency = processPersonalCompetency(activity, person, competency, extensions);
 
-        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+        } catch (AggregatorException e) {
             throw e;
         }
 
@@ -86,8 +96,9 @@ public class ProcessCompetency implements Rule {
     }
 
     /**
-     * @param statement
-     * @return competency
+     * @param Activity
+     * @return Competency
+     * @throws AggregatorException
      */
     private Competency processCompetency(final Activity activity) {
 
@@ -106,16 +117,13 @@ public class ProcessCompetency implements Rule {
 
             } else {
 
-                String[] strings = { "Competency", activity.getId(), "exists." };
-                log.info(String.join(" ", strings));
+                log.info("Competency " + activity.getId() + " exists.");
                 competency = updateCompetency(competency, activity);
 
             }
 
-        } catch (AggregatorException | ClassCastException | NullPointerException e) {
-
-            String[] strings = { "Error processing competency -", e.getMessage() };
-            log.info(String.join(" ", strings));
+        } catch (AggregatorException e) {
+            log.info(e.getMessage());
             e.printStackTrace();
             throw e;
         }
@@ -124,8 +132,9 @@ public class ProcessCompetency implements Rule {
     }
 
     /**
-     * @param activity
-     * @return competency
+     * @param Activity
+     * @return Competency
+     * @throws AggregatorException
      */
     private Competency createCompetency(final Activity activity) {
 
@@ -146,10 +155,9 @@ public class ProcessCompetency implements Rule {
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.save(competency);
-            String[] strings = { "Competency", activity.getId(), "created." };
-            log.info(String.join(" ", strings));
+            log.info("Competency " + activity.getId() + " created.");
 
-        } catch (AggregatorException | ClassCastException | NullPointerException e) {
+        } catch (AggregatorException e) {
             log.error(e.getMessage());
             e.printStackTrace();
             throw e;
@@ -159,8 +167,10 @@ public class ProcessCompetency implements Rule {
     }
 
     /**
-     * @param activity
-     * @return competency
+     * @param Competency
+     * @param Activity
+     * @return Competency
+     * @throws AggregatorException
      */
     private Competency updateCompetency(Competency competency, final Activity activity) {
 
@@ -180,7 +190,7 @@ public class ProcessCompetency implements Rule {
             competencyService.update(competency);
             log.info("Competency " + activity.getId() + " updated.");
 
-        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+        } catch (AggregatorException e) {
             log.error(e.getMessage());
             e.printStackTrace();
             throw e;
@@ -258,7 +268,8 @@ public class ProcessCompetency implements Rule {
 
         personalCompetencyService.save(personalCompetency);
 
-        log.info("Personal Competency for " + person.getName() + " - " + competency.getFrameworkTitle() + " created.");
+        log.info("Personal Competency for " + person.getName() + " - "
+                + personalCompetency.getCompetency().getFrameworkTitle() + " created.");
 
         return personalCompetency;
     }
@@ -268,7 +279,8 @@ public class ProcessCompetency implements Rule {
      * @param person
      * @param competency
      * @param expires
-     * @return
+     * @return PersonalCompetency
+     * @throws RuntimeServiceException
      */
     private PersonalCompetency updatePersonalCompetency(PersonalCompetency personalCompetency, final Person person,
             final Competency competency, final LocalDate expires) {
@@ -280,9 +292,8 @@ public class ProcessCompetency implements Rule {
                 personalCompetency.setExpires(expires);
                 personalCompetencyService.update(personalCompetency);
 
-                String[] strings = { "Personal Credential", person.getName(), "-",
-                        personalCompetency.getCompetency().getFrameworkTitle(), " updated." };
-                log.info(String.join(" ", strings));
+                log.info("Personal Competency for " + person.getName() + " - "
+                        + personalCompetency.getCompetency().getFrameworkTitle() + " updated.");
 
             }
 

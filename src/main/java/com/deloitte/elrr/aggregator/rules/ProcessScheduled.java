@@ -12,7 +12,6 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
@@ -32,6 +31,10 @@ public class ProcessScheduled implements Rule {
     @Autowired
     PersonSvc personService;
 
+    /**
+     * @param Statement
+     * @return boolean
+     */
     @Override
     public boolean fireRule(final Statement statement) {
 
@@ -41,6 +44,11 @@ public class ProcessScheduled implements Rule {
 
     }
 
+    /**
+     * @param Person
+     * @param Statement
+     * @throws AggregatorException
+     */
     @Override
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
@@ -66,7 +74,7 @@ public class ProcessScheduled implements Rule {
             person.getLearningRecords().add(learningRecord);
             personService.save(person);
 
-        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+        } catch (AggregatorException e) {
             throw e;
         }
 

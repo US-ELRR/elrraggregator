@@ -16,7 +16,6 @@ import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
-import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
@@ -65,12 +64,12 @@ public class ELRRMessageListener {
     private String deadLetterTopic;
 
     /**
-     * @param message
-     * @throws JsonProcessingException
+     * @param String
+     * @throws AggregatorException
      */
     @Transactional
     @KafkaListener(topics = "${kafka.topic}")
-    public void listen(final String message) throws JsonProcessingException {
+    public void listen(final String message) {
 
         log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
 
@@ -80,12 +79,11 @@ public class ELRRMessageListener {
             if (InputSanitizer.isValidInput(message)) {
                 processMessage(message);
             } else {
-                String[] strings = { "Invalid message did not pass whitelist check -", message };
-                log.error(String.join(" ", strings));
+                log.error("Invalid message did not pass whitelist check - " + message);
                 kafkaTemplate.send(deadLetterTopic, message);
             }
 
-        } catch (AggregatorException | JsonProcessingException e) {
+        } catch (AggregatorException e) {
             // Send to dead letter queue
             kafkaTemplate.send(deadLetterTopic, message);
             throw e;
@@ -93,12 +91,11 @@ public class ELRRMessageListener {
     }
 
     /**
-     * @param statement
-     * @throws JsonProcessingException
+     * @param String
      * @throws AggregatorException
      */
     @Transactional
-    public void processMessage(final String payload) throws JsonProcessingException {
+    public void processMessage(final String payload) {
 
         log.info(" \n\n ===============Process Kafka message===============");
 
@@ -121,26 +118,22 @@ public class ELRRMessageListener {
             List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
                     processInitialized, processPassed, processSatisfied, processRegistered, processScheduled);
 
-            outerloop: for (Rule rule : classList) {
+            for (Rule rule : classList) {
 
-                String[] strings = { "Process verb", statement.getVerb().getId(), "by", ruleToString(rule.toString()) };
-                log.info(String.join(" ", strings));
+                log.info("Process verb " + statement.getVerb().getId() + " by " + ruleToString(rule.toString()));
 
                 if (rule.fireRule(statement)) {
 
                     // Process Rule
                     rule.processRule(person, statement);
-                    break outerloop;
 
                 }
             }
 
-        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException
-                | PersonNotFoundException | JsonProcessingException e) {
+        } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
 
-            String[] strings = { "Error processing Kafka message -", e.getMessage() };
-            log.error(String.join(" ", strings));
-            throw e;
+            log.error("Error processing Kafka message", e);
+            throw new AggregatorException("Error processing Kafka message.");
 
         }
 

@@ -40,6 +40,10 @@ public class ProcessCredential implements Rule {
     @Autowired
     PersonSvc personService;
 
+    /**
+     * @param Statement
+     * @return boolean
+     */
     @Override
     public boolean fireRule(final Statement statement) {
 
@@ -54,6 +58,11 @@ public class ProcessCredential implements Rule {
 
     }
 
+    /**
+     * @param Person
+     * @param Statement
+     * @throws AggregatorException
+     */
     @Override
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
@@ -80,7 +89,7 @@ public class ProcessCredential implements Rule {
             // Process PersonalCredential
             PersonalCredential personalCredential = processPersonalCredential(activity, person, credential, extensions);
 
-        } catch (AggregatorException | ClassCastException | NullPointerException | RuntimeServiceException e) {
+        } catch (AggregatorException e) {
             throw e;
         }
 
@@ -90,6 +99,7 @@ public class ProcessCredential implements Rule {
     /**
      * @param statement
      * @return credential
+     * @throws AggregatorException
      */
     private Credential processCredential(final Activity activity) {
 
@@ -112,9 +122,8 @@ public class ProcessCredential implements Rule {
                 credential = updateCredential(credential, activity);
             }
 
-        } catch (AggregatorException | ClassCastException | NullPointerException e) {
-
-            log.error("Error processing competency - " + e.getMessage());
+        } catch (AggregatorException e) {
+            log.error("Error processing competency", e);
             e.printStackTrace();
             throw e;
         }
@@ -125,6 +134,7 @@ public class ProcessCredential implements Rule {
     /**
      * @param activity
      * @return credential
+     * @throws AggregatorException
      */
     private Credential createCredential(final Activity activity) {
 
@@ -145,10 +155,9 @@ public class ProcessCredential implements Rule {
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);
-            String[] strings = { "Credential", activity.getId(), "created." };
-            log.info(String.join(" ", strings));
+            log.info("Credential " + activity.getId() + " created.");
 
-        } catch (AggregatorException | ClassCastException | NullPointerException e) {
+        } catch (AggregatorException e) {
             log.error(e.getMessage());
             e.printStackTrace();
             throw e;
@@ -160,6 +169,7 @@ public class ProcessCredential implements Rule {
     /**
      * @param activity
      * @return credential
+     * @throws AggregatorException
      */
     private Credential updateCredential(Credential credential, final Activity activity) {
 
@@ -176,10 +186,9 @@ public class ProcessCredential implements Rule {
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.update(credential);
-            String[] strings = { "Credential", activity.getId(), "updated." };
-            log.info(String.join(" ", strings));
+            log.info("Credential " + activity.getId() + " updated.");
 
-        } catch (AggregatorException | ClassCastException | NullPointerException e) {
+        } catch (AggregatorException e) {
             log.error(e.getMessage());
             e.printStackTrace();
             throw e;
@@ -257,9 +266,8 @@ public class ProcessCredential implements Rule {
 
         personalCredentialService.save(personalCredential);
 
-        String[] strings = { "Personal Credential", person.getName(), "-", credential.getFrameworkTitle(),
-                " created." };
-        log.info(String.join(" ", strings));
+        log.info("Personal Credential for " + person.getName() + " - "
+                + personalCredential.getCredential().getFrameworkTitle() + " created.");
 
         return personalCredential;
     }
@@ -269,7 +277,8 @@ public class ProcessCredential implements Rule {
      * @param person
      * @param credential
      * @param expires
-     * @return
+     * @return PersonalCredential
+     * @throws RuntimeServiceException
      */
     private PersonalCredential updatePersonalCredential(PersonalCredential personalCredential, final Person person,
             final Credential credential, final LocalDate expires) {
@@ -281,9 +290,8 @@ public class ProcessCredential implements Rule {
                 personalCredential.setExpires(expires);
                 personalCredentialService.update(personalCredential);
 
-                String[] strings = { "Personal Credential", person.getName(), "-", credential.getFrameworkTitle(),
-                        " updated." };
-                log.info(String.join(" ", strings));
+                log.info("Personal Credential for " + person.getName() + " - "
+                        + personalCredential.getCredential().getFrameworkTitle() + " updated.");
 
             }
 
