@@ -157,7 +157,8 @@ public class LearningRecordUtil {
 
             return LearningStatus.ATTEMPTED;
 
-        } else if (verb.getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID)) {
+        } else if (verb.getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID)
+                || verb.getId().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID)) {
 
             return LearningStatus.REGISTERED;
 

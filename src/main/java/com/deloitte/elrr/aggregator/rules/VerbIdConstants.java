@@ -8,4 +8,5 @@ public final class VerbIdConstants {
     public static final String INITIALIZED_VERB_ID = "http://adlnet.gov/expapi/verbs/initialized";
     public static final String SATISFIED_VERB_ID = "http://adlnet.gov/expapi/verbs/satisfied";
     public static final String REGISTERED_VERB_ID = "http://adlnet.gov/expapi/verbs/registered";
+    public static final String SCHEDULED_VERB_ID = "http://adlnet.gov/expapi/verbs/scheduled";
 }

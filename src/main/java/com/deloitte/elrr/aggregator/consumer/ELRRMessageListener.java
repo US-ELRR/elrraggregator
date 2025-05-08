@@ -56,6 +56,9 @@ public class ELRRMessageListener {
     private Rule processRegistered;
 
     @Autowired
+    private Rule processScheduled;
+
+    @Autowired
     KafkaTemplate<?, String> kafkaTemplate;
 
     @Value("${kafka.dead.letter.topic}")
@@ -116,7 +119,7 @@ public class ELRRMessageListener {
 
             // *** ADD NEW RULES HERE ***
             List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
-                    processInitialized, processPassed, processSatisfied, processRegistered);
+                    processInitialized, processPassed, processSatisfied, processRegistered, processScheduled);
 
             outerloop: for (Rule rule : classList) {
 
