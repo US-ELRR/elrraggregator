@@ -38,9 +38,13 @@ public class ProcessScheduled implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = scheduled and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = scheduled
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID));
 
     }
 

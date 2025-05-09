@@ -47,12 +47,16 @@ public class ProcessCompetency implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
         Activity obj = (Activity) statement.getObject();
         String objType = obj.getDefinition().getType();
 
-        // Is Verb Id = achieved, object = activity and object type != credential
+        // Is Verb Id = achieved and object type != credential
         return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-                && statement.getObject() instanceof Activity
                 && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
     }
 
@@ -151,7 +155,6 @@ public class ProcessCompetency implements Rule {
 
             competency = new Competency();
             competency.setIdentifier(activity.getId());
-            competency.setRecordStatus(StatusConstants.COMPLETED);
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.save(competency);
@@ -184,7 +187,6 @@ public class ProcessCompetency implements Rule {
             activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-            competency.setRecordStatus(StatusConstants.COMPLETED);
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.update(competency);

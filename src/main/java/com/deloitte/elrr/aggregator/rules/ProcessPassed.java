@@ -38,9 +38,13 @@ public class ProcessPassed implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = passed and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = passed
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID));
 
     }
 

@@ -38,9 +38,13 @@ public class ProcessRegistered implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = registered and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = registered
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID));
 
     }
 

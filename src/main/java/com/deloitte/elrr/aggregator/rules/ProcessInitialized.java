@@ -38,9 +38,13 @@ public class ProcessInitialized implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = initialized and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = initialized
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID));
     }
 
     /**

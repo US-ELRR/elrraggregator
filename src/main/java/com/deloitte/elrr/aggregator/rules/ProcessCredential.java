@@ -47,13 +47,17 @@ public class ProcessCredential implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
         // Is Verb Id = achieved and object = activity
         Activity obj = (Activity) statement.getObject();
         String objType = obj.getDefinition().getType();
 
-        // Is Verb Id = achieved, object = activity and object type = competency
+        // Is Verb Id = achieved and object type = competency
         return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
-                && statement.getObject() instanceof Activity && objType != null
                 && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
@@ -151,7 +155,6 @@ public class ProcessCredential implements Rule {
 
             credential = new Credential();
             credential.setIdentifier(activity.getId());
-            credential.setRecordStatus(StatusConstants.COMPLETED);
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);
@@ -182,7 +185,6 @@ public class ProcessCredential implements Rule {
             activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
-            credential.setRecordStatus(StatusConstants.COMPLETED);
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.update(credential);

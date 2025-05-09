@@ -86,7 +86,6 @@ class ProcessCredentialTest {
             Credential credential = new Credential();
             credential.setId(UUID.randomUUID());
             credential.setIdentifier("http://example.edlm/credentials/credential-a");
-            credential.setRecordStatus("SUCCESS");
             credential.setFrameworkTitle("Test Credential A");
             credential.setFrameworkDescription("Object representing Test Credential A level");
             Mockito.doReturn(credential).when(credentialService).save(any());

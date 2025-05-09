@@ -38,9 +38,13 @@ public class ProcessCompleted implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = completed and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = completed
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID));
 
     }
 

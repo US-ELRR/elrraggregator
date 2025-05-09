@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.rules.ProcessCompetency;
 import com.deloitte.elrr.aggregator.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Competency;
@@ -39,83 +38,82 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessCompetencyTest {
 
-	@Mock
-	private LangMapUtil langMapUtil;
+    @Mock
+    private LangMapUtil langMapUtil;
 
-	@Mock
-	PersonSvc personService;
+    @Mock
+    PersonSvc personService;
 
-	@Mock
-	CompetencySvc competencyService;
+    @Mock
+    CompetencySvc competencyService;
 
-	@Mock
-	PersonalCompetencySvc personalCompetencyService;
+    @Mock
+    PersonalCompetencySvc personalCompetencyService;
 
-	@InjectMocks
-	ProcessCompetency processCompetency;
+    @InjectMocks
+    ProcessCompetency processCompetency;
 
-	@Test
-	void test() {
+    @Test
+    void test() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtils.getJsonTestFile("competency.json");
+            File testFile = TestFileUtils.getJsonTestFile("competency.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            assertNotNull(stmt);
 
-			Mockito.doReturn("Competency A").doReturn("Object representing Competency A level").when(langMapUtil)
-					.getLangMapValue(any());
+            Mockito.doReturn("Competency A").doReturn("Object representing Competency A level").when(langMapUtil)
+                    .getLangMapValue(any());
 
-			Email email = new Email();
-			email.setId(UUID.randomUUID());
-			email.setEmailAddressType("primary");
-			email.setEmailAddress("mailto:testcompetency@gmail.com");
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:testcompetency@gmail.com");
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Test Competency");
-			person.setEmailAddresses(new HashSet<Email>());
-			person.getEmailAddresses().add(email);
-			Mockito.doReturn(person).when(personService).save(person);
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Test Competency");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+            Mockito.doReturn(person).when(personService).save(person);
 
-			Identity identity = new Identity();
-			identity.setId(UUID.randomUUID());
-			identity.setMbox("mailto:testcompetency@gmail.com");
+            Identity identity = new Identity();
+            identity.setId(UUID.randomUUID());
+            identity.setMbox("mailto:testcompetency@gmail.com");
 
-			Competency competency = new Competency();
-			competency.setId(UUID.randomUUID());
-			competency.setIdentifier("http://example.edlm/competencies/testcompetency-a");
-			competency.setRecordStatus("SUCCESS");
-			competency.setFrameworkTitle("Competency A");
-			competency.setFrameworkDescription("Object representing Competency A level");
-			Mockito.doReturn(competency).when(competencyService).save(any());
+            Competency competency = new Competency();
+            competency.setId(UUID.randomUUID());
+            competency.setIdentifier("http://example.edlm/competencies/testcompetency-a");
+            competency.setFrameworkTitle("Competency A");
+            competency.setFrameworkDescription("Object representing Competency A level");
+            Mockito.doReturn(competency).when(competencyService).save(any());
 
-			PersonalCompetency personalCompetency = new PersonalCompetency();
-			personalCompetency.setId(UUID.randomUUID());
-			personalCompetency.setHasRecord(true);
-			personalCompetency.setExpires(LocalDate.parse("2026-03-07"));
-			personalCompetency.setPerson(person);
-			personalCompetency.setCompetency(competency);
-			Mockito.doReturn(personalCompetency).when(personalCompetencyService).save(any());
+            PersonalCompetency personalCompetency = new PersonalCompetency();
+            personalCompetency.setId(UUID.randomUUID());
+            personalCompetency.setHasRecord(true);
+            personalCompetency.setExpires(LocalDate.parse("2026-03-07"));
+            personalCompetency.setPerson(person);
+            personalCompetency.setCompetency(competency);
+            Mockito.doReturn(personalCompetency).when(personalCompetencyService).save(any());
 
-			boolean fireRule = processCompetency.fireRule(stmt);
-			assertTrue(fireRule);
+            boolean fireRule = processCompetency.fireRule(stmt);
+            assertTrue(fireRule);
 
-			Person personResult = processCompetency.processRule(person, stmt);
+            Person personResult = processCompetency.processRule(person, stmt);
 
-			Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
-			assertNotNull(personalCompetencies);
+            Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
+            assertNotNull(personalCompetencies);
 
-			PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
-			assertNotNull(personalCompetencyResult);
+            PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
+            assertNotNull(personalCompetencyResult);
 
-			assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
-			assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
-					"Object representing Competency A level");
+            assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
+            assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
+                    "Object representing Competency A level");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

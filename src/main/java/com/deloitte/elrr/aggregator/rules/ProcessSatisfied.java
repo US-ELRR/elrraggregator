@@ -38,9 +38,13 @@ public class ProcessSatisfied implements Rule {
     @Override
     public boolean fireRule(final Statement statement) {
 
-        // Is Verb Id = satisfied and object = activity
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID)
-                && statement.getObject() instanceof Activity);
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        // Is Verb Id = satisfied
+        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID));
 
     }
 
