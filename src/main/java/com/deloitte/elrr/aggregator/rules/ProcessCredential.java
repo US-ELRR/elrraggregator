@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -209,38 +211,47 @@ public class ProcessCredential implements Rule {
     private PersonalCredential processPersonalCredential(final Activity activity, Person person,
             final Credential credential, Extensions extensions) {
 
-        LocalDate expires = null;
+        LocalDateTime expires = null;
+        PersonalCredential personalCredential = null;
 
-        // Get PersonalCredential
-        PersonalCredential personalCredential = personalCredentialService.findByPersonIdAndCredentialId(person.getId(),
-                credential.getId());
+        try {
 
-        if (extensions != null) {
+            // Get PersonalCredential
+            personalCredential = personalCredentialService.findByPersonIdAndCredentialId(person.getId(),
+                    credential.getId());
 
-            Map extensionMap = extensions.getMap();
-            String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+            if (extensions != null) {
 
-            if (strExpires != null) {
-                expires = LocalDate.parse(strExpires);
+                Map extensionMap = extensions.getMap();
+                String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+                if (strExpires != null) {
+                    expires = LocalDateTime.parse(strExpires, DateTimeFormatter.ISO_DATE_TIME);
+                }
+
             }
 
-        }
+            // If PersonalCredential doesn't exist
+            if (personalCredential == null) {
 
-        // If PersonalCredential doesn't exist
-        if (personalCredential == null) {
+                personalCredential = createPersonalCredential(person, credential, expires);
 
-            personalCredential = createPersonalCredential(person, credential, expires);
+                if (person.getCredentials() == null) {
+                    person.setCredentials(new HashSet<PersonalCredential>());
+                }
 
-            if (person.getCredentials() == null) {
-                person.setCredentials(new HashSet<PersonalCredential>());
+                person.getCredentials().add(personalCredential);
+                personService.save(person);
+
+            } else {
+
+                personalCredential = updatePersonalCredential(personalCredential, person, credential, expires);
             }
 
-            person.getCredentials().add(personalCredential);
-            personService.save(person);
-
-        } else {
-
-            personalCredential = updatePersonalCredential(personalCredential, person, credential, expires);
+        } catch (DateTimeParseException e) {
+            log.error("Error processing credential", e);
+            e.printStackTrace();
+            throw new AggregatorException("Error processing credential");
         }
 
         return personalCredential;
@@ -253,7 +264,7 @@ public class ProcessCredential implements Rule {
      * @return PersonalCredential
      */
     private PersonalCredential createPersonalCredential(final Person person, final Credential credential,
-            final LocalDate expires) {
+            final LocalDateTime expires) {
 
         log.info("Creating new personal credential record.");
         PersonalCredential personalCredential = new PersonalCredential();
@@ -283,7 +294,7 @@ public class ProcessCredential implements Rule {
      * @throws RuntimeServiceException
      */
     private PersonalCredential updatePersonalCredential(PersonalCredential personalCredential, final Person person,
-            final Credential credential, final LocalDate expires) {
+            final Credential credential, final LocalDateTime expires) {
 
         try {
 

@@ -7,7 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -93,7 +94,10 @@ class ProcessCredentialTest {
             PersonalCredential personalCredential = new PersonalCredential();
             personalCredential.setId(UUID.randomUUID());
             personalCredential.setHasRecord(true);
-            personalCredential.setExpires(LocalDate.parse("2026-03-07"));
+
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z", DateTimeFormatter.ISO_DATE_TIME);
+            personalCredential.setExpires(expires);
+
             personalCredential.setPerson(person);
             personalCredential.setCredential(credential);
             Mockito.doReturn(personalCredential).when(personalCredentialService).save(any());

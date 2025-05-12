@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -211,38 +213,48 @@ public class ProcessCompetency implements Rule {
     private PersonalCompetency processPersonalCompetency(final Activity activity, Person person,
             final Competency competency, final Extensions extensions) {
 
-        LocalDate expires = null;
+        LocalDateTime expires = null;
+        PersonalCompetency personalCompetency = null;
 
-        // Get PersonalCompetency
-        PersonalCompetency personalCompetency = personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(),
-                competency.getId());
+        try {
 
-        if (extensions != null) {
+            // Get PersonalCompetency
+            personalCompetency = personalCompetencyService.findByPersonIdAndCompetencyId(person.getId(),
+                    competency.getId());
 
-            Map extensionMap = extensions.getMap();
-            String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+            if (extensions != null) {
 
-            if (strExpires != null) {
-                expires = LocalDate.parse(strExpires);
+                Map extensionMap = extensions.getMap();
+                String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+                if (strExpires != null) {
+                    expires = LocalDateTime.parse(strExpires, DateTimeFormatter.ISO_DATE_TIME);
+                }
+
             }
 
-        }
+            // If PersonalCompetancy doesn't exist
+            if (personalCompetency == null) {
 
-        // If PersonalCompetancy doesn't exist
-        if (personalCompetency == null) {
+                personalCompetency = createPersonalCompetency(person, competency, expires);
 
-            personalCompetency = createPersonalCompetency(person, competency, expires);
+                if (person.getCompetencies() == null) {
+                    person.setCompetencies(new HashSet<PersonalCompetency>());
+                }
 
-            if (person.getCompetencies() == null) {
-                person.setCompetencies(new HashSet<PersonalCompetency>());
+                person.getCompetencies().add(personalCompetency);
+                personService.save(person);
+
+            } else {
+
+                personalCompetency = updatePersonalCompetency(personalCompetency, person, competency, expires);
             }
 
-            person.getCompetencies().add(personalCompetency);
-            personService.save(person);
+        } catch (DateTimeParseException e) {
+            log.error("Error processing competency", e);
+            e.printStackTrace();
+            throw new AggregatorException("Error processing competency");
 
-        } else {
-
-            personalCompetency = updatePersonalCompetency(personalCompetency, person, competency, expires);
         }
 
         return personalCompetency;
@@ -251,11 +263,11 @@ public class ProcessCompetency implements Rule {
     /**
      * @param Person
      * @param Competency
-     * @param expires
+     * @param ZonedDateTime
      * @return PersonalCompetency
      */
     private PersonalCompetency createPersonalCompetency(final Person person, final Competency competency,
-            final LocalDate expires) {
+            final LocalDateTime expires) {
 
         log.info("Creating new personal competency record.");
         PersonalCompetency personalCompetency = new PersonalCompetency();
@@ -277,15 +289,15 @@ public class ProcessCompetency implements Rule {
     }
 
     /**
-     * @param personalCompetency
-     * @param person
-     * @param competency
-     * @param expires
+     * @param PersonalCompetency
+     * @param Person
+     * @param Competency
+     * @param ZonedDateTime
      * @return PersonalCompetency
      * @throws RuntimeServiceException
      */
     private PersonalCompetency updatePersonalCompetency(PersonalCompetency personalCompetency, final Person person,
-            final Competency competency, final LocalDate expires) {
+            final Competency competency, final LocalDateTime expires) {
 
         try {
 

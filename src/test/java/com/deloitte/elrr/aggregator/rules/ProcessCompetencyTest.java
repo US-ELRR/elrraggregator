@@ -7,7 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -92,7 +93,10 @@ class ProcessCompetencyTest {
             PersonalCompetency personalCompetency = new PersonalCompetency();
             personalCompetency.setId(UUID.randomUUID());
             personalCompetency.setHasRecord(true);
-            personalCompetency.setExpires(LocalDate.parse("2026-03-07"));
+
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z", DateTimeFormatter.ISO_DATE_TIME);
+            personalCompetency.setExpires(expires);
+
             personalCompetency.setPerson(person);
             personalCompetency.setCompetency(competency);
             Mockito.doReturn(personalCompetency).when(personalCompetencyService).save(any());
