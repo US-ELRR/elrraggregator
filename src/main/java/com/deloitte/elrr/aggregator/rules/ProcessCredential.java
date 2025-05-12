@@ -251,7 +251,7 @@ public class ProcessCredential implements Rule {
         } catch (DateTimeParseException e) {
             log.error("Error processing credential", e);
             e.printStackTrace();
-            throw new AggregatorException("Error processing credential");
+            throw new AggregatorException("Error processing credential", e);
         }
 
         return personalCredential;

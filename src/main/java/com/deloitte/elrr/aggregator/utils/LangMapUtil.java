@@ -87,7 +87,7 @@ public class LangMapUtil {
         } catch (ClassCastException | NullPointerException e) {
             log.error("Error getting language codes", e);
             e.printStackTrace();
-            throw new AggregatorException("Error getting language codes");
+            throw new AggregatorException("Error getting language codes", e);
         }
     }
 }

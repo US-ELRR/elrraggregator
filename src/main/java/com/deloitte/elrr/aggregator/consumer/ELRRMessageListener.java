@@ -133,7 +133,7 @@ public class ELRRMessageListener {
         } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
 
             log.error("Error processing Kafka message", e);
-            throw new AggregatorException("Error processing Kafka message.");
+            throw new AggregatorException("Error processing Kafka message.", e);
 
         }
 

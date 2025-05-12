@@ -253,7 +253,7 @@ public class ProcessCompetency implements Rule {
         } catch (DateTimeParseException e) {
             log.error("Error processing competency", e);
             e.printStackTrace();
-            throw new AggregatorException("Error processing competency");
+            throw new AggregatorException("Error processing competency", e);
 
         }
 
