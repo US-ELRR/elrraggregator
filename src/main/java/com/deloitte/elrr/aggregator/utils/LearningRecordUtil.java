@@ -67,7 +67,7 @@ public class LearningRecordUtil {
     /**
      * @param Person
      * @param learningResource
-     * @param verb
+     * @param Verb
      * @param Result
      * @return LearningRecord
      */
@@ -141,28 +141,28 @@ public class LearningRecordUtil {
     }
 
     /**
-     * @param verb
-     * @param result
+     * @param Verb
+     * @param Result
      * @return LearningStatus
      */
     private LearningStatus getStatus(final Verb verb, final Result result) {
 
         log.info("Verb = " + verb.getId());
 
-        if (verb.getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID)) {
+        if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID.toString())) {
 
             return LearningStatus.PASSED;
 
-        } else if (verb.getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID)) {
+        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID.toString())) {
 
             return LearningStatus.FAILED;
 
-        } else if (verb.getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID)) {
+        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID.toString())) {
 
             return LearningStatus.ATTEMPTED;
 
-        } else if (verb.getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID)
-                || verb.getId().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID)) {
+        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID.toString())
+                || verb.getId().toString().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
 
             return LearningStatus.REGISTERED;
 

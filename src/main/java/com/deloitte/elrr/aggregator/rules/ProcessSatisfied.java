@@ -44,7 +44,7 @@ public class ProcessSatisfied implements Rule {
         }
 
         // Is Verb Id = satisfied
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.SATISFIED_VERB_ID.toString()));
 
     }
 

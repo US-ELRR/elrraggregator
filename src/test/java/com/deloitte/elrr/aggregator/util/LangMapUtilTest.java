@@ -31,7 +31,7 @@ class LangMapUtilTest {
 
 			LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtils.getJsonTestFile("completed.json");
+			File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -59,7 +59,7 @@ class LangMapUtilTest {
 
 			LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtils.getJsonTestFile("completed_fr.json");
+			File testFile = TestFileUtil.getJsonTestFile("completed_fr.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -87,7 +87,7 @@ class LangMapUtilTest {
 
 			LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtils.getJsonTestFile("completed_es.json");
+			File testFile = TestFileUtil.getJsonTestFile("completed_es.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -115,7 +115,7 @@ class LangMapUtilTest {
 
 			LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtils.getJsonTestFile("completed_multiple.json");
+			File testFile = TestFileUtil.getJsonTestFile("completed_multiple.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);

@@ -44,7 +44,7 @@ public class ProcessFailed implements Rule {
         }
 
         // Is Verb Id = failed
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID.toString()));
 
     }
 

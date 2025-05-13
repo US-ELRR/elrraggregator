@@ -44,7 +44,7 @@ public class ProcessPassed implements Rule {
         }
 
         // Is Verb Id = passed
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID.toString()));
 
     }
 

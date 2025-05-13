@@ -44,7 +44,7 @@ public class ProcessScheduled implements Rule {
         }
 
         // Is Verb Id = scheduled
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID.toString()));
 
     }
 

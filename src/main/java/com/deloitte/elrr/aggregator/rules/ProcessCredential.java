@@ -54,12 +54,16 @@ public class ProcessCredential implements Rule {
             return false;
         }
 
-        // Is Verb Id = achieved and object = activity
+        String objType = null;
+
         Activity obj = (Activity) statement.getObject();
-        String objType = obj.getDefinition().getType();
+
+        if (obj.getDefinition().getType() != null) {
+            objType = obj.getDefinition().getType().toString();
+        }
 
         // Is Verb Id = achieved and object type = competency
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID.toString())
                 && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
@@ -115,7 +119,7 @@ public class ProcessCredential implements Rule {
         try {
 
             // Get credential
-            credential = credentialService.findByIdentifier(activity.getId());
+            credential = credentialService.findByIdentifier(activity.getId().toString());
 
             // If credential doesn't exist
             if (credential == null) {
@@ -156,7 +160,7 @@ public class ProcessCredential implements Rule {
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
             credential = new Credential();
-            credential.setIdentifier(activity.getId());
+            credential.setIdentifier(activity.getId().toString());
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);

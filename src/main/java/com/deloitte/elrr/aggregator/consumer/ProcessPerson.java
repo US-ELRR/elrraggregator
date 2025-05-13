@@ -80,10 +80,26 @@ public class ProcessPerson {
     public Person getPerson(AbstractActor actor, Account account) {
 
         Person person = null;
+        String mBox = null;
+        String mboxSha1sum = null;
+        String openId = null;
+
+        if (actor.getMbox() != null) {
+            mBox = actor.getMbox().toString();
+        }
+
+        if (actor.getMbox_sha1sum() != null) {
+            mboxSha1sum = actor.getMbox_sha1sum().toString();
+        }
+
+        if (actor.getOpenid() != null) {
+            openId = actor.getOpenid().toString();
+        }
 
         // Does person exist
-        String ifi = Identity.createIfi(actor.getMbox_sha1sum(), actor.getMbox(), actor.getOpenid(),
-                (account != null) ? account.getHomePage() : null, (account != null) ? account.getName() : null);
+        String ifi = Identity.createIfi(mboxSha1sum, mBox, openId,
+                (account != null) ? account.getHomePage().toString() : null,
+                (account != null) ? account.getName() : null);
 
         Identity identity = identityService.getByIfi(ifi);
 
@@ -110,8 +126,8 @@ public class ProcessPerson {
         Email email = null;
 
         // If email
-        if (actor.getMbox() != null && actor.getMbox().length() > 0) {
-            email = createEmail(actor.getMbox());
+        if (actor.getMbox() != null) {
+            email = createEmail(actor.getMbox().toString());
         }
 
         Person person = new Person();
@@ -143,18 +159,40 @@ public class ProcessPerson {
      * @return Identity
      */
     public Identity createIdentity(Person person, AbstractActor actor, Account account) {
+
+        String mBox = null;
+        String mboxSha1sum = null;
+        String openId = null;
+
+        if (actor.getMbox() != null) {
+            mBox = actor.getMbox().toString();
+        }
+
+        if (actor.getMbox_sha1sum() != null) {
+            mboxSha1sum = actor.getMbox_sha1sum().toString();
+        }
+
+        if (actor.getOpenid() != null) {
+            openId = actor.getOpenid().toString();
+        }
+
         log.info("Creating new identity.");
+
         Identity identity = new Identity();
-        identity.setMboxSha1Sum(actor.getMbox_sha1sum());
-        identity.setMbox(actor.getMbox());
-        identity.setOpenid(actor.getOpenid());
+        identity.setMboxSha1Sum(mboxSha1sum);
+        identity.setMbox(mBox);
+        identity.setOpenid(openId);
         identity.setPerson(person);
+
         if (account != null) {
-            identity.setHomePage(account.getHomePage());
+            identity.setHomePage(account.getHomePage().toString());
             identity.setName(account.getName());
         }
+
         identityService.save(identity);
+
         log.info("Identity " + identity.getIfi() + " created.");
+
         return identity;
     }
 
