@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,7 +42,7 @@ class ProcessPersonTest {
     @InjectMocks
     private ProcessPerson processPerson;
 
-    // @Test
+    @Test
     void test() {
 
         try {
