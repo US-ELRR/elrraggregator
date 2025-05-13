@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -226,8 +225,7 @@ public class ProcessCredential implements Rule {
 
             if (extensions != null) {
 
-                Map extensionMap = extensions.getMap();
-                String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                String strExpires = (String) extensions.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                 if (strExpires != null) {
                     expires = LocalDateTime.parse(strExpires, DateTimeFormatter.ISO_DATE_TIME);
