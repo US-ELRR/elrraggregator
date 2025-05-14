@@ -43,7 +43,9 @@ public class LangMapUtil {
 
                 LangTag code = langCodesIterator.next();
 
-                if (languageCodes.contains(code)) {
+                int index = languageCodes.toString().indexOf(code.toString());
+
+                if (index != -1) {
                     langCode = code;
                     break;
                 }
