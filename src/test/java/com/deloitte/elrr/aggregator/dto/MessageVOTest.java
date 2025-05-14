@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.dto;
+package com.deloitte.elrr.aggregator.dto;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.deloitte.elrr.aggregator.dto.MessageVO;
-import com.deloitte.elrr.aggregator.test.util.ValueObjectTestUtility;
+import com.deloitte.elrr.aggregator.util.ValueObjectTestUtility;
 
 class MessageVOTest {
 

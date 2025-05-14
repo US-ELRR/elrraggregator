@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.util;
+package com.deloitte.elrr.aggregator.util;
 
 import com.openpojo.reflection.impl.PojoClassFactory;
 import com.openpojo.validation.Validator;

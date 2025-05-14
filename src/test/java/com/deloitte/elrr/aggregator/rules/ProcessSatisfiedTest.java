@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test.rules;
+package com.deloitte.elrr.aggregator.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,8 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.rules.ProcessInitialized;
-import com.deloitte.elrr.aggregator.test.util.TestFileUtils;
+import com.deloitte.elrr.aggregator.util.TestFileUtils;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Email;
@@ -38,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ProcessInitializedTest {
+class ProcessSatisfiedTest {
 
 	@Mock
 	PersonSvc personService;
@@ -50,14 +49,14 @@ class ProcessInitializedTest {
 	LearningRecordUtil learningRecordUtil;
 
 	@InjectMocks
-	ProcessInitialized processInitialized;
+	ProcessSatisfied processSatisfied;
 
 	@Test
 	void test() {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("initialized.json");
+			File testFile = TestFileUtils.getJsonTestFile("satisfied.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -72,23 +71,23 @@ class ProcessInitializedTest {
 			Email email = new Email();
 			email.setId(UUID.randomUUID());
 			email.setEmailAddressType("primary");
-			email.setEmailAddress("mailto:test@gmail.com");
+			email.setEmailAddress("mailto:brady.learner@adlnet.gov");
 
 			Person person = new Person();
 			person.setId(UUID.randomUUID());
-			person.setName("test");
+			person.setName("Tom Brady");
 			person.setEmailAddresses(new HashSet<Email>());
 			person.getEmailAddresses().add(email);
 
 			UUID identityUUID = UUID.randomUUID();
 			Identity identity = new Identity();
 			identity.setId(identityUUID);
-			identity.setMbox("mailto:test@gmail.com");
+			identity.setMbox("mailto:brady.learner@adlnet.gov");
 
 			LearningResource learningResource = new LearningResource();
 			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("Example Activity 10");
-			learningResource.setDescription("Example activity 10 description");
+			learningResource.setTitle("simple CBT 3 course");
+			learningResource.setDescription("A fictitious example CBT 3 course.");
 			Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
 
 			LearningRecord learningRecord = new LearningRecord();
@@ -99,11 +98,11 @@ class ProcessInitializedTest {
 			Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
 					result, learningResource);
 
-			boolean fireRule = processInitialized.fireRule(stmt);
+			boolean fireRule = processSatisfied.fireRule(stmt);
 			assertTrue(fireRule);
 
-			Person personResult = processInitialized.processRule(person, stmt);
-			assertEquals(personResult.getName(), "test");
+			Person personResult = person = processSatisfied.processRule(person, stmt);
+			assertEquals(personResult.getName(), "Tom Brady");
 
 			Set<LearningRecord> learningRecords = personResult.getLearningRecords();
 			assertNotNull(learningRecords);
@@ -113,8 +112,8 @@ class ProcessInitializedTest {
 			assertNotNull(learningRecord.getPerson());
 			assertNotNull(learningRecord.getLearningResource());
 			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
+			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT 3 course");
+			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT 3 course.");
 
 		} catch (IOException e) {
 			e.printStackTrace();

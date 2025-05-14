@@ -1,4 +1,4 @@
-package com.deloitte.elrr.aggregator.test;
+package com.deloitte.elrr.aggregator;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
