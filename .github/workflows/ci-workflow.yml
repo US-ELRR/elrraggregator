@@ -1,13 +1,9 @@
-name: Docker-CI
+name: CI
 #building image for argo
 on:
   push:
     branches:
-      - dev-update-base
-  pull_request:
-    branches:
-      - dev-update-base
-    types: [opened, synchronize, reopened]
+      - '*'
 
 jobs:  
   build-push:
@@ -33,7 +29,7 @@ jobs:
       with:
         repository: US-ELRR/elrrserviceentities
         path: elrrserviceentities
-        ref: elrr-drools
+        ref: elrr-rules
     - name: Maven build Entities
       run: |
        cd elrrserviceentities

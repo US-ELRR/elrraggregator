@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.yetanalytics.xapi.model.LangMap;
+import com.yetanalytics.xapi.model.LangTag;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,36 +29,39 @@ public class LangMapUtil {
      * @return langCode
      * @throws AggregatorException
      */
-    public String getLangMapValue(LangMap map) {
+    public String getLangMapValue(LangMap langMap) {
 
-        String langCode = null;
-        Set<String> langCodes = map.getLanguageCodes();
+        LangTag langCode = null;
+        Set<LangTag> langCodes = langMap.getKeys();
 
         try {
 
-            Iterator<String> langCodesIterator = langCodes.iterator();
+            Iterator<LangTag> langCodesIterator = langCodes.iterator();
 
             // Iterate and compare to lang.codes in .properties
             while (langCodesIterator.hasNext()) {
 
-                String code = langCodesIterator.next();
+                LangTag code = langCodesIterator.next();
 
-                if (languageCodes.contains(code)) {
+                if (languageCodes.contains(code.toString().toLowerCase())) {
                     langCode = code;
                     break;
                 }
             }
 
             // If langCode not found
-            if (langCode == null || langCode.length() == 0) {
+            if (langCode == null) {
+
+                LangTag enUS = new LangTag("en-us");
+                LangTag en = new LangTag("en");
 
                 // Check for en-us
-                if (langCodes.contains("en-us")) {
+                if (langCodes.contains(enUS)) {
 
-                    langCode = "en-us";
+                    langCode = enUS;
 
                     // Check for begins with en
-                } else if (langCodes.contains("en")) {
+                } else if (langCodes.contains(en)) {
 
                     // Reset pointer
                     langCodesIterator = langCodes.iterator();
@@ -65,9 +69,9 @@ public class LangMapUtil {
                     // Iterate and get 1st en*
                     while (langCodesIterator.hasNext()) {
 
-                        String code = langCodesIterator.next();
+                        LangTag code = langCodesIterator.next();
 
-                        if (code.startsWith("en")) {
+                        if (code.toString().startsWith("en")) {
                             langCode = code;
                             break;
                         }
@@ -78,11 +82,11 @@ public class LangMapUtil {
             // Get 1st element
             if (langCode == null) {
 
-                String firstElement = langCodes.stream().findFirst().orElse(null);
+                LangTag firstElement = langCodes.stream().findFirst().orElse(null);
                 langCode = firstElement;
             }
 
-            return map.get(langCode);
+            return langMap.get(langCode);
 
         } catch (ClassCastException | NullPointerException e) {
             log.error("Error getting language codes", e);

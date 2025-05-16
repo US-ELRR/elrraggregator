@@ -44,7 +44,8 @@ public class ProcessInitialized implements Rule {
         }
 
         // Is Verb Id = initialized
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID));
+        return (statement.getVerb().getId().toString()
+                .equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID.toString()));
     }
 
     /**

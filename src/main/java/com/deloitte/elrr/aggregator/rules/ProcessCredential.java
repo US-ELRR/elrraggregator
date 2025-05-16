@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,12 +53,16 @@ public class ProcessCredential implements Rule {
             return false;
         }
 
-        // Is Verb Id = achieved and object = activity
+        String objType = null;
+
         Activity obj = (Activity) statement.getObject();
-        String objType = obj.getDefinition().getType();
+
+        if (obj.getDefinition().getType() != null) {
+            objType = obj.getDefinition().getType().toString();
+        }
 
         // Is Verb Id = achieved and object type = competency
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID.toString())
                 && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
@@ -115,7 +118,7 @@ public class ProcessCredential implements Rule {
         try {
 
             // Get credential
-            credential = credentialService.findByIdentifier(activity.getId());
+            credential = credentialService.findByIdentifier(activity.getId().toString());
 
             // If credential doesn't exist
             if (credential == null) {
@@ -156,7 +159,7 @@ public class ProcessCredential implements Rule {
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
             credential = new Credential();
-            credential.setIdentifier(activity.getId());
+            credential.setIdentifier(activity.getId().toString());
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);
@@ -222,8 +225,7 @@ public class ProcessCredential implements Rule {
 
             if (extensions != null) {
 
-                Map extensionMap = extensions.getMap();
-                String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                String strExpires = (String) extensions.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                 if (strExpires != null) {
                     expires = LocalDateTime.parse(strExpires, DateTimeFormatter.ISO_DATE_TIME);

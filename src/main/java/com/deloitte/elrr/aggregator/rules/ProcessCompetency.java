@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,11 +53,16 @@ public class ProcessCompetency implements Rule {
             return false;
         }
 
+        String objType = null;
+
         Activity obj = (Activity) statement.getObject();
-        String objType = obj.getDefinition().getType();
+
+        if (obj.getDefinition().getType() != null) {
+            objType = obj.getDefinition().getType().toString();
+        }
 
         // Is Verb Id = achieved and object type != credential
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID)
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID.toString())
                 && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
     }
 
@@ -114,7 +118,7 @@ public class ProcessCompetency implements Rule {
         try {
 
             // Get competency
-            competency = competencyService.findByIdentifier(activity.getId());
+            competency = competencyService.findByIdentifier(activity.getId().toString());
 
             // If competency doesn't exist
             if (competency == null) {
@@ -156,7 +160,7 @@ public class ProcessCompetency implements Rule {
             activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
             competency = new Competency();
-            competency.setIdentifier(activity.getId());
+            competency.setIdentifier(activity.getId().toString());
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.save(competency);
@@ -224,8 +228,8 @@ public class ProcessCompetency implements Rule {
 
             if (extensions != null) {
 
-                Map extensionMap = extensions.getMap();
-                String strExpires = (String) extensionMap.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                String strExpires = (String) extensions.get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                log.info("strExpires = " + strExpires);
 
                 if (strExpires != null) {
                     expires = LocalDateTime.parse(strExpires, DateTimeFormatter.ISO_DATE_TIME);

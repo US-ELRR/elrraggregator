@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.springframework.core.io.ClassPathResource;
 
-public class TestFileUtils {
+public class TestFileUtil {
 
   public static File getJsonTestFile(String filename) throws IOException {
 

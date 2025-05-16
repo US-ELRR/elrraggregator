@@ -7,23 +7,23 @@
   "verb": {
     "id": "http://adlnet.gov/expapi/verbs/completed",
     "display": {
-      "en-US": "completed",
-      "es-ES": "completado",
-      "fr-FR": "terminé"
+      "en-us": "completed",
+      "es-es": "completado",
+      "fr-fr": "terminé"
     }
   },
   "object": {
     "id": "http://example.com/activities/learning-module",
     "definition": {
       "name": {
-        "en-US": "Learning Module",
-        "es-ES": "Módulo de Aprendizaje",
-        "fr-FR": "Module d'Apprentissage"
+        "en-us": "Learning Module",
+        "es-es": "Módulo de Aprendizaje",
+        "fr-fr": "Module d'Apprentissage"
       },
       "description": {
-        "en-US": "A module to learn about xAPI.",
-        "es-ES": "Un módulo para aprender sobre xAPI.",
-        "fr-FR": "Un module pour apprendre sur xAPI."
+        "en-us": "A module to learn about xAPI.",
+        "es-es": "Un módulo para aprender sobre xAPI.",
+        "fr-fr": "Un module pour apprendre sur xAPI."
       }
     },
     "objectType": "Activity"

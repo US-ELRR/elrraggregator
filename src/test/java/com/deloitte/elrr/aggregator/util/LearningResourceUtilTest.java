@@ -38,7 +38,7 @@ class LearningResourceUtilTest {
 
     try {
 
-      File testFile = TestFileUtils.getJsonTestFile("completed.json");
+      File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
       Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);

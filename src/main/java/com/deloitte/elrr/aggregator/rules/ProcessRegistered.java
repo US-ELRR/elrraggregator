@@ -44,7 +44,7 @@ public class ProcessRegistered implements Rule {
         }
 
         // Is Verb Id = registered
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID.toString()));
 
     }
 

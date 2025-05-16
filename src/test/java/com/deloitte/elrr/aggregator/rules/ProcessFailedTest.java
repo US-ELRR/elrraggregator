@@ -18,7 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.rules.ProcessFailed;
-import com.deloitte.elrr.aggregator.util.TestFileUtils;
+import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Email;
@@ -57,7 +57,7 @@ class ProcessFailedTest {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("failed.json");
+			File testFile = TestFileUtil.getJsonTestFile("failed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);

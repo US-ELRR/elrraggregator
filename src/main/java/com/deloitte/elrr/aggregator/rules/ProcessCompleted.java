@@ -44,7 +44,7 @@ public class ProcessCompleted implements Rule {
         }
 
         // Is Verb Id = completed
-        return (statement.getVerb().getId().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.COMPLETED_VERB_ID.toString()));
 
     }
 

@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.util.TestFileUtils;
+import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Competency;
 import com.deloitte.elrr.entity.Email;
@@ -59,7 +59,7 @@ class ProcessCompetencyTest {
 
         try {
 
-            File testFile = TestFileUtils.getJsonTestFile("competency.json");
+            File testFile = TestFileUtil.getJsonTestFile("competency.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
             assertNotNull(stmt);

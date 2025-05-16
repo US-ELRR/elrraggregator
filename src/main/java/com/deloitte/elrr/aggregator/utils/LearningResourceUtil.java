@@ -30,7 +30,7 @@ public class LearningResourceUtil {
         log.info("Process learning resource.");
 
         // Get learningResource
-        LearningResource learningResource = learningResourceService.findByIri(activity.getId());
+        LearningResource learningResource = learningResourceService.findByIri(activity.getId().toString());
 
         // If LearningResource already exists
         if (learningResource != null) {
@@ -70,7 +70,7 @@ public class LearningResourceUtil {
             String activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
 
             learningResource = new LearningResource();
-            learningResource.setIri(activity.getId());
+            learningResource.setIri(activity.getId().toString());
             learningResource.setDescription(activityDescription);
             learningResource.setTitle(activityName);
             learningResourceService.save(learningResource);

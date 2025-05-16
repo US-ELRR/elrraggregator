@@ -46,7 +46,7 @@ class LearningRecordUtilTest {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("completed.json");
+			File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -87,7 +87,7 @@ class LearningRecordUtilTest {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("passed.json");
+			File testFile = TestFileUtil.getJsonTestFile("passed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -128,7 +128,7 @@ class LearningRecordUtilTest {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("failed.json");
+			File testFile = TestFileUtil.getJsonTestFile("failed.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
@@ -169,7 +169,7 @@ class LearningRecordUtilTest {
 
 		try {
 
-			File testFile = TestFileUtils.getJsonTestFile("initialized.json");
+			File testFile = TestFileUtil.getJsonTestFile("initialized.json");
 
 			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
 			assertNotNull(stmt);
