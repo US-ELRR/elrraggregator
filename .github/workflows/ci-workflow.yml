@@ -1,12 +1,12 @@
-name: Docker-CI
+name: CI
 #building image for argo
 on:
   push:
     branches:
-      - dev-update-base
+      - '*'
   pull_request:
     branches:
-      - *
+      - '*'
 
 jobs:  
   build-push:
