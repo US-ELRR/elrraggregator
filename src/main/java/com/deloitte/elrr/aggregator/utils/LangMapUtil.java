@@ -29,10 +29,10 @@ public class LangMapUtil {
      * @return langCode
      * @throws AggregatorException
      */
-    public String getLangMapValue(LangMap map) {
+    public String getLangMapValue(LangMap langMap) {
 
         LangTag langCode = null;
-        Set<LangTag> langCodes = map.getKeys();
+        Set<LangTag> langCodes = langMap.getKeys();
 
         try {
 
@@ -43,9 +43,7 @@ public class LangMapUtil {
 
                 LangTag code = langCodesIterator.next();
 
-                int index = languageCodes.toString().indexOf(code.toString());
-
-                if (index != -1) {
+                if (languageCodes.contains(code.toString().toLowerCase())) {
                     langCode = code;
                     break;
                 }
@@ -88,7 +86,7 @@ public class LangMapUtil {
                 langCode = firstElement;
             }
 
-            return map.get(langCode);
+            return langMap.get(langCode);
 
         } catch (ClassCastException | NullPointerException e) {
             log.error("Error getting language codes", e);

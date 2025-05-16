@@ -21,116 +21,116 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class LangMapUtilTest {
 
-	@Test
-	void testEnglish() {
+    @Test
+    void testEnglish() {
 
-		String activityName = "";
-		String activityDescription = "";
+        String activityName = "";
+        String activityDescription = "";
 
-		try {
+        try {
 
-			LangMapUtil langMapUtil = new LangMapUtil();
+            LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtil.getJsonTestFile("completed.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
-			assertEquals(activityName, "Activity 1");
-			assertEquals(activityDescription, "Example Activity Test");
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            assertEquals(activityName, "Activity 1");
+            assertEquals(activityDescription, "Example Activity Test");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testFrench() {
+    @Test
+    void testFrench() {
 
-		String activityName = "";
-		String activityDescription = "";
+        String activityName = "";
+        String activityDescription = "";
 
-		try {
+        try {
 
-			LangMapUtil langMapUtil = new LangMapUtil();
+            LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtil.getJsonTestFile("completed_fr.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed_fr.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
-			assertEquals(activityName, "Activité 1");
-			assertEquals(activityDescription, "Exemple de test d'activité");
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            assertEquals(activityName, "Activité 1");
+            assertEquals(activityDescription, "Exemple de test d'activité");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testSpanish() {
+    @Test
+    void testSpanish() {
 
-		String activityName = "";
-		String activityDescription = "";
+        String activityName = "";
+        String activityDescription = "";
 
-		try {
+        try {
 
-			LangMapUtil langMapUtil = new LangMapUtil();
+            LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtil.getJsonTestFile("completed_es.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed_es.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
-			assertEquals(activityName, "actividad ejemplar 1");
-			assertEquals(activityDescription, "Ejemplo de actividad");
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            assertEquals(activityName, "actividad ejemplar 1");
+            assertEquals(activityDescription, "Ejemplo de actividad");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testMulti() {
+    @Test
+    void testMulti() {
 
-		String activityName = "";
-		String activityDescription = "";
+        String activityName = "";
+        String activityDescription = "";
 
-		try {
+        try {
 
-			LangMapUtil langMapUtil = new LangMapUtil();
+            LangMapUtil langMapUtil = new LangMapUtil();
 
-			File testFile = TestFileUtil.getJsonTestFile("completed_multiple.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed_multiple.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-			activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
-			assertEquals(activityName, "Learning Module");
-			assertEquals(activityDescription, "A module to learn about xAPI.");
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
+            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            assertEquals(activityName, "Learning Module");
+            assertEquals(activityDescription, "A module to learn about xAPI.");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
