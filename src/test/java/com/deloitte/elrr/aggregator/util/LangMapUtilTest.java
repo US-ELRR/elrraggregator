@@ -33,14 +33,17 @@ class LangMapUtilTest {
 
             File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
             assertNotNull(activity);
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
             assertEquals(activityName, "Activity 1");
             assertEquals(activityDescription, "Example Activity Test");
 
@@ -61,14 +64,17 @@ class LangMapUtilTest {
 
             File testFile = TestFileUtil.getJsonTestFile("completed_fr.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
             assertNotNull(activity);
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
             assertEquals(activityName, "Activité 1");
             assertEquals(activityDescription, "Exemple de test d'activité");
 
@@ -89,14 +95,17 @@ class LangMapUtilTest {
 
             File testFile = TestFileUtil.getJsonTestFile("completed_es.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
             assertNotNull(activity);
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
             assertEquals(activityName, "actividad ejemplar 1");
             assertEquals(activityDescription, "Ejemplo de actividad");
 
@@ -115,16 +124,20 @@ class LangMapUtilTest {
 
             LangMapUtil langMapUtil = new LangMapUtil();
 
-            File testFile = TestFileUtil.getJsonTestFile("completed_multiple.json");
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "completed_multiple.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
             assertNotNull(activity);
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
             assertEquals(activityName, "Learning Module");
             assertEquals(activityDescription, "A module to learn about xAPI.");
 

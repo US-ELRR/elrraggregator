@@ -7,17 +7,22 @@ import org.springframework.core.io.ClassPathResource;
 
 public class TestFileUtil {
 
-  public static File getJsonTestFile(String filename) throws IOException {
+    /**
+     * @param filename
+     * @return file
+     * @throws IOException
+     */
+    public static File getJsonTestFile(String filename) throws IOException {
 
-    File file;
+        File file;
 
-    try {
-      file = new ClassPathResource(filename).getFile();
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw e;
+        try {
+            file = new ClassPathResource(filename).getFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+        return file;
     }
-
-    return file;
-  }
 }

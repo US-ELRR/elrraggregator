@@ -27,33 +27,40 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class LearningResourceUtilTest {
 
-  @Mock private LearningResourceSvc learningResourceSvc;
+    @Mock
+    private LearningResourceSvc learningResourceSvc;
 
-  @Spy private LangMapUtil langMapUtil;
+    @Spy
+    private LangMapUtil langMapUtil;
 
-  @InjectMocks private LearningResourceUtil learningResourceUtil;
+    @InjectMocks
+    private LearningResourceUtil learningResourceUtil;
 
-  @Test
-  void test() {
+    @Test
+    void test() {
 
-    try {
+        try {
 
-      File testFile = TestFileUtil.getJsonTestFile("completed.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      Activity activity = (Activity) stmt.getObject();
-      assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-      LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
-      assertNotNull(learningResource);
-      assertEquals(learningResource.getIri(), "http://example.edlm/activities/activityTest");
-      assertEquals(learningResource.getTitle(), "Activity 1");
-      assertEquals(learningResource.getDescription(), "Example Activity Test");
+            LearningResource learningResource = learningResourceUtil
+                    .processLearningResource(activity);
+            assertNotNull(learningResource);
+            assertEquals(learningResource.getIri(),
+                    "http://example.edlm/activities/activityTest");
+            assertEquals(learningResource.getTitle(), "Activity 1");
+            assertEquals(learningResource.getDescription(),
+                    "Example Activity Test");
 
-    } catch (IOException e) {
-      e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-  }
 }

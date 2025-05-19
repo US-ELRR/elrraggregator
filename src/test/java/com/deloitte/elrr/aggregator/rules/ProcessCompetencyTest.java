@@ -43,16 +43,16 @@ class ProcessCompetencyTest {
     private LangMapUtil langMapUtil;
 
     @Mock
-    PersonSvc personService;
+    private PersonSvc personService;
 
     @Mock
-    CompetencySvc competencyService;
+    private CompetencySvc competencyService;
 
     @Mock
-    PersonalCompetencySvc personalCompetencyService;
+    private PersonalCompetencySvc personalCompetencyService;
 
     @InjectMocks
-    ProcessCompetency processCompetency;
+    private ProcessCompetency processCompetency;
 
     @Test
     void test() {
@@ -61,10 +61,12 @@ class ProcessCompetencyTest {
 
             File testFile = TestFileUtil.getJsonTestFile("competency.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
-            Mockito.doReturn("Competency A").doReturn("Object representing Competency A level").when(langMapUtil)
+            Mockito.doReturn("Competency A").doReturn(
+                    "Object representing Competency A level").when(langMapUtil)
                     .getLangMapValue(any());
 
             Email email = new Email();
@@ -85,35 +87,43 @@ class ProcessCompetencyTest {
 
             Competency competency = new Competency();
             competency.setId(UUID.randomUUID());
-            competency.setIdentifier("http://example.edlm/competencies/testcompetency-a");
+            competency.setIdentifier(
+                    "http://example.edlm/competencies/testcompetency-a");
             competency.setFrameworkTitle("Competency A");
-            competency.setFrameworkDescription("Object representing Competency A level");
+            competency.setFrameworkDescription(
+                    "Object representing Competency A level");
             Mockito.doReturn(competency).when(competencyService).save(any());
 
             PersonalCompetency personalCompetency = new PersonalCompetency();
             personalCompetency.setId(UUID.randomUUID());
             personalCompetency.setHasRecord(true);
 
-            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z", DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
             personalCompetency.setExpires(expires);
 
             personalCompetency.setPerson(person);
             personalCompetency.setCompetency(competency);
-            Mockito.doReturn(personalCompetency).when(personalCompetencyService).save(any());
+            Mockito.doReturn(personalCompetency).when(personalCompetencyService)
+                    .save(any());
 
             boolean fireRule = processCompetency.fireRule(stmt);
             assertTrue(fireRule);
 
             Person personResult = processCompetency.processRule(person, stmt);
 
-            Set<PersonalCompetency> personalCompetencies = personResult.getCompetencies();
+            Set<PersonalCompetency> personalCompetencies = personResult
+                    .getCompetencies();
             assertNotNull(personalCompetencies);
 
-            PersonalCompetency personalCompetencyResult = personalCompetencies.stream().findFirst().orElse(null);
+            PersonalCompetency personalCompetencyResult = personalCompetencies
+                    .stream().findFirst().orElse(null);
             assertNotNull(personalCompetencyResult);
 
-            assertEquals(personalCompetencyResult.getCompetency().getFrameworkTitle(), "Competency A");
-            assertEquals(personalCompetencyResult.getCompetency().getFrameworkDescription(),
+            assertEquals(personalCompetencyResult.getCompetency()
+                    .getFrameworkTitle(), "Competency A");
+            assertEquals(personalCompetencyResult.getCompetency()
+                    .getFrameworkDescription(),
                     "Object representing Competency A level");
 
         } catch (IOException e) {

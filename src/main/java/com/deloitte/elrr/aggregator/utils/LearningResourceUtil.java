@@ -22,7 +22,7 @@ public class LearningResourceUtil {
 
     /**
      * @param activity
-     * @return LearningResource
+     * @return learningResource
      * @throws AggregatorException
      */
     public LearningResource processLearningResource(final Activity activity) {
@@ -30,12 +30,14 @@ public class LearningResourceUtil {
         log.info("Process learning resource.");
 
         // Get learningResource
-        LearningResource learningResource = learningResourceService.findByIri(activity.getId().toString());
+        LearningResource learningResource = learningResourceService.findByIri(
+                activity.getId().toString());
 
         // If LearningResource already exists
         if (learningResource != null) {
 
-            log.info("Learning Resource " + learningResource.getTitle() + " exists.");
+            log.info("Learning Resource " + learningResource.getTitle()
+                    + " exists.");
 
         } else {
 
@@ -54,8 +56,8 @@ public class LearningResourceUtil {
     }
 
     /**
-     * @param Activity
-     * @return LearningResource
+     * @param activity
+     * @return learningResource
      * @throws AggregatorException
      */
     private LearningResource createLearningResource(final Activity activity) {
@@ -66,8 +68,10 @@ public class LearningResourceUtil {
 
         try {
 
-            String activityName = langMapUtil.getLangMapValue(activity.getDefinition().getName());
-            String activityDescription = langMapUtil.getLangMapValue(activity.getDefinition().getDescription());
+            String activityName = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getName());
+            String activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
 
             learningResource = new LearningResource();
             learningResource.setIri(activity.getId().toString());
@@ -75,7 +79,8 @@ public class LearningResourceUtil {
             learningResource.setTitle(activityName);
             learningResourceService.save(learningResource);
 
-            log.info("Learning Resource " + learningResource.getTitle() + " created.");
+            log.info("Learning Resource " + learningResource.getTitle()
+                    + " created.");
 
         } catch (AggregatorException e) {
             log.error(e.getMessage());

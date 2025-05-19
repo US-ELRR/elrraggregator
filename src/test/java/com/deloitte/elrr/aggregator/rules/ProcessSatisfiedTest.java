@@ -39,84 +39,93 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessSatisfiedTest {
 
-	@Mock
-	PersonSvc personService;
+    @Mock
+    private PersonSvc personService;
 
-	@Mock
-	LearningResourceUtil learningResourceUtil;
+    @Mock
+    private LearningResourceUtil learningResourceUtil;
 
-	@Mock
-	LearningRecordUtil learningRecordUtil;
+    @Mock
+    private LearningRecordUtil learningRecordUtil;
 
-	@InjectMocks
-	ProcessSatisfied processSatisfied;
+    @InjectMocks
+    private ProcessSatisfied processSatisfied;
 
-	@Test
-	void test() {
+    @Test
+    void test() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("satisfied.json");
+            File testFile = TestFileUtil.getJsonTestFile("satisfied.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
+            Activity activity = (Activity) stmt.getObject();
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Email email = new Email();
-			email.setId(UUID.randomUUID());
-			email.setEmailAddressType("primary");
-			email.setEmailAddress("mailto:brady.learner@adlnet.gov");
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:brady.learner@adlnet.gov");
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Tom Brady");
-			person.setEmailAddresses(new HashSet<Email>());
-			person.getEmailAddresses().add(email);
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Tom Brady");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
 
-			UUID identityUUID = UUID.randomUUID();
-			Identity identity = new Identity();
-			identity.setId(identityUUID);
-			identity.setMbox("mailto:brady.learner@adlnet.gov");
+            UUID identityUUID = UUID.randomUUID();
+            Identity identity = new Identity();
+            identity.setId(identityUUID);
+            identity.setMbox("mailto:brady.learner@adlnet.gov");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("simple CBT 3 course");
-			learningResource.setDescription("A fictitious example CBT 3 course.");
-			Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("simple CBT 3 course");
+            learningResource.setDescription(
+                    "A fictitious example CBT 3 course.");
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
 
-			LearningRecord learningRecord = new LearningRecord();
-			learningRecord.setId(UUID.randomUUID());
-			learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-			learningRecord.setPerson(person);
-			learningRecord.setLearningResource(learningResource);
-			Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
-					result, learningResource);
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
 
-			boolean fireRule = processSatisfied.fireRule(stmt);
-			assertTrue(fireRule);
+            boolean fireRule = processSatisfied.fireRule(stmt);
+            assertTrue(fireRule);
 
-			Person personResult = person = processSatisfied.processRule(person, stmt);
-			assertEquals(personResult.getName(), "Tom Brady");
+            Person personResult = person = processSatisfied.processRule(person,
+                    stmt);
+            assertEquals(personResult.getName(), "Tom Brady");
 
-			Set<LearningRecord> learningRecords = personResult.getLearningRecords();
-			assertNotNull(learningRecords);
-			learningRecord = learningRecords.stream().findFirst().orElse(null);
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
+            assertNotNull(learningRecords);
+            learningRecord = learningRecords.stream().findFirst().orElse(null);
 
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT 3 course");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT 3 course.");
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "simple CBT 3 course");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "A fictitious example CBT 3 course.");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

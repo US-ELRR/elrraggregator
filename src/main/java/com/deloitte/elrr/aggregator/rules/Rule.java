@@ -7,8 +7,22 @@ import com.yetanalytics.xapi.model.Statement;
 
 public interface Rule {
 
-	boolean fireRule(Statement statement);
+    /**
+     * @param statement
+     * @return
+     */
+    boolean fireRule(Statement statement);
 
-	Person processRule(Person person, Statement statement)
-			throws AggregatorException, ClassCastException, NullPointerException, RuntimeServiceException;
+    /**
+     * @param person
+     * @param statement
+     * @return person
+     * @throws AggregatorException
+     * @throws ClassCastException
+     * @throws NullPointerException
+     * @throws RuntimeServiceException
+     */
+    Person processRule(Person person, Statement statement)
+            throws AggregatorException, ClassCastException,
+            NullPointerException, RuntimeServiceException;
 }

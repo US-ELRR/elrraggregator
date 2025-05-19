@@ -22,36 +22,41 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaConsumerConfig {
 
-  @Value("${brokerUrl}")
-  private String brokerUrl;
+    @Value("${brokerUrl}")
+    private String brokerUrl;
 
-  @Value("${kafka.groupIdConfig}")
-  private String groupIdConfig;
+    @Value("${kafka.groupIdConfig}")
+    private String groupIdConfig;
 
-  /**
-   * @return ConsumerFactory consumerFactory
-   */
-  @Bean
-  public ConsumerFactory<String, String> consumerFactory() {
-    log.info("Start building Kafka Consumer factory");
-    Map<String, Object> props = new HashMap<>();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupIdConfig);
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    return new DefaultKafkaConsumerFactory<>(props);
-  }
+    /**
+     * @return ConsumerFactory consumerFactory
+     */
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        log.info("Start building Kafka Consumer factory");
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupIdConfig);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
 
-  /**
-   * @return ConcurrentKafkaListenerContainerFactory concurrentKafkaListenerContainerFactory
-   */
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+    /**
+     * @return ConcurrentKafkaListenerContainerFactory
+     *         concurrentKafkaListenerContainerFactory
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String,
+            String> kafkaListenerContainerFactory() {
 
-    ConcurrentKafkaListenerContainerFactory<String, String> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory());
-    factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 2L)));
-    return factory;
-  }
+        ConcurrentKafkaListenerContainerFactory<String, String> factory;
+        factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(
+                1000L, 2L)));
+        return factory;
+    }
 }

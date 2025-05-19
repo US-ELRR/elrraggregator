@@ -25,14 +25,17 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
     private boolean checkMediaTypeJson;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            if (isApplicationJson(request) && request.getContentLengthLong() < MAX_SIZE_LIMIT) {
+            if (isApplicationJson(request) && request
+                    .getContentLengthLong() < MAX_SIZE_LIMIT) {
                 filterChain.doFilter(request, response);
             } else {
                 log.error("Request size exceeds the limit.");
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request size exceeds the limit.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "Request size exceeds the limit.");
             }
         } catch (IOException | ServletException e) {
             log.error(e.getMessage());
@@ -46,8 +49,9 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
         if (!checkMediaTypeJson) {
             return true;
         } else {
-            return (MediaType.APPLICATION_JSON
-                    .isCompatibleWith(MediaType.parseMediaType(httpRequest.getHeader(HttpHeaders.CONTENT_TYPE))));
+            return (MediaType.APPLICATION_JSON.isCompatibleWith(MediaType
+                    .parseMediaType(httpRequest.getHeader(
+                            HttpHeaders.CONTENT_TYPE))));
         }
     }
 }
