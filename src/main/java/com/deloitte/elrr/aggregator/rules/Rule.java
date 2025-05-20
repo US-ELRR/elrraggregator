@@ -9,7 +9,7 @@ public interface Rule {
 
     /**
      * @param statement
-     * @return
+     * @return boolean
      */
     boolean fireRule(Statement statement);
 

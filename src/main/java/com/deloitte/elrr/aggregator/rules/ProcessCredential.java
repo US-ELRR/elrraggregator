@@ -181,7 +181,7 @@ public class ProcessCredential implements Rule {
 
     /**
      * @param credential
-     * @paream activity
+     * @param activity
      * @return credential
      * @throws AggregatorException
      */

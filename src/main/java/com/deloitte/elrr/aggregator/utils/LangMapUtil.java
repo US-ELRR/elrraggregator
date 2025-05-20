@@ -20,6 +20,9 @@ public class LangMapUtil {
     @Value("${lang.codes}")
     private ArrayList<String> languageCodes = new ArrayList<String>();
 
+    /**
+     * Constructor.
+     */
     public LangMapUtil() {
         this.languageCodes.add("en-us");
     }
