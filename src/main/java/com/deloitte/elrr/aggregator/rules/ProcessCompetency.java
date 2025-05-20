@@ -62,8 +62,8 @@ public class ProcessCompetency implements Rule {
         }
 
         // Is Verb Id = achieved and object type != credential
-        return (statement.getVerb().getId().toString()
-                .equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID.toString())
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(
+                VerbIdConstants.ACHIEVED_VERB_ID.toString())
                 && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
     }
 
@@ -120,8 +120,8 @@ public class ProcessCompetency implements Rule {
         try {
 
             // Get competency
-            competency = competencyService
-                    .findByIdentifier(activity.getId().toString());
+            competency = competencyService.findByIdentifier(activity.getId()
+                    .toString());
 
             // If competency doesn't exist
             if (competency == null) {
@@ -159,10 +159,10 @@ public class ProcessCompetency implements Rule {
 
         try {
 
-            activityName = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
 
             competency = new Competency();
             competency.setIdentifier(activity.getId().toString());
@@ -196,10 +196,10 @@ public class ProcessCompetency implements Rule {
 
         try {
 
-            activityName = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
 
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
@@ -233,13 +233,13 @@ public class ProcessCompetency implements Rule {
 
             // Get PersonalCompetency
             personalCompetency = personalCompetencyService
-                    .findByPersonIdAndCompetencyId(person.getId(),
-                            competency.getId());
+                    .findByPersonIdAndCompetencyId(person.getId(), competency
+                            .getId());
 
             if (extensions != null) {
 
-                String strExpires = (String) extensions
-                        .get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                String strExpires = (String) extensions.get(
+                        ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                 if (strExpires != null) {
                     expires = LocalDateTime.parse(strExpires,
@@ -268,9 +268,8 @@ public class ProcessCompetency implements Rule {
             }
 
         } catch (DateTimeParseException e) {
-            log.error("Error processing competency.  Invalid expiration date.",
-                    e);
-            throw new AggregatorException("Error processing competency.  Invalid expiration date.", e);
+            log.error("Error invalid expires date.", e);
+            throw new AggregatorException("Error invalid expires date.", e);
 
         }
 

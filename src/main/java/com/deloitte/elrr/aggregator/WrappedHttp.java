@@ -10,6 +10,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
+@SuppressWarnings("checkstyle:hiddenfield")
 public class WrappedHttp extends HttpServletRequestWrapper {
     private final String body;
 

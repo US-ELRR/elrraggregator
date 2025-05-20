@@ -62,9 +62,9 @@ public class ProcessCredential implements Rule {
         }
 
         // Is Verb Id = achieved and object type = competency
-        return (statement.getVerb().getId().toString()
-                .equalsIgnoreCase(VerbIdConstants.ACHIEVED_VERB_ID.toString())
-                && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(
+                VerbIdConstants.ACHIEVED_VERB_ID.toString()) && objType
+                        .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
 
@@ -120,8 +120,8 @@ public class ProcessCredential implements Rule {
         try {
 
             // Get credential
-            credential = credentialService
-                    .findByIdentifier(activity.getId().toString());
+            credential = credentialService.findByIdentifier(activity.getId()
+                    .toString());
 
             // If credential doesn't exist
             if (credential == null) {
@@ -158,10 +158,10 @@ public class ProcessCredential implements Rule {
 
         try {
 
-            activityName = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
 
             credential = new Credential();
             credential.setIdentifier(activity.getId().toString());
@@ -194,10 +194,10 @@ public class ProcessCredential implements Rule {
         String activityDescription = "";
         try {
 
-            activityName = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getName());
-            activityDescription = langMapUtil
-                    .getLangMapValue(activity.getDefinition().getDescription());
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
 
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
@@ -231,13 +231,13 @@ public class ProcessCredential implements Rule {
 
             // Get PersonalCredential
             personalCredential = personalCredentialService
-                    .findByPersonIdAndCredentialId(person.getId(),
-                            credential.getId());
+                    .findByPersonIdAndCredentialId(person.getId(), credential
+                            .getId());
 
             if (extensions != null) {
 
-                String strExpires = (String) extensions
-                        .get(ExtensionsConstants.CONTEXT_EXTENSIONS);
+                String strExpires = (String) extensions.get(
+                        ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                 if (strExpires != null) {
                     expires = LocalDateTime.parse(strExpires,
@@ -266,9 +266,8 @@ public class ProcessCredential implements Rule {
             }
 
         } catch (DateTimeParseException e) {
-            log.error("Error processing credential.  Invalid expiration date",
-                    e);
-            throw new AggregatorException("Error processing credential.  Invalid expiration date.", e);
+            log.error("Error invalid expires date", e);
+            throw new AggregatorException("Error invalid expires date.", e);
         }
 
         return personalCredential;
