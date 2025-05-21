@@ -40,16 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 class ProcessRegisteredTest {
 
     @Mock
-    PersonSvc personService;
+    private PersonSvc personService;
 
     @Mock
-    LearningResourceUtil learningResourceUtil;
+    private LearningResourceUtil learningResourceUtil;
 
     @Mock
-    LearningRecordUtil learningRecordUtil;
+    private LearningRecordUtil learningRecordUtil;
 
     @InjectMocks
-    ProcessRegistered processRegistered;
+    private ProcessRegistered processRegistered;
 
     @Test
     void test() {
@@ -58,7 +58,8 @@ class ProcessRegisteredTest {
 
             File testFile = TestFileUtil.getJsonTestFile("registered.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
@@ -87,16 +88,19 @@ class ProcessRegisteredTest {
             LearningResource learningResource = new LearningResource();
             learningResource.setId(UUID.randomUUID());
             learningResource.setTitle("Example Registered Activity");
-            learningResource.setDescription("Example Registered Activity Description");
-            Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
+            learningResource.setDescription(
+                    "Example Registered Activity Description");
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
 
             LearningRecord learningRecord = new LearningRecord();
             learningRecord.setId(UUID.randomUUID());
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
-            Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
-                    result, learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
 
             boolean fireRule = processRegistered.fireRule(stmt);
             assertTrue(fireRule);
@@ -104,15 +108,18 @@ class ProcessRegisteredTest {
             Person personResult = processRegistered.processRule(person, stmt);
             assertEquals(personResult.getName(), "Luke Skywalker");
 
-            Set<LearningRecord> learningRecords = personResult.getLearningRecords();
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
             assertNotNull(learningRecords);
             learningRecord = learningRecords.stream().findFirst().orElse(null);
 
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());
-            assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-            assertEquals(learningRecord.getLearningResource().getTitle(), "Example Registered Activity");
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Registered Activity");
             assertEquals(learningRecord.getLearningResource().getDescription(),
                     "Example Registered Activity Description");
 

@@ -40,16 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 class ProcessScheduledTest {
 
     @Mock
-    PersonSvc personService;
+    private PersonSvc personService;
 
     @Mock
-    LearningResourceUtil learningResourceUtil;
+    private LearningResourceUtil learningResourceUtil;
 
     @Mock
-    LearningRecordUtil learningRecordUtil;
+    private LearningRecordUtil learningRecordUtil;
 
     @InjectMocks
-    ProcessScheduled processScheduled;
+    private ProcessScheduled processScheduled;
 
     @Test
     void test() {
@@ -58,7 +58,8 @@ class ProcessScheduledTest {
 
             File testFile = TestFileUtil.getJsonTestFile("scheduled.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
@@ -87,16 +88,19 @@ class ProcessScheduledTest {
             LearningResource learningResource = new LearningResource();
             learningResource.setId(UUID.randomUUID());
             learningResource.setTitle("Example Scheduled Activity");
-            learningResource.setDescription("Example Scheduled Activity Description");
-            Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
+            learningResource.setDescription(
+                    "Example Scheduled Activity Description");
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
 
             LearningRecord learningRecord = new LearningRecord();
             learningRecord.setId(UUID.randomUUID());
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
-            Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
-                    result, learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
 
             boolean fireRule = processScheduled.fireRule(stmt);
             assertTrue(fireRule);
@@ -104,15 +108,18 @@ class ProcessScheduledTest {
             Person personResult = processScheduled.processRule(person, stmt);
             assertEquals(personResult.getName(), "Han Solo");
 
-            Set<LearningRecord> learningRecords = personResult.getLearningRecords();
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
             assertNotNull(learningRecords);
             learningRecord = learningRecords.stream().findFirst().orElse(null);
 
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());
-            assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-            assertEquals(learningRecord.getLearningResource().getTitle(), "Example Scheduled Activity");
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Scheduled Activity");
             assertEquals(learningRecord.getLearningResource().getDescription(),
                     "Example Scheduled Activity Description");
 

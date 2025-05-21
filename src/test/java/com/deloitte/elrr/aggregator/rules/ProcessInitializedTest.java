@@ -40,16 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 class ProcessInitializedTest {
 
     @Mock
-    PersonSvc personService;
+    private PersonSvc personService;
 
     @Mock
-    LearningResourceUtil learningResourceUtil;
+    private LearningResourceUtil learningResourceUtil;
 
     @Mock
-    LearningRecordUtil learningRecordUtil;
+    private LearningRecordUtil learningRecordUtil;
 
     @InjectMocks
-    ProcessInitialized processInitialized;
+    private ProcessInitialized processInitialized;
 
     @Test
     void test() {
@@ -58,7 +58,8 @@ class ProcessInitializedTest {
 
             File testFile = TestFileUtil.getJsonTestFile("initialized.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Activity activity = (Activity) stmt.getObject();
@@ -88,15 +89,17 @@ class ProcessInitializedTest {
             learningResource.setId(UUID.randomUUID());
             learningResource.setTitle("Example Activity 10");
             learningResource.setDescription("Example activity 10 description");
-            Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
 
             LearningRecord learningRecord = new LearningRecord();
             learningRecord.setId(UUID.randomUUID());
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
-            Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
-                    result, learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
 
             boolean fireRule = processInitialized.fireRule(stmt);
             assertTrue(fireRule);
@@ -104,16 +107,20 @@ class ProcessInitializedTest {
             Person personResult = processInitialized.processRule(person, stmt);
             assertEquals(personResult.getName(), "test");
 
-            Set<LearningRecord> learningRecords = personResult.getLearningRecords();
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
             assertNotNull(learningRecords);
             learningRecord = learningRecords.stream().findFirst().orElse(null);
 
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());
-            assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-            assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
-            assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Activity 10");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example activity 10 description");
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -32,177 +32,198 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class LearningRecordUtilTest {
 
-	@Mock
-	private LearningRecordSvc learningRecordSvc;
+    @Mock
+    private LearningRecordSvc learningRecordSvc;
 
-	@Mock
-	private LangMapUtil langMapUtil;
+    @Mock
+    private LangMapUtil langMapUtil;
 
-	@InjectMocks
-	private LearningRecordUtil learningRecordUtil;
+    @InjectMocks
+    private LearningRecordUtil learningRecordUtil;
 
-	@Test
-	void testCompleted() {
+    @Test
+    void testCompleted() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("completed.json");
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("test");
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("test");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("Activity 1");
-			learningResource.setDescription("Example Activity Test");
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Activity 1");
+            learningResource.setDescription("Example Activity Test");
 
-			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person, verb, result,
-					learningResource);
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "Activity 1");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "Example Activity Test");
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Activity 1");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example Activity Test");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testPassed() {
+    @Test
+    void testPassed() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("passed.json");
+            File testFile = TestFileUtil.getJsonTestFile("passed.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Tom Brady");
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Tom Brady");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("simple CBT 2 course");
-			learningResource.setDescription("A fictitious example CBT 2 course.");
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("simple CBT 2 course");
+            learningResource.setDescription(
+                    "A fictitious example CBT 2 course.");
 
-			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person, verb, result,
-					learningResource);
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.PASSED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT 2 course");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT 2 course.");
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.PASSED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "simple CBT 2 course");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "A fictitious example CBT 2 course.");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testFailed() {
+    @Test
+    void testFailed() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("failed.json");
+            File testFile = TestFileUtil.getJsonTestFile("failed.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Example Learner");
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Example Learner");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("simple CBT course");
-			learningResource.setDescription("A fictitious example CBT course.");
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("simple CBT course");
+            learningResource.setDescription("A fictitious example CBT course.");
 
-			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person, verb, result,
-					learningResource);
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.FAILED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT course");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT course.");
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.FAILED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "simple CBT course");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "A fictitious example CBT course.");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Test
-	void testInitialized() {
+    @Test
+    void testInitialized() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("initialized.json");
+            File testFile = TestFileUtil.getJsonTestFile("initialized.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
-			assertNotNull(activity);
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Robert Engle");
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Robert Engle");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("Example Activity 10");
-			learningResource.setDescription("Example activity 10 description");
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Example Activity 10");
+            learningResource.setDescription("Example activity 10 description");
 
-			LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person, verb, result,
-					learningResource);
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.ATTEMPTED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "Example Activity 10");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "Example activity 10 description");
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.ATTEMPTED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Activity 10");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example activity 10 description");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

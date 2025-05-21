@@ -43,7 +43,7 @@ class ProcessCredentialTest {
     private LangMapUtil langMapUtil;
 
     @Mock
-    PersonSvc personService;
+    private PersonSvc personService;
 
     @Mock
     private CredentialSvc credentialService;
@@ -52,7 +52,7 @@ class ProcessCredentialTest {
     private PersonalCredentialSvc personalCredentialService;
 
     @InjectMocks
-    ProcessCredential processCredential;
+    private ProcessCredential processCredential;
 
     @Test
     void test() {
@@ -61,10 +61,12 @@ class ProcessCredentialTest {
 
             File testFile = TestFileUtil.getJsonTestFile("credential.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
-            Mockito.doReturn("Test Credential A").doReturn("Object representing Credential A level").when(langMapUtil)
+            Mockito.doReturn("Test Credential A").doReturn(
+                    "Object representing Credential A level").when(langMapUtil)
                     .getLangMapValue(any());
 
             Email email = new Email();
@@ -86,35 +88,43 @@ class ProcessCredentialTest {
 
             Credential credential = new Credential();
             credential.setId(UUID.randomUUID());
-            credential.setIdentifier("http://example.edlm/credentials/credential-a");
+            credential.setIdentifier(
+                    "http://example.edlm/credentials/credential-a");
             credential.setFrameworkTitle("Test Credential A");
-            credential.setFrameworkDescription("Object representing Test Credential A level");
+            credential.setFrameworkDescription(
+                    "Object representing Test Credential A level");
             Mockito.doReturn(credential).when(credentialService).save(any());
 
             PersonalCredential personalCredential = new PersonalCredential();
             personalCredential.setId(UUID.randomUUID());
             personalCredential.setHasRecord(true);
 
-            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z", DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
             personalCredential.setExpires(expires);
 
             personalCredential.setPerson(person);
             personalCredential.setCredential(credential);
-            Mockito.doReturn(personalCredential).when(personalCredentialService).save(any());
+            Mockito.doReturn(personalCredential).when(personalCredentialService)
+                    .save(any());
 
             boolean fireRule = processCredential.fireRule(stmt);
             assertTrue(fireRule);
 
             Person personResult = processCredential.processRule(person, stmt);
 
-            Set<PersonalCredential> personalCredentials = personResult.getCredentials();
+            Set<PersonalCredential> personalCredentials = personResult
+                    .getCredentials();
             assertNotNull(personalCredentials);
 
-            personalCredential = personalCredentials.stream().findFirst().orElse(null);
+            personalCredential = personalCredentials.stream().findFirst()
+                    .orElse(null);
             assertNotNull(personalCredential);
 
-            assertEquals(personalCredential.getCredential().getFrameworkTitle(), "Test Credential A");
-            assertEquals(personalCredential.getCredential().getFrameworkDescription(),
+            assertEquals(personalCredential.getCredential().getFrameworkTitle(),
+                    "Test Credential A");
+            assertEquals(personalCredential.getCredential()
+                    .getFrameworkDescription(),
                     "Object representing Credential A level");
 
         } catch (IOException e) {

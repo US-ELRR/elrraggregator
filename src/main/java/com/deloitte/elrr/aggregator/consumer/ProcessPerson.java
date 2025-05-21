@@ -75,7 +75,8 @@ public class ProcessPerson {
 
     /**
      * @param actor
-     * @param Person
+     * @param account
+     * @return person
      */
     public Person getPerson(AbstractActor actor, Account account) {
 
@@ -158,7 +159,8 @@ public class ProcessPerson {
      * @param account
      * @return Identity
      */
-    public Identity createIdentity(Person person, AbstractActor actor, Account account) {
+    public Identity createIdentity(Person person, AbstractActor actor,
+            Account account) {
 
         String mBox = null;
         String mboxSha1sum = null;
@@ -197,8 +199,8 @@ public class ProcessPerson {
     }
 
     /**
-     * @param emailAddrress
-     * @return Email
+     * @param emailAddress
+     * @return email
      */
     public Email createEmail(String emailAddress) {
         log.info("Creating new email.");

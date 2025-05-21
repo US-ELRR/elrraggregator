@@ -22,8 +22,8 @@ public class HeaderFilter implements Filter {
     private boolean checkHttpHeader;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response,
+            FilterChain chain) throws IOException, ServletException {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
@@ -31,11 +31,13 @@ public class HeaderFilter implements Filter {
             if (!checkHttpHeader) {
                 chain.doFilter(request, response);
             } else {
-                if ("https".equalsIgnoreCase(httpServletRequest.getHeader("X-Forwarded-Proto"))) {
+                if ("https".equalsIgnoreCase(httpServletRequest.getHeader(
+                        "X-Forwarded-Proto"))) {
                     chain.doFilter(request, response);
                 } else {
                     log.error("Not a HTTPS request.");
-                    ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN,
+                    ((HttpServletResponse) response).sendError(
+                            HttpServletResponse.SC_FORBIDDEN,
                             "Not a HTTPS request.");
                 }
             }

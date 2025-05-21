@@ -58,20 +58,20 @@ public class ELRRMessageListener {
     private Rule processScheduled;
 
     @Autowired
-    KafkaTemplate<?, String> kafkaTemplate;
+    private KafkaTemplate<?, String> kafkaTemplate;
 
     @Value("${kafka.dead.letter.topic}")
     private String deadLetterTopic;
 
     /**
-     * @param String
+     * @param message
      * @throws AggregatorException
      */
     @Transactional
     @KafkaListener(topics = "${kafka.topic}")
     public void listen(final String message) {
 
-        log.info("\n\n ===============Received Messasge in group - group-id=============== \n" + message);
+        log.info("\n\n Received Messasge in group - group-id== \n" + message);
 
         try {
 
@@ -79,7 +79,8 @@ public class ELRRMessageListener {
             if (InputSanitizer.isValidInput(message)) {
                 processMessage(message);
             } else {
-                log.error("Invalid message did not pass whitelist check - " + message);
+                log.error("Invalid message did not pass whitelist check - "
+                        + message);
                 kafkaTemplate.send(deadLetterTopic, message);
             }
 
@@ -91,7 +92,7 @@ public class ELRRMessageListener {
     }
 
     /**
-     * @param String
+     * @param payload
      * @throws AggregatorException
      */
     @Transactional
@@ -115,12 +116,15 @@ public class ELRRMessageListener {
             person = processPerson.processPerson(statement);
 
             // *** ADD NEW RULES HERE ***
-            List<Rule> classList = Arrays.asList(processCompetency, processCompleted, processCredential, processFailed,
-                    processInitialized, processPassed, processSatisfied, processRegistered, processScheduled);
+            List<Rule> classList = Arrays.asList(processCompetency,
+                    processCompleted, processCredential, processFailed,
+                    processInitialized, processPassed, processSatisfied,
+                    processRegistered, processScheduled);
 
             for (Rule rule : classList) {
 
-                log.info("Process verb " + statement.getVerb().getId() + " by " + ruleToString(rule.toString()));
+                log.info("Process verb " + statement.getVerb().getId() + " by "
+                        + ruleToString(rule.toString()));
 
                 if (rule.fireRule(statement)) {
 
@@ -130,7 +134,8 @@ public class ELRRMessageListener {
                 }
             }
 
-        } catch (AggregatorException | PersonNotFoundException | JsonProcessingException e) {
+        } catch (AggregatorException | PersonNotFoundException
+                | JsonProcessingException e) {
 
             log.error("Error processing Kafka message", e);
             throw new AggregatorException("Error processing Kafka message.", e);

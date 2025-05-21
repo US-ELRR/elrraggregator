@@ -25,16 +25,17 @@ public class LearningRecordUtil {
     private LearningRecordSvc learningRecordService;
 
     /**
-     * @param Activity
-     * @param Person
+     * @param activity
+     * @param person
      * @param verb
-     * @param Result
-     * @param LearningResource
-     * @return LearningRccord
+     * @param result
+     * @param learningResource
+     * @return learningRccord
      * @throws RuntimeServiceException
      */
-    public LearningRecord processLearningRecord(final Activity activity, final Person person, final Verb verb,
-            final Result result, final LearningResource learningResource) {
+    public LearningRecord processLearningRecord(final Activity activity,
+            final Person person, final Verb verb, final Result result,
+            final LearningResource learningResource) {
 
         LearningRecord learningRecord = null;
 
@@ -43,18 +44,21 @@ public class LearningRecordUtil {
             log.info("Process learning record.");
 
             // Get LearningRecord
-            learningRecord = learningRecordService.findByPersonIdAndLearningResourceId(person.getId(),
-                    learningResource.getId());
+            learningRecord = learningRecordService
+                    .findByPersonIdAndLearningResourceId(person.getId(),
+                            learningResource.getId());
 
             // If LearningRecord doesn't exist
             if (learningRecord == null) {
 
-                learningRecord = createLearningRecord(person, learningResource, verb, result);
+                learningRecord = createLearningRecord(person, learningResource,
+                        verb, result);
 
                 // If learningRecord already exists
             } else {
 
-                learningRecord = updateLearningRecord(person, learningRecord, verb, result);
+                learningRecord = updateLearningRecord(person, learningRecord,
+                        verb, result);
             }
 
         } catch (RuntimeServiceException e) {
@@ -65,14 +69,15 @@ public class LearningRecordUtil {
     }
 
     /**
-     * @param Person
+     * @param person
      * @param learningResource
-     * @param Verb
-     * @param Result
-     * @return LearningRecord
+     * @param verb
+     * @param result
+     * @return learningRecord
      */
-    private LearningRecord createLearningRecord(final Person person, final LearningResource learningResource,
-            final Verb verb, final Result result) {
+    private LearningRecord createLearningRecord(final Person person,
+            final LearningResource learningResource, final Verb verb,
+            final Result result) {
 
         log.info("Creating new learning record.");
         LearningRecord learningRecord = new LearningRecord();
@@ -87,7 +92,8 @@ public class LearningRecordUtil {
             Score score = result.getScore();
             if (score != null) {
                 if (score.getScaled() != null) {
-                    learningRecord.setAcademicGrade(score.getScaled().toString());
+                    learningRecord.setAcademicGrade(score.getScaled()
+                            .toString());
                 }
             }
 
@@ -95,20 +101,22 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        log.info("Learning Record for " + person.getName() + " - " + learningResource.getTitle() + " created.");
+        log.info("Learning Record for " + person.getName() + " - "
+                + learningResource.getTitle() + " created.");
 
         return learningRecord;
     }
 
     /**
-     * @param Person
-     * @param LearningRecord
-     * @param Verb
-     * @param Result
-     * @return LearningRecord
+     * @param person
+     * @param learningRecord
+     * @param verb
+     * @param result
+     * @return learningRecord
      * @throws RuntimeServiceException
      */
-    private LearningRecord updateLearningRecord(Person person, LearningRecord learningRecord, final Verb verb,
+    private LearningRecord updateLearningRecord(Person person,
+            LearningRecord learningRecord, final Verb verb,
             final Result result) {
 
         log.info("Update learning record.");
@@ -123,7 +131,8 @@ public class LearningRecordUtil {
                 Score score = result.getScore();
                 if (score != null) {
                     if (score.getScaled() != null) {
-                        learningRecord.setAcademicGrade(score.getScaled().toString());
+                        learningRecord.setAcademicGrade(score.getScaled()
+                                .toString());
                     }
                 }
 
@@ -131,7 +140,8 @@ public class LearningRecordUtil {
 
             learningRecordService.update(learningRecord);
 
-            log.info("Learning Record for " + person.getName() + " - " + learningRecord.getLearningResource().getTitle()
+            log.info("Learning Record for " + person.getName() + " - "
+                    + learningRecord.getLearningResource().getTitle()
                     + " updated.");
 
         } catch (RuntimeServiceException e) {
@@ -141,28 +151,33 @@ public class LearningRecordUtil {
     }
 
     /**
-     * @param Verb
-     * @param Result
-     * @return LearningStatus
+     * @param verb
+     * @param result
+     * @return learningStatus
      */
     private LearningStatus getStatus(final Verb verb, final Result result) {
 
         log.info("Verb = " + verb.getId());
 
-        if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.PASSED_VERB_ID.toString())) {
+        if (verb.getId().toString().equalsIgnoreCase(
+                VerbIdConstants.PASSED_VERB_ID.toString())) {
 
             return LearningStatus.PASSED;
 
-        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.FAILED_VERB_ID.toString())) {
+        } else if (verb.getId().toString().equalsIgnoreCase(
+                VerbIdConstants.FAILED_VERB_ID.toString())) {
 
             return LearningStatus.FAILED;
 
-        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.INITIALIZED_VERB_ID.toString())) {
+        } else if (verb.getId().toString().equalsIgnoreCase(
+                VerbIdConstants.INITIALIZED_VERB_ID.toString())) {
 
             return LearningStatus.ATTEMPTED;
 
-        } else if (verb.getId().toString().equalsIgnoreCase(VerbIdConstants.REGISTERED_VERB_ID.toString())
-                || verb.getId().toString().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
+        } else if (verb.getId().toString().equalsIgnoreCase(
+                VerbIdConstants.REGISTERED_VERB_ID.toString()) || verb.getId()
+                        .toString().equalsIgnoreCase(
+                                VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
 
             return LearningStatus.REGISTERED;
 

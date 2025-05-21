@@ -49,7 +49,8 @@ class ProcessPersonTest {
 
             File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
-            Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
             assertNotNull(stmt);
 
             Person person = processPerson.processPerson(stmt);

@@ -14,5 +14,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MessageVO {
-  private Statement statement;
+    private Statement statement;
 }

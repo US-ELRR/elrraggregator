@@ -23,16 +23,16 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessScheduled implements Rule {
 
     @Autowired
-    LearningResourceUtil learningResourceUtil;
+    private LearningResourceUtil learningResourceUtil;
 
     @Autowired
-    LearningRecordUtil learningRecordUtil;
+    private LearningRecordUtil learningRecordUtil;
 
     @Autowired
-    PersonSvc personService;
+    private PersonSvc personService;
 
     /**
-     * @param Statement
+     * @param statement
      * @return boolean
      */
     @Override
@@ -44,13 +44,14 @@ public class ProcessScheduled implements Rule {
         }
 
         // Is Verb Id = scheduled
-        return (statement.getVerb().getId().toString().equalsIgnoreCase(VerbIdConstants.SCHEDULED_VERB_ID.toString()));
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(
+                VerbIdConstants.SCHEDULED_VERB_ID.toString()));
 
     }
 
     /**
-     * @param Person
-     * @param Statement
+     * @param person
+     * @param statement
      * @throws AggregatorException
      */
     @Override
@@ -65,11 +66,14 @@ public class ProcessScheduled implements Rule {
             Activity activity = (Activity) statement.getObject();
 
             // Process LearningResource
-            LearningResource learningResource = learningResourceUtil.processLearningResource(activity);
+            LearningResource learningResource = learningResourceUtil
+                    .processLearningResource(activity);
 
             // Process LearningRecord
-            LearningRecord learningRecord = learningRecordUtil.processLearningRecord(activity, person,
-                    statement.getVerb(), statement.getResult(), learningResource);
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, statement
+                            .getVerb(), statement.getResult(),
+                            learningResource);
 
             if (person.getLearningRecords() == null) {
                 person.setLearningRecords(new HashSet<LearningRecord>());

@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.rules.ProcessPassed;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
@@ -40,84 +39,92 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessPassedTest {
 
-	@Mock
-	PersonSvc personService;
+    @Mock
+    private PersonSvc personService;
 
-	@Mock
-	LearningResourceUtil learningResourceUtil;
+    @Mock
+    private LearningResourceUtil learningResourceUtil;
 
-	@Mock
-	LearningRecordUtil learningRecordUtil;
+    @Mock
+    private LearningRecordUtil learningRecordUtil;
 
-	@InjectMocks
-	ProcessPassed processPassed;
+    @InjectMocks
+    private ProcessPassed processPassed;
 
-	@Test
-	void test() {
+    @Test
+    void test() {
 
-		try {
+        try {
 
-			File testFile = TestFileUtil.getJsonTestFile("passed.json");
+            File testFile = TestFileUtil.getJsonTestFile("passed.json");
 
-			Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-			assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-			Activity activity = (Activity) stmt.getObject();
+            Activity activity = (Activity) stmt.getObject();
 
-			Verb verb = stmt.getVerb();
-			assertNotNull(verb);
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
 
-			Result result = stmt.getResult();
+            Result result = stmt.getResult();
 
-			Email email = new Email();
-			email.setId(UUID.randomUUID());
-			email.setEmailAddressType("primary");
-			email.setEmailAddress("mailto:brady.learner@adlnet.gov");
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:brady.learner@adlnet.gov");
 
-			Person person = new Person();
-			person.setId(UUID.randomUUID());
-			person.setName("Tom Brady");
-			person.setEmailAddresses(new HashSet<Email>());
-			person.getEmailAddresses().add(email);
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Tom Brady");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
 
-			UUID identityUUID = UUID.randomUUID();
-			Identity identity = new Identity();
-			identity.setId(identityUUID);
-			identity.setMbox("mailto:brady.learner@adlnet.gov");
+            UUID identityUUID = UUID.randomUUID();
+            Identity identity = new Identity();
+            identity.setId(identityUUID);
+            identity.setMbox("mailto:brady.learner@adlnet.gov");
 
-			LearningResource learningResource = new LearningResource();
-			learningResource.setId(UUID.randomUUID());
-			learningResource.setTitle("simple CBT 2 course");
-			learningResource.setDescription("A fictitious example CBT 2 course.");
-			Mockito.doReturn(learningResource).when(learningResourceUtil).processLearningResource(activity);
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("simple CBT 2 course");
+            learningResource.setDescription(
+                    "A fictitious example CBT 2 course.");
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
 
-			LearningRecord learningRecord = new LearningRecord();
-			learningRecord.setId(UUID.randomUUID());
-			learningRecord.setRecordStatus(LearningStatus.COMPLETED);
-			learningRecord.setPerson(person);
-			learningRecord.setLearningResource(learningResource);
-			Mockito.doReturn(learningRecord).when(learningRecordUtil).processLearningRecord(activity, person, verb,
-					result, learningResource);
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
 
-			boolean fireRule = processPassed.fireRule(stmt);
-			assertTrue(fireRule);
+            boolean fireRule = processPassed.fireRule(stmt);
+            assertTrue(fireRule);
 
-			Person personResult = processPassed.processRule(person, stmt);
-			assertEquals(personResult.getName(), "Tom Brady");
+            Person personResult = processPassed.processRule(person, stmt);
+            assertEquals(personResult.getName(), "Tom Brady");
 
-			Set<LearningRecord> learningRecords = personResult.getLearningRecords();
-			assertNotNull(learningRecords);
-			learningRecord = learningRecords.stream().findFirst().orElse(null);
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
+            assertNotNull(learningRecords);
+            learningRecord = learningRecords.stream().findFirst().orElse(null);
 
-			assertNotNull(learningRecord);
-			assertNotNull(learningRecord.getPerson());
-			assertNotNull(learningRecord.getLearningResource());
-			assertEquals(learningRecord.getRecordStatus(), LearningStatus.COMPLETED);
-			assertEquals(learningRecord.getLearningResource().getTitle(), "simple CBT 2 course");
-			assertEquals(learningRecord.getLearningResource().getDescription(), "A fictitious example CBT 2 course.");
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "simple CBT 2 course");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "A fictitious example CBT 2 course.");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

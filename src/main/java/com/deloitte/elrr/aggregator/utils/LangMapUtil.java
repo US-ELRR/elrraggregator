@@ -18,14 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 public class LangMapUtil {
 
     @Value("${lang.codes}")
-    ArrayList<String> languageCodes = new ArrayList<String>();
+    private ArrayList<String> languageCodes = new ArrayList<String>();
 
+    /**
+     * Constructor.
+     */
     public LangMapUtil() {
         this.languageCodes.add("en-us");
     }
 
     /**
-     * @param map
+     * @param langMap
      * @return langCode
      * @throws AggregatorException
      */
@@ -82,7 +85,8 @@ public class LangMapUtil {
             // Get 1st element
             if (langCode == null) {
 
-                LangTag firstElement = langCodes.stream().findFirst().orElse(null);
+                LangTag firstElement = langCodes.stream().findFirst().orElse(
+                        null);
                 langCode = firstElement;
             }
 
