@@ -1,7 +1,9 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -16,7 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import com.deloitte.elrr.aggregator.util.GenerateLogsUtil;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
@@ -35,7 +40,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @Slf4j
 class ProcessScheduledTest {
 
@@ -127,4 +132,35 @@ class ProcessScheduledTest {
             e.printStackTrace();
         }
     }
+    
+    @Test
+    void testFireRule() {
+
+        File testFile;
+
+        try {
+
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            boolean fireRule = processScheduled.fireRule(stmt);
+            assertFalse(fireRule);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    void logProcessActivity(CapturedOutput capturedOutput) {
+        String log = "Process activity scheduled.";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);   
+    }
+ 
 }

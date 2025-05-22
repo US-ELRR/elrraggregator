@@ -115,7 +115,7 @@ public class LearningRecordUtil {
      * @return learningRecord
      * @throws RuntimeServiceException
      */
-    private LearningRecord updateLearningRecord(Person person,
+    public LearningRecord updateLearningRecord(Person person,
             LearningRecord learningRecord, final Verb verb,
             final Result result) {
 

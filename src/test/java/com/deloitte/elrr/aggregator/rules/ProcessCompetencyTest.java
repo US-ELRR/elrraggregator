@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import com.deloitte.elrr.aggregator.util.GenerateLogsUtil;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Competency;
@@ -30,12 +35,13 @@ import com.deloitte.elrr.entity.PersonalCompetency;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
+import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
 @Slf4j
 class ProcessCompetencyTest {
 
@@ -65,9 +71,9 @@ class ProcessCompetencyTest {
                     Statement.class);
             assertNotNull(stmt);
 
-            Mockito.doReturn("Competency A").doReturn(
-                    "Object representing Competency A level").when(langMapUtil)
-                    .getLangMapValue(any());
+            Mockito.doReturn("Competency A")
+                    .doReturn("Object representing Competency A level")
+                    .when(langMapUtil).getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -122,12 +128,90 @@ class ProcessCompetencyTest {
 
             assertEquals(personalCompetencyResult.getCompetency()
                     .getFrameworkTitle(), "Competency A");
-            assertEquals(personalCompetencyResult.getCompetency()
-                    .getFrameworkDescription(),
+            assertEquals(
+                    personalCompetencyResult.getCompetency()
+                            .getFrameworkDescription(),
                     "Object representing Competency A level");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    @Test
+    void testUpdate() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("competency.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Mockito.doReturn("Competency A")
+                    .doReturn("Object representing Competency A level")
+                    .when(langMapUtil).getLangMapValue(any());
+
+            Competency competency = new Competency();
+            competency.setId(UUID.randomUUID());
+            competency.setIdentifier(
+                    "http://example.edlm/competencies/testcompetency-a");
+            competency.setFrameworkTitle("Competency A");
+            competency.setFrameworkDescription(
+                    "Object representing Competency A level");
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
+            boolean fireRule = processCompetency.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Competency competencyResult = processCompetency
+                    .updateCompetency(competency, activity);
+            assertNotNull(competencyResult);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testFireRule() {
+
+        File testFile;
+
+        try {
+
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            boolean fireRule = processCompetency.fireRule(stmt);
+            assertFalse(fireRule);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    void logExists(CapturedOutput capturedOutput) {
+        String log = "Competency exists.";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);
+    }
+
+    @Test
+    void logError(CapturedOutput capturedOutput) {
+        String log = "Error processing competency";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);
+    }
+
 }

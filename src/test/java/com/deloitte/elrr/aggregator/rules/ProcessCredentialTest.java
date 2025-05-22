@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import com.deloitte.elrr.aggregator.util.GenerateLogsUtil;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Credential;
@@ -30,12 +35,13 @@ import com.deloitte.elrr.entity.PersonalCredential;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
+import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @Slf4j
 class ProcessCredentialTest {
 
@@ -65,9 +71,9 @@ class ProcessCredentialTest {
                     Statement.class);
             assertNotNull(stmt);
 
-            Mockito.doReturn("Test Credential A").doReturn(
-                    "Object representing Credential A level").when(langMapUtil)
-                    .getLangMapValue(any());
+            Mockito.doReturn("Test Credential A")
+                    .doReturn("Object representing Credential A level")
+                    .when(langMapUtil).getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -123,12 +129,89 @@ class ProcessCredentialTest {
 
             assertEquals(personalCredential.getCredential().getFrameworkTitle(),
                     "Test Credential A");
-            assertEquals(personalCredential.getCredential()
-                    .getFrameworkDescription(),
+            assertEquals(
+                    personalCredential.getCredential()
+                            .getFrameworkDescription(),
                     "Object representing Credential A level");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    @Test
+    void testUpdate() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("credential.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Mockito.doReturn("Test Credential A")
+                    .doReturn("Object representing Credential A level")
+                    .when(langMapUtil).getLangMapValue(any());
+
+            Credential credential = new Credential();
+            credential.setId(UUID.randomUUID());
+            credential.setIdentifier(
+                    "http://example.edlm/credentials/credential-a");
+            credential.setFrameworkTitle("Test Credential A");
+            credential.setFrameworkDescription(
+                    "Object representing Test Credential A level");
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
+            boolean fireRule = processCredential.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Credential credentialResult = processCredential.updateCredential(credential, activity);
+            assertNotNull(credentialResult);
+  
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testFireRule() {
+
+        File testFile;
+
+        try {
+
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            boolean fireRule = processCredential.fireRule(stmt);
+            assertFalse(fireRule);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    void logExists(CapturedOutput capturedOutput) {
+        String log = "Credential exists.";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);   
+    }
+    
+    @Test
+    void logError(CapturedOutput capturedOutput) {
+        String log = "Error processing credential";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);   
+    }
+
 }

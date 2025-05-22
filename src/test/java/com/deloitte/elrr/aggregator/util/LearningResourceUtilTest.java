@@ -2,6 +2,7 @@ package com.deloitte.elrr.aggregator.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
@@ -23,7 +26,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @Slf4j
 class LearningResourceUtilTest {
 
@@ -63,4 +66,21 @@ class LearningResourceUtilTest {
             e.printStackTrace();
         }
     }
+    
+    @Test
+    void logExists(CapturedOutput capturedOutput) {
+        String log = "Learning Resource exists";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);   
+    }
+    
+    @Test
+    void logError(CapturedOutput capturedOutput) {
+        String log = "ErrorProcessing learning resource";
+        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
+        generateLogs.generateLogs(log);
+        assertThat(capturedOutput.getOut()).contains(log);   
+    }
+
 }

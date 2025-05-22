@@ -186,7 +186,7 @@ public class ProcessCompetency implements Rule {
      * @return competency
      * @throws AggregatorException
      */
-    private Competency updateCompetency(Competency competency,
+    public Competency updateCompetency(Competency competency,
             final Activity activity) {
 
         log.info("Updating competency.");

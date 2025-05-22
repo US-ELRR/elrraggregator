@@ -135,7 +135,7 @@ public class ProcessCredential implements Rule {
             }
 
         } catch (AggregatorException e) {
-            log.error("Error processing competency", e);
+            log.error("Error processing credential", e);
             e.printStackTrace();
             throw e;
         }
@@ -185,7 +185,7 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private Credential updateCredential(Credential credential,
+    public Credential updateCredential(Credential credential,
             final Activity activity) {
 
         log.info("Updating credential.");
