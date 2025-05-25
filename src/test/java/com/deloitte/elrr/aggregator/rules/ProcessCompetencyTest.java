@@ -71,6 +71,9 @@ class ProcessCompetencyTest {
                     Statement.class);
             assertNotNull(stmt);
 
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
             Mockito.doReturn("Competency A")
                     .doReturn("Object representing Competency A level")
                     .when(langMapUtil).getLangMapValue(any());
@@ -133,44 +136,21 @@ class ProcessCompetencyTest {
                             .getFrameworkDescription(),
                     "Object representing Competency A level");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    void testUpdate() {
-
-        try {
-
-            File testFile = TestFileUtil.getJsonTestFile("competency.json");
-
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
-
-            Mockito.doReturn("Competency A")
-                    .doReturn("Object representing Competency A level")
-                    .when(langMapUtil).getLangMapValue(any());
-
-            Competency competency = new Competency();
-            competency.setId(UUID.randomUUID());
-            competency.setIdentifier(
-                    "http://example.edlm/competencies/testcompetency-a");
-            competency.setFrameworkTitle("Competency A");
-            competency.setFrameworkDescription(
-                    "Object representing Competency A level");
-
-            // Get Activity
-            Activity activity = (Activity) stmt.getObject();
-
-            boolean fireRule = processCompetency.fireRule(stmt);
-            assertTrue(fireRule);
-
+            // Test update competency
             Competency competencyResult = processCompetency
                     .updateCompetency(competency, activity);
             assertNotNull(competencyResult);
 
+            // Test update personal competency
+            expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+
+            PersonalCompetency personalCompetencyResult2 = processCompetency
+                    .updatePersonalCompetency(personalCompetencyResult,
+                            personResult, competencyResult, expires);
+            assertNotNull(personalCompetencyResult2);
+            assertEquals(personalCompetencyResult2.getExpires(), expires);
+            
         } catch (IOException e) {
             e.printStackTrace();
         }

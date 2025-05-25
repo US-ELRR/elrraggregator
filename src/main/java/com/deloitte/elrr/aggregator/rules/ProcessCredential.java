@@ -310,7 +310,7 @@ public class ProcessCredential implements Rule {
      * @return PersonalCredential
      * @throws RuntimeServiceException
      */
-    private PersonalCredential updatePersonalCredential(
+    public PersonalCredential updatePersonalCredential(
             PersonalCredential personalCredential, final Person person,
             final Credential credential, final LocalDateTime expires) {
 

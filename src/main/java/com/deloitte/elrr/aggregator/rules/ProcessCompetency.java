@@ -313,7 +313,7 @@ public class ProcessCompetency implements Rule {
      * @return personalCompetency
      * @throws RuntimeServiceException
      */
-    private PersonalCompetency updatePersonalCompetency(
+    public PersonalCompetency updatePersonalCompetency(
             PersonalCompetency personalCompetency, final Person person,
             final Competency competency, final LocalDateTime expires) {
 

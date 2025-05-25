@@ -41,7 +41,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
+@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
 @Slf4j
 class ProcessCredentialTest {
 
@@ -70,6 +70,9 @@ class ProcessCredentialTest {
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
 
             Mockito.doReturn("Test Credential A")
                     .doReturn("Object representing Credential A level")
@@ -134,43 +137,21 @@ class ProcessCredentialTest {
                             .getFrameworkDescription(),
                     "Object representing Credential A level");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    void testUpdate() {
-
-        try {
-
-            File testFile = TestFileUtil.getJsonTestFile("credential.json");
-
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
-
-            Mockito.doReturn("Test Credential A")
-                    .doReturn("Object representing Credential A level")
-                    .when(langMapUtil).getLangMapValue(any());
-
-            Credential credential = new Credential();
-            credential.setId(UUID.randomUUID());
-            credential.setIdentifier(
-                    "http://example.edlm/credentials/credential-a");
-            credential.setFrameworkTitle("Test Credential A");
-            credential.setFrameworkDescription(
-                    "Object representing Test Credential A level");
-
-            // Get Activity
-            Activity activity = (Activity) stmt.getObject();
-
-            boolean fireRule = processCredential.fireRule(stmt);
-            assertTrue(fireRule);
-
-            Credential credentialResult = processCredential.updateCredential(credential, activity);
+            // Test update credential
+            Credential credentialResult = processCredential
+                    .updateCredential(credential, activity);
             assertNotNull(credentialResult);
-  
+
+            // Test update personal credential
+            expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+
+            PersonalCredential personalCredentialResult2 = processCredential
+                    .updatePersonalCredential(personalCredential, personResult,
+                            credentialResult, expires);
+            assertNotNull(personalCredentialResult2);
+            assertEquals(personalCredentialResult2.getExpires(), expires);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -203,15 +184,15 @@ class ProcessCredentialTest {
         String log = "Credential exists.";
         GenerateLogsUtil generateLogs = new GenerateLogsUtil();
         generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
+        assertThat(capturedOutput.getOut()).contains(log);
     }
-    
+
     @Test
     void logError(CapturedOutput capturedOutput) {
         String log = "Error processing credential";
         GenerateLogsUtil generateLogs = new GenerateLogsUtil();
         generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
+        assertThat(capturedOutput.getOut()).contains(log);
     }
 
 }
