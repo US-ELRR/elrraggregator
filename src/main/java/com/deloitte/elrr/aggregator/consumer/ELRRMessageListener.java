@@ -149,8 +149,17 @@ public class ELRRMessageListener {
      * @return String
      */
     private String ruleToString(String rule) {
-        int indx = rule.indexOf("Process");
-        int indx2 = rule.indexOf("@");
-        return rule.substring(indx, indx2);
+
+        try {
+
+            int indx = rule.indexOf("Process");
+            int indx2 = rule.indexOf("@");
+            rule = rule.substring(indx, indx2);
+
+        } catch (StringIndexOutOfBoundsException e) {
+
+        }
+
+        return rule;
     }
 }
