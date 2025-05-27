@@ -1,8 +1,8 @@
 package com.deloitte.elrr.aggregator.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
@@ -31,7 +29,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
+@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
 @Slf4j
 class LearningRecordUtilTest {
 
@@ -117,13 +115,14 @@ class LearningRecordUtilTest {
             learningResource.setId(UUID.randomUUID());
             learningResource.setTitle("Activity 1");
             learningResource.setDescription("Example Activity Test");
-            
+
             LearningRecord learningRecord = new LearningRecord();
             learningRecord.setId(UUID.randomUUID());
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
 
-            LearningRecord learningRecordResult = learningRecordUtil.updateLearningRecord(person, learningRecord, verb, result);
+            LearningRecord learningRecordResult = learningRecordUtil
+                    .updateLearningRecord(person, learningRecord, verb, result);
             assertNotNull(learningRecordResult);
 
         } catch (IOException e) {
@@ -271,19 +270,42 @@ class LearningRecordUtilTest {
     }
 
     @Test
-    void logCreate(CapturedOutput capturedOutput) {
-        String log = "Create new learning record.";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
-    }
+    void testLogging(LogCapture logCapture) {
 
-    @Test
-    void logUpdate(CapturedOutput capturedOutput) {
-        String log = "Update learning record.";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("test");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Activity 1");
+            learningResource.setDescription("Example Activity Test");
+
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(activity, person, verb, result,
+                            learningResource);
+            assertNotNull(learningRecord);
+            assertThat(logCapture.getLoggingEvents()).hasSize(4);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

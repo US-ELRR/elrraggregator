@@ -21,10 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import com.deloitte.elrr.aggregator.util.GenerateLogsUtil;
+import com.deloitte.elrr.aggregator.util.LogCapture;
+import com.deloitte.elrr.aggregator.util.LogCaptureExtension;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Credential;
@@ -41,7 +40,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
+@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
 @Slf4j
 class ProcessCredentialTest {
 
@@ -74,9 +73,9 @@ class ProcessCredentialTest {
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
 
-            Mockito.doReturn("Test Credential A")
-                    .doReturn("Object representing Credential A level")
-                    .when(langMapUtil).getLangMapValue(any());
+            Mockito.doReturn("Test Credential A").doReturn(
+                    "Object representing Credential A level").when(langMapUtil)
+                    .getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -132,14 +131,13 @@ class ProcessCredentialTest {
 
             assertEquals(personalCredential.getCredential().getFrameworkTitle(),
                     "Test Credential A");
-            assertEquals(
-                    personalCredential.getCredential()
-                            .getFrameworkDescription(),
+            assertEquals(personalCredential.getCredential()
+                    .getFrameworkDescription(),
                     "Object representing Credential A level");
 
             // Test update credential
-            Credential credentialResult = processCredential
-                    .updateCredential(credential, activity);
+            Credential credentialResult = processCredential.updateCredential(
+                    credential, activity);
             assertNotNull(credentialResult);
 
             // Test update personal credential
@@ -151,6 +149,94 @@ class ProcessCredentialTest {
                             credentialResult, expires);
             assertNotNull(personalCredentialResult2);
             assertEquals(personalCredentialResult2.getExpires(), expires);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void testLogging(LogCapture logCapture) {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("credential.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
+            Mockito.doReturn("Test Credential A").doReturn(
+                    "Object representing Credential A level").when(langMapUtil)
+                    .getLangMapValue(any());
+
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:testcredential@gmail.com");
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Test Credential");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+            Mockito.doReturn(person).when(personService).save(person);
+
+            UUID identityUUID = UUID.randomUUID();
+            Identity identity = new Identity();
+            identity.setId(identityUUID);
+            identity.setMbox("mailto:testcredential@gmail.com");
+
+            Credential credential = new Credential();
+            credential.setId(UUID.randomUUID());
+            credential.setIdentifier(
+                    "http://example.edlm/credentials/credential-a");
+            credential.setFrameworkTitle("Test Credential A");
+            credential.setFrameworkDescription(
+                    "Object representing Test Credential A level");
+            Mockito.doReturn(credential).when(credentialService).save(any());
+
+            PersonalCredential personalCredential = new PersonalCredential();
+            personalCredential.setId(UUID.randomUUID());
+            personalCredential.setHasRecord(true);
+
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+            personalCredential.setExpires(expires);
+
+            personalCredential.setPerson(person);
+            personalCredential.setCredential(credential);
+            Mockito.doReturn(personalCredential).when(personalCredentialService)
+                    .save(any());
+
+            boolean fireRule = processCredential.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Person personResult = processCredential.processRule(person, stmt);
+
+            Set<PersonalCredential> personalCredentials = personResult
+                    .getCredentials();
+            assertNotNull(personalCredentials);
+            assertThat(logCapture.getLoggingEvents()).hasSize(5);
+
+            // Test update credential
+            Credential credentialResult = processCredential.updateCredential(
+                    credential, activity);
+            assertNotNull(credentialResult);
+            assertThat(logCapture.getLoggingEvents()).hasSize(7);
+
+            // Test update personal credential
+            expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+
+            PersonalCredential personalCredentialResult2 = processCredential
+                    .updatePersonalCredential(personalCredential, personResult,
+                            credentialResult, expires);
+            assertNotNull(personalCredentialResult2);
+            assertThat(logCapture.getLoggingEvents()).hasSize(8);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -177,22 +263,6 @@ class ProcessCredentialTest {
             e.printStackTrace();
         }
 
-    }
-
-    @Test
-    void logExists(CapturedOutput capturedOutput) {
-        String log = "Credential exists.";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);
-    }
-
-    @Test
-    void logError(CapturedOutput capturedOutput) {
-        String log = "Error processing credential";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);
     }
 
 }

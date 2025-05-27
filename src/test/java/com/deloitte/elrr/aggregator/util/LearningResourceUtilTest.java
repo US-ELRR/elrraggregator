@@ -1,8 +1,8 @@
 package com.deloitte.elrr.aggregator.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
@@ -26,7 +24,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
+@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
 @Slf4j
 class LearningResourceUtilTest {
 
@@ -66,21 +64,29 @@ class LearningResourceUtilTest {
             e.printStackTrace();
         }
     }
-    
+
     @Test
-    void logExists(CapturedOutput capturedOutput) {
-        String log = "Learning Resource exists";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
-    }
-    
-    @Test
-    void logError(CapturedOutput capturedOutput) {
-        String log = "ErrorProcessing learning resource";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);   
+    void testLogging(LogCapture logCapture) {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            LearningResource learningResource = learningResourceUtil
+                    .processLearningResource(activity);
+            assertNotNull(learningResource);
+            assertThat(logCapture.getLoggingEvents()).hasSize(3);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

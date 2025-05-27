@@ -21,10 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import com.deloitte.elrr.aggregator.util.GenerateLogsUtil;
+import com.deloitte.elrr.aggregator.util.LogCapture;
+import com.deloitte.elrr.aggregator.util.LogCaptureExtension;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.entity.Competency;
@@ -41,7 +40,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({ MockitoExtension.class, OutputCaptureExtension.class })
+@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
 @Slf4j
 class ProcessCompetencyTest {
 
@@ -74,9 +73,9 @@ class ProcessCompetencyTest {
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
 
-            Mockito.doReturn("Competency A")
-                    .doReturn("Object representing Competency A level")
-                    .when(langMapUtil).getLangMapValue(any());
+            Mockito.doReturn("Competency A").doReturn(
+                    "Object representing Competency A level").when(langMapUtil)
+                    .getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -131,14 +130,13 @@ class ProcessCompetencyTest {
 
             assertEquals(personalCompetencyResult.getCompetency()
                     .getFrameworkTitle(), "Competency A");
-            assertEquals(
-                    personalCompetencyResult.getCompetency()
-                            .getFrameworkDescription(),
+            assertEquals(personalCompetencyResult.getCompetency()
+                    .getFrameworkDescription(),
                     "Object representing Competency A level");
 
             // Test update competency
-            Competency competencyResult = processCompetency
-                    .updateCompetency(competency, activity);
+            Competency competencyResult = processCompetency.updateCompetency(
+                    competency, activity);
             assertNotNull(competencyResult);
 
             // Test update personal competency
@@ -150,7 +148,7 @@ class ProcessCompetencyTest {
                             personResult, competencyResult, expires);
             assertNotNull(personalCompetencyResult2);
             assertEquals(personalCompetencyResult2.getExpires(), expires);
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -179,19 +177,94 @@ class ProcessCompetencyTest {
     }
 
     @Test
-    void logExists(CapturedOutput capturedOutput) {
-        String log = "Competency exists.";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);
-    }
+    void testLogging(LogCapture logCapture) {
 
-    @Test
-    void logError(CapturedOutput capturedOutput) {
-        String log = "Error processing competency";
-        GenerateLogsUtil generateLogs = new GenerateLogsUtil();
-        generateLogs.generateLogs(log);
-        assertThat(capturedOutput.getOut()).contains(log);
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("competency.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
+            Mockito.doReturn("Competency A").doReturn(
+                    "Object representing Competency A level").when(langMapUtil)
+                    .getLangMapValue(any());
+
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:testcompetency@gmail.com");
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Test Competency");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+            Mockito.doReturn(person).when(personService).save(person);
+
+            Identity identity = new Identity();
+            identity.setId(UUID.randomUUID());
+            identity.setMbox("mailto:testcompetency@gmail.com");
+
+            Competency competency = new Competency();
+            competency.setId(UUID.randomUUID());
+            competency.setIdentifier(
+                    "http://example.edlm/competencies/testcompetency-a");
+            competency.setFrameworkTitle("Competency A");
+            competency.setFrameworkDescription(
+                    "Object representing Competency A level");
+            Mockito.doReturn(competency).when(competencyService).save(any());
+
+            PersonalCompetency personalCompetency = new PersonalCompetency();
+            personalCompetency.setId(UUID.randomUUID());
+            personalCompetency.setHasRecord(true);
+
+            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+            personalCompetency.setExpires(expires);
+
+            personalCompetency.setPerson(person);
+            personalCompetency.setCompetency(competency);
+            Mockito.doReturn(personalCompetency).when(personalCompetencyService)
+                    .save(any());
+
+            boolean fireRule = processCompetency.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Person personResult = processCompetency.processRule(person, stmt);
+
+            Set<PersonalCompetency> personalCompetencies = personResult
+                    .getCompetencies();
+            assertNotNull(personalCompetencies);
+
+            PersonalCompetency personalCompetencyResult = personalCompetencies
+                    .stream().findFirst().orElse(null);
+            assertNotNull(personalCompetencyResult);
+            assertThat(logCapture.getLoggingEvents()).hasSize(5);
+
+            // Test update competency
+            Competency competencyResult = processCompetency.updateCompetency(
+                    competency, activity);
+            assertNotNull(competencyResult);
+            assertThat(logCapture.getLoggingEvents()).hasSize(7);
+
+            // Test update personal competency
+            expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
+                    DateTimeFormatter.ISO_DATE_TIME);
+
+            PersonalCompetency personalCompetencyResult2 = processCompetency
+                    .updatePersonalCompetency(personalCompetencyResult,
+                            personResult, competencyResult, expires);
+            assertNotNull(personalCompetencyResult2);
+            assertThat(logCapture.getLoggingEvents()).hasSize(8);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
