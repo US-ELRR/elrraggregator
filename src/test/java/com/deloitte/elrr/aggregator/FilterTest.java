@@ -1,8 +1,8 @@
 package com.deloitte.elrr.aggregator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -17,6 +17,8 @@ public class FilterTest {
 
     private final SanitizingFilter sf = new SanitizingFilter();
     private WrappedHttp http;
+    private JSONRequestSizeLimitFilter sl = new JSONRequestSizeLimitFilter();
+    private HeaderFilter hf = new HeaderFilter();
 
     @Test
     void testIllegalBodyNotJson() throws IOException, ServletException {
@@ -42,7 +44,8 @@ public class FilterTest {
     @Test
     void testIllegalBodyWhitelist() throws IOException, ServletException {
         MockHttpServletRequest req = new MockHttpServletRequest();
-        http = new WrappedHttp(req, "{Unwise: afsd,.e\0nab}"); // not allowed illegal \0
+        http = new WrappedHttp(req, "{Unwise: afsd,.e\0nab}"); // not allowed
+                                                               // illegal \0
         MockHttpServletResponse res = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
         sf.doFilter(http, res, chain);
@@ -86,6 +89,40 @@ public class FilterTest {
         MockHttpServletResponse res = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
         sf.doFilter(http, res, chain);
+        assertFalse(res.isCommitted());
+    }
+
+    @Test
+    void testSizeLimitOk() throws IOException, ServletException {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addParameter("anything", "goes");
+        http = new WrappedHttp(req, "{Unwise: nap}");
+
+        // next lines are simply to increase coverage of wrappedhttp
+        http.getInputStream().available();
+        http.getInputStream().isReady();
+        http.getInputStream().read();
+
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        sl.doFilter(http, res, chain);
+        assertFalse(res.isCommitted());
+    }
+
+    @Test
+    void testHeader() throws IOException, ServletException {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addParameter("anything", "goes");
+        http = new WrappedHttp(req, "{Unwise: nap}");
+
+        // next lines are simply to increase coverage of wrappedhttp
+        http.getInputStream().available();
+        http.getInputStream().isReady();
+        http.getInputStream().read();
+
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+        hf.doFilter(http, res, chain);
         assertFalse(res.isCommitted());
     }
 }

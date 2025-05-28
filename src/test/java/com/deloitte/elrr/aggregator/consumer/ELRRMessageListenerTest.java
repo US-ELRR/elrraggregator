@@ -74,6 +74,7 @@ class ELRRMessageListenerTest {
             elrrMessageListener.listen(content);
 
         } catch (AggregatorException e) {
+            e.printStackTrace();
         }
     }
 
