@@ -157,7 +157,7 @@ public class ELRRMessageListener {
             rule = rule.substring(indx, indx2);
 
         } catch (StringIndexOutOfBoundsException e) {
-
+            return rule;
         }
 
         return rule;

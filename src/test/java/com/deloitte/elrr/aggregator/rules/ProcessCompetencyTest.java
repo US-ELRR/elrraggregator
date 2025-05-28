@@ -181,6 +181,8 @@ class ProcessCompetencyTest {
 
         try {
 
+            logCapture.clear();
+
             File testFile = TestFileUtil.getJsonTestFile("competency.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
@@ -245,12 +247,18 @@ class ProcessCompetencyTest {
                     .stream().findFirst().orElse(null);
             assertNotNull(personalCompetencyResult);
             assertThat(logCapture.getLoggingEvents()).hasSize(5);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process competency.");
+            logCapture.clear();
 
             // Test update competency
             Competency competencyResult = processCompetency.updateCompetency(
                     competency, activity);
             assertNotNull(competencyResult);
-            assertThat(logCapture.getLoggingEvents()).hasSize(7);
+            assertThat(logCapture.getLoggingEvents()).hasSize(2);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Updating competency.");
+            logCapture.clear();
 
             // Test update personal competency
             expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
@@ -260,7 +268,9 @@ class ProcessCompetencyTest {
                     .updatePersonalCompetency(personalCompetencyResult,
                             personResult, competencyResult, expires);
             assertNotNull(personalCompetencyResult2);
-            assertThat(logCapture.getLoggingEvents()).hasSize(8);
+            assertThat(logCapture.getLoggingEvents()).hasSize(1);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Personal Competency for Test Competency - Competency A updated.");
 
         } catch (IOException e) {
             e.printStackTrace();

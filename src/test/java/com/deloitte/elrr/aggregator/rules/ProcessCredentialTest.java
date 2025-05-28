@@ -160,6 +160,8 @@ class ProcessCredentialTest {
 
         try {
 
+            logCapture.clear();
+
             File testFile = TestFileUtil.getJsonTestFile("credential.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
@@ -221,12 +223,18 @@ class ProcessCredentialTest {
                     .getCredentials();
             assertNotNull(personalCredentials);
             assertThat(logCapture.getLoggingEvents()).hasSize(5);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process credential.");
+            logCapture.clear();
 
             // Test update credential
             Credential credentialResult = processCredential.updateCredential(
                     credential, activity);
             assertNotNull(credentialResult);
-            assertThat(logCapture.getLoggingEvents()).hasSize(7);
+            assertThat(logCapture.getLoggingEvents()).hasSize(2);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Updating credential.");
+            logCapture.clear();
 
             // Test update personal credential
             expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
@@ -236,7 +244,9 @@ class ProcessCredentialTest {
                     .updatePersonalCredential(personalCredential, personResult,
                             credentialResult, expires);
             assertNotNull(personalCredentialResult2);
-            assertThat(logCapture.getLoggingEvents()).hasSize(8);
+            assertThat(logCapture.getLoggingEvents()).hasSize(1);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Personal Credential for Test Credential - Object representing Credential A level updated.");
 
         } catch (IOException e) {
             e.printStackTrace();

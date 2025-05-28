@@ -70,6 +70,8 @@ class LearningResourceUtilTest {
 
         try {
 
+            logCapture.clear();
+
             File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
@@ -83,6 +85,8 @@ class LearningResourceUtilTest {
                     .processLearningResource(activity);
             assertNotNull(learningResource);
             assertThat(logCapture.getLoggingEvents()).hasSize(3);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process learning resource.");
 
         } catch (IOException e) {
             e.printStackTrace();

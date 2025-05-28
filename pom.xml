@@ -313,6 +313,7 @@
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
+                    <outputFile>${project.build.directory}/checkstyle/checkstyle-report.xml</outputFile>
                     <linkXRef>false</linkXRef>
                 </configuration>
                 <executions>

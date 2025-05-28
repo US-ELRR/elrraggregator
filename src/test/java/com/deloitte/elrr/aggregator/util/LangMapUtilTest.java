@@ -115,6 +115,37 @@ class LangMapUtilTest {
     }
 
     @Test
+    void testHebrew() {
+
+        String activityName = "";
+        String activityDescription = "";
+
+        try {
+
+            LangMapUtil langMapUtil = new LangMapUtil();
+
+            File testFile = TestFileUtil.getJsonTestFile("completed_il.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
+            assertEquals(activityName, "פעילות 1");
+            assertEquals(activityDescription, "מבחן פעילות לדוגמה");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     void testMulti() {
 
         String activityName = "";

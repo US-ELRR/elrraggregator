@@ -274,6 +274,8 @@ class LearningRecordUtilTest {
 
         try {
 
+            logCapture.clear();
+
             File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
@@ -302,6 +304,8 @@ class LearningRecordUtilTest {
                             learningResource);
             assertNotNull(learningRecord);
             assertThat(logCapture.getLoggingEvents()).hasSize(4);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process learning record.");
 
         } catch (IOException e) {
             e.printStackTrace();

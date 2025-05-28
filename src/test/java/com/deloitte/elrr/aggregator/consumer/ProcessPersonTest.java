@@ -79,6 +79,8 @@ class ProcessPersonTest {
 
         try {
 
+            logCapture.clear();
+
             File testFile = TestFileUtil.getJsonTestFile("completed.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
@@ -88,6 +90,8 @@ class ProcessPersonTest {
             Person person = processPerson.processPerson(stmt);
             assertNotNull(person);
             assertThat(logCapture.getLoggingEvents()).hasSize(7);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process person.");
 
         } catch (IOException e) {
             e.printStackTrace();
