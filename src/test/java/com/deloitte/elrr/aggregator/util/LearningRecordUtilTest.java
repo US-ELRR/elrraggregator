@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -84,7 +85,7 @@ class LearningRecordUtilTest {
                     "Example Activity Test");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -126,7 +127,7 @@ class LearningRecordUtilTest {
             assertNotNull(learningRecordResult);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -173,7 +174,7 @@ class LearningRecordUtilTest {
                     "A fictitious example CBT 2 course.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -219,7 +220,7 @@ class LearningRecordUtilTest {
                     "A fictitious example CBT course.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -265,7 +266,7 @@ class LearningRecordUtilTest {
                     "Example activity 10 description");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -308,7 +309,7 @@ class LearningRecordUtilTest {
                     "Process learning record.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 

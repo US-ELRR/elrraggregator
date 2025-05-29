@@ -71,7 +71,6 @@ public class ProcessCompleted implements Rule {
                     .processLearningResource(activity);
 
             // Process LearningRecord
-
             LearningRecord learningRecord = learningRecordUtil
                     .processLearningRecord(activity, person, statement
                             .getVerb(), statement.getResult(),

@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -61,7 +62,7 @@ class LearningResourceUtilTest {
                     "Example Activity Test");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -89,7 +90,7 @@ class LearningResourceUtilTest {
                     "Process learning resource.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 

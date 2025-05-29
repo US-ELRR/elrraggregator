@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -70,7 +71,7 @@ class ProcessPersonTest {
             assertEquals(identity.getMbox(), "mailto:test@gmail.com");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -94,7 +95,7 @@ class ProcessPersonTest {
                     "Process person.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -121,7 +122,7 @@ class ProcessPersonTest {
             assertEquals(identity.getName(), "account_name");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 

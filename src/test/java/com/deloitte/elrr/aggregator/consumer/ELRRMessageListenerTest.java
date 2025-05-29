@@ -1,5 +1,8 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,7 +64,7 @@ class ELRRMessageListenerTest {
             elrrMessageListener.listen(content);
 
         } catch (AggregatorException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -74,7 +77,7 @@ class ELRRMessageListenerTest {
             elrrMessageListener.listen(content);
 
         } catch (AggregatorException e) {
-            e.printStackTrace();
+            assertNotNull(e);
         }
     }
 

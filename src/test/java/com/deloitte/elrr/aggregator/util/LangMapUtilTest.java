@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.util;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -48,7 +49,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Example Activity Test");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -79,7 +80,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Exemple de test d'activité");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -110,7 +111,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Ejemplo de actividad");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -141,7 +142,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "מבחן פעילות לדוגמה");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -173,7 +174,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "A module to learn about xAPI.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 

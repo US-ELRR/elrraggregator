@@ -1,6 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -151,7 +152,7 @@ class ProcessCredentialTest {
             assertEquals(personalCredentialResult2.getExpires(), expires);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -249,7 +250,7 @@ class ProcessCredentialTest {
                     "Personal Credential for Test Credential - Object representing Credential A level updated.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -270,7 +271,7 @@ class ProcessCredentialTest {
             assertFalse(fireRule);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
 
     }
