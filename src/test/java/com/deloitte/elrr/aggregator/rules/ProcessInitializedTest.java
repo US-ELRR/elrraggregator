@@ -1,6 +1,8 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -123,7 +125,30 @@ class ProcessInitializedTest {
                     "Example activity 10 description");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
+
+    @Test
+    void testFireRule() {
+
+        File testFile;
+
+        try {
+
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            boolean fireRule = processInitialized.fireRule(stmt);
+            assertFalse(fireRule);
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+
+    }
+
 }

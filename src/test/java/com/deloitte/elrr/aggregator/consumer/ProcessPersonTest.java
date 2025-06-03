@@ -1,5 +1,7 @@
-package com.deloitte.elrr.aggregator.rules;
+package com.deloitte.elrr.aggregator.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -13,7 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
+import com.deloitte.elrr.aggregator.util.LogCapture;
+import com.deloitte.elrr.aggregator.util.LogCaptureExtension;
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
@@ -26,7 +29,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
 @Slf4j
 class ProcessPersonTest {
 
@@ -68,7 +71,59 @@ class ProcessPersonTest {
             assertEquals(identity.getMbox(), "mailto:test@gmail.com");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
+
+    @Test
+    void testLogging(LogCapture logCapture) {
+
+        try {
+
+            logCapture.clear();
+
+            File testFile = TestFileUtil.getJsonTestFile("completed.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Person person = processPerson.processPerson(stmt);
+            assertNotNull(person);
+            assertThat(logCapture.getLoggingEvents()).hasSize(7);
+            assertEquals(logCapture.getFirstFormattedMessage(),
+                    "Process person.");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testHomepage() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "completed_homepage.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Person person = processPerson.processPerson(stmt);
+            assertNotNull(person);
+            assertEquals(person.getName(), "Terry Bradshaw");
+
+            Set<Identity> identities = person.getIdentities();
+            assertNotNull(identities);
+            Identity identity = identities.stream().findFirst().orElse(null);
+            assertEquals(identity.getHomePage(), "http://example44.org");
+            assertEquals(identity.getName(), "account_name");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
 }

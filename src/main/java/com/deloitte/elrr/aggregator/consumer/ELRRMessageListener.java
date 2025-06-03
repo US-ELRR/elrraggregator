@@ -123,9 +123,6 @@ public class ELRRMessageListener {
 
             for (Rule rule : classList) {
 
-                log.info("Process verb " + statement.getVerb().getId() + " by "
-                        + ruleToString(rule.toString()));
-
                 if (rule.fireRule(statement)) {
 
                     // Process Rule
@@ -144,13 +141,4 @@ public class ELRRMessageListener {
 
     }
 
-    /**
-     * @param rule
-     * @return String
-     */
-    private String ruleToString(String rule) {
-        int indx = rule.indexOf("Process");
-        int indx2 = rule.indexOf("@");
-        return rule.substring(indx, indx2);
-    }
 }

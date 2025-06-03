@@ -3,7 +3,6 @@ package com.deloitte.elrr.aggregator;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,103 +21,81 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SanitizingFilter implements Filter {
 
-    private boolean invalidParam;
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         WrappedHttp httpRequest;
-        invalidParam = false;
 
         StringBuilder body = new StringBuilder();
-        try {
-            for (String line : request.getReader().lines().toList()) {
-                if (InputSanitizer.isValidInput(line)) {
-                    body.append(line);
-                    body.append('\n');
+        for (String line : request.getReader().lines().toList()) {
+            if (InputSanitizer.isValidInput(line)) {
+                body.append(line);
+                body.append('\n');
 
-                } else {
-                    // need to log bad request. Might be best to continue
-                    // processing
-                    // and report all bad lines. / complete body
-                    httpResponse.sendError(HttpStatus.BAD_REQUEST.value(),
-                            "Illegal line in request body: " + line);
-                }
+            } else {
+                // need to log bad request. Might be best to continue processing
+                // and report all bad lines. / complete body
+                httpResponse.sendError(HttpStatus.BAD_REQUEST.value(),
+                        "Illegal line in request body: " + line);
             }
-        } catch (IOException | IllegalStateException e) {
-            log.error("Error: " + e.getMessage());
-            e.printStackTrace();
-            return;
         }
 
         if (httpResponse.isCommitted()) {
             return;
         }
 
-        httpRequest = new WrappedHttp((HttpServletRequest) request, body
-                .toString());
+        httpRequest = new WrappedHttp((HttpServletRequest) request,
+                body.toString());
         httpRequest.getParameterMap(); // might help to cache parameters for
-        // future filter chain
+                                       // future filter chain
 
-        // Check each parameter string for any invalid values
-        httpRequest.getParameterNames().asIterator().forEachRemaining((
-                param) -> {
+        // below we check each parameter and parameter values for any invalid
+        // strings
+        httpRequest.getParameterNames().asIterator().forEachRemaining(param -> {
             String paramVal = request.getParameter(param);
-            if (!InputSanitizer.isValidInput(paramVal)) {
-                invalidParam = true;
-                log.error("Illegal Parameter Value " + paramVal);
+            if (!InputSanitizer.isValidInput(paramVal)
+                    || !InputSanitizer.isValidInput(param)) {
+                try {
+                    httpResponse.sendError(HttpStatus.BAD_REQUEST.value(),
+                            "Illegal Parameter Value");
+                    return;
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 
-        if (invalidParam) {
-            try {
-                httpResponse.sendError(HttpStatus.BAD_REQUEST.value(),
-                        "Illegal Parameter Value");
-                return;
-            } catch (IOException e) {
-                log.error("Error: " + e.getMessage());
-                e.printStackTrace();
-                return;
-            }
-        }
-
-        if (hasHomoGlyphs(httpRequest)) {
-            try {
-                log.error("Request body contains homoglyphs.");
+        try {
+            if (httpRequest.getBody().length() > 0
+                    && hasHomoGlyphs(new JSONObject(httpRequest.getBody()))) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Request body contains homoglyphs.");
-                return;
-            } catch (IOException | JSONException e) {
-                log.error("Error: " + e.getMessage());
-                e.printStackTrace();
+                log.warn("returning on homoglyph");
                 return;
             }
-        }
-
-        try {
-            chain.doFilter(httpRequest, response);
-        } catch (IOException | ServletException e) {
-            log.error("Error: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) {
+            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Malformed request body");
             return;
         }
+        chain.doFilter(httpRequest, response);
     }
 
-    private static boolean hasHomoGlyphs(WrappedHttp httpRequest) {
-
-        if (httpRequest.getBody().isEmpty()) {
-            return false;
-        }
+    private static boolean hasHomoGlyphs(JSONObject jo) {
         Confusables confusables = Confusables.fromInternal();
-        JSONObject jsonObject = new JSONObject(httpRequest.getBody());
-        Iterator<String> keys = jsonObject.keys();
+
+        Iterator<String> keys = jo.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            String value = (String) jsonObject.get(key);
-            boolean dangerousKey = confusables.isDangerous(key);
-            boolean dangerousValue = confusables.isDangerous(value);
-            if (dangerousKey || dangerousValue) {
+            Object val = jo.get(key);
+            if (val instanceof JSONObject) {
+                if (hasHomoGlyphs((JSONObject) val)) {
+                    return true;
+                }
+            } else if (confusables.isDangerous(key)
+                    || confusables.isDangerous(String.valueOf(val))) {
                 return true;
             }
         }

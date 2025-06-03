@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.util;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -48,7 +49,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Example Activity Test");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -79,7 +80,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Exemple de test d'activité");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -110,7 +111,38 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "Ejemplo de actividad");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testHebrew() {
+
+        String activityName = "";
+        String activityDescription = "";
+
+        try {
+
+            LangMapUtil langMapUtil = new LangMapUtil();
+
+            File testFile = TestFileUtil.getJsonTestFile("completed_il.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                    .getName());
+            activityDescription = langMapUtil.getLangMapValue(activity
+                    .getDefinition().getDescription());
+            assertEquals(activityName, "פעילות 1");
+            assertEquals(activityDescription, "מבחן פעילות לדוגמה");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
         }
     }
 
@@ -142,7 +174,7 @@ class LangMapUtilTest {
             assertEquals(activityDescription, "A module to learn about xAPI.");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            fail("Should not have thrown any exception");
         }
     }
 
