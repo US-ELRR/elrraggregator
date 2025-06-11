@@ -135,8 +135,6 @@ public class ProcessCredential implements Rule {
             }
 
         } catch (AggregatorException e) {
-            log.error("Error processing credential", e);
-            e.printStackTrace();
             throw e;
         }
 
@@ -171,8 +169,6 @@ public class ProcessCredential implements Rule {
             log.info("Credential " + activity.getId() + " created.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
@@ -205,8 +201,6 @@ public class ProcessCredential implements Rule {
             log.info("Credential " + activity.getId() + " updated.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 

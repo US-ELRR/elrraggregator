@@ -136,8 +136,6 @@ public class ProcessCompetency implements Rule {
             }
 
         } catch (AggregatorException e) {
-            log.info(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
@@ -172,8 +170,6 @@ public class ProcessCompetency implements Rule {
             log.info("Competency " + activity.getId() + " created.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
@@ -207,8 +203,6 @@ public class ProcessCompetency implements Rule {
             log.info("Competency " + activity.getId() + " updated.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 

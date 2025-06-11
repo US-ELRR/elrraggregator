@@ -93,8 +93,6 @@ public class LangMapUtil {
             return langMap.get(langCode);
 
         } catch (ClassCastException | NullPointerException e) {
-            log.error("Error getting language codes", e);
-            e.printStackTrace();
             throw new AggregatorException("Error getting language codes", e);
         }
     }

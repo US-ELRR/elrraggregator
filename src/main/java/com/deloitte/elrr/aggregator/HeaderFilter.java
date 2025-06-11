@@ -43,7 +43,6 @@ public class HeaderFilter implements Filter {
             }
         } catch (IOException | ServletException e) {
             log.error(e.getMessage());
-            e.printStackTrace();
             return;
         }
     }
