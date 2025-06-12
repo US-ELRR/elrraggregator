@@ -13,16 +13,7 @@ public final class TestFileUtil {
      * @throws IOException
      */
     public static File getJsonTestFile(String filename) throws IOException {
-
-        File file;
-
-        try {
-            file = new ClassPathResource(filename).getFile();
-        } catch (IOException e) {
-            throw e;
-        }
-
-        return file;
+        return new ClassPathResource(filename).getFile();
     }
 
     private TestFileUtil() {
