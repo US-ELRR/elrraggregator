@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class VerbIdConstantsTest {
 
     @Test
@@ -16,7 +19,7 @@ public class VerbIdConstantsTest {
             URI uri = new URI("http://adlnet.gov/expapi/verbs/achieved");
             assertEquals(VerbIdConstants.ACHIEVED_VERB_ID, uri);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Error: " + e.getMessage());
         }
 
     }

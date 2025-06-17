@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,7 +29,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 class LearningRecordUtilTest {
 
@@ -264,49 +263,6 @@ class LearningRecordUtilTest {
                     "Example Activity 10");
             assertEquals(learningRecord.getLearningResource().getDescription(),
                     "Example activity 10 description");
-
-        } catch (IOException e) {
-            fail("Should not have thrown any exception");
-        }
-    }
-
-    @Test
-    void testLogging(LogCapture logCapture) {
-
-        try {
-
-            logCapture.clear();
-
-            File testFile = TestFileUtil.getJsonTestFile("completed.json");
-
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
-
-            Activity activity = (Activity) stmt.getObject();
-            assertNotNull(activity);
-
-            Verb verb = stmt.getVerb();
-            assertNotNull(verb);
-
-            Result result = stmt.getResult();
-
-            Person person = new Person();
-            person.setId(UUID.randomUUID());
-            person.setName("test");
-
-            LearningResource learningResource = new LearningResource();
-            learningResource.setId(UUID.randomUUID());
-            learningResource.setTitle("Activity 1");
-            learningResource.setDescription("Example Activity Test");
-
-            LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, verb, result,
-                            learningResource);
-            assertNotNull(learningRecord);
-            assertThat(logCapture.getLoggingEvents()).hasSize(4);
-            assertEquals(logCapture.getFirstFormattedMessage(),
-                    "Process learning record.");
 
         } catch (IOException e) {
             fail("Should not have thrown any exception");

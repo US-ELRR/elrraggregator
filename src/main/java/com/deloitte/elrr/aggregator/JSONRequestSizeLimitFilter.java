@@ -39,7 +39,6 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
             }
         } catch (IOException | ServletException e) {
             log.error(e.getMessage());
-            e.printStackTrace();
             return;
         }
     }

@@ -12,19 +12,8 @@ public final class TestFileUtil {
      * @return file
      * @throws IOException
      */
-    public static File getJsonTestFile(String filename)
-            throws IOException {
-
-        File file;
-
-        try {
-            file = new ClassPathResource(filename).getFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        }
-
-        return file;
+    public static File getJsonTestFile(String filename) throws IOException {
+        return new ClassPathResource(filename).getFile();
     }
 
     private TestFileUtil() {

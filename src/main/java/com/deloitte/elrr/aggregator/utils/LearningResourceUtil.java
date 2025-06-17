@@ -46,8 +46,6 @@ public class LearningResourceUtil {
                 learningResource = createLearningResource(activity);
 
             } catch (AggregatorException e) {
-                log.error("Error processing learning resource", e);
-                e.printStackTrace();
                 throw e;
             }
         }
@@ -83,8 +81,6 @@ public class LearningResourceUtil {
                     + " created.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 

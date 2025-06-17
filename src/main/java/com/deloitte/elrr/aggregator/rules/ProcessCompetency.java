@@ -112,33 +112,26 @@ public class ProcessCompetency implements Rule {
      * @return competency
      * @throws AggregatorException
      */
-    private Competency processCompetency(final Activity activity) {
+    private Competency processCompetency(final Activity activity)
+            throws AggregatorException {
 
         Competency competency = null;
         PersonalCompetency personalCompetency = null;
 
-        try {
+        // Get competency
+        competency = competencyService.findByIdentifier(activity.getId()
+                .toString());
 
-            // Get competency
-            competency = competencyService.findByIdentifier(activity.getId()
-                    .toString());
+        // If competency doesn't exist
+        if (competency == null) {
 
-            // If competency doesn't exist
-            if (competency == null) {
+            competency = createCompetency(activity);
 
-                competency = createCompetency(activity);
+        } else {
 
-            } else {
+            log.info("Competency " + activity.getId() + " exists.");
+            competency = updateCompetency(competency, activity);
 
-                log.info("Competency " + activity.getId() + " exists.");
-                competency = updateCompetency(competency, activity);
-
-            }
-
-        } catch (AggregatorException e) {
-            log.info(e.getMessage());
-            e.printStackTrace();
-            throw e;
         }
 
         return competency;
@@ -172,8 +165,6 @@ public class ProcessCompetency implements Rule {
             log.info("Competency " + activity.getId() + " created.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
@@ -207,8 +198,6 @@ public class ProcessCompetency implements Rule {
             log.info("Competency " + activity.getId() + " updated.");
 
         } catch (AggregatorException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
