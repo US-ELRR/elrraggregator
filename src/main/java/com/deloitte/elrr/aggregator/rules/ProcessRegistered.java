@@ -56,35 +56,29 @@ public class ProcessRegistered implements Rule {
      */
     @Override
     @Transactional
-    public Person processRule(final Person person, final Statement statement) {
+    public Person processRule(final Person person, final Statement statement)
+            throws AggregatorException {
 
-        try {
+        log.info("Process activity registered");
 
-            log.info("Process activity registered");
+        // Get Activity
+        Activity activity = (Activity) statement.getObject();
 
-            // Get Activity
-            Activity activity = (Activity) statement.getObject();
+        // Process LearningResource
+        LearningResource learningResource = learningResourceUtil
+                .processLearningResource(activity);
 
-            // Process LearningResource
-            LearningResource learningResource = learningResourceUtil
-                    .processLearningResource(activity);
+        // Process LearningRecord
+        LearningRecord learningRecord = learningRecordUtil
+                .processLearningRecord(activity, person, statement.getVerb(),
+                        statement.getResult(), learningResource);
 
-            // Process LearningRecord
-            LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, statement
-                            .getVerb(), statement.getResult(),
-                            learningResource);
-
-            if (person.getLearningRecords() == null) {
-                person.setLearningRecords(new HashSet<LearningRecord>());
-            }
-
-            person.getLearningRecords().add(learningRecord);
-            personService.save(person);
-
-        } catch (AggregatorException e) {
-            throw e;
+        if (person.getLearningRecords() == null) {
+            person.setLearningRecords(new HashSet<LearningRecord>());
         }
+
+        person.getLearningRecords().add(learningRecord);
+        personService.save(person);
 
         return person;
     }

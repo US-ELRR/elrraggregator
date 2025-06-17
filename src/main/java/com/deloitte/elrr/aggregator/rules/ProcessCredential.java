@@ -112,30 +112,25 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private Credential processCredential(final Activity activity) {
+    private Credential processCredential(final Activity activity)
+            throws AggregatorException {
 
         Credential credential = null;
         PersonalCredential personalCredential = null;
 
-        try {
+        // Get credential
+        credential = credentialService.findByIdentifier(activity.getId()
+                .toString());
 
-            // Get credential
-            credential = credentialService.findByIdentifier(activity.getId()
-                    .toString());
+        // If credential doesn't exist
+        if (credential == null) {
 
-            // If credential doesn't exist
-            if (credential == null) {
+            credential = createCredential(activity);
 
-                credential = createCredential(activity);
+        } else {
 
-            } else {
-
-                log.info("Credential " + activity.getId() + " exists.");
-                credential = updateCredential(credential, activity);
-            }
-
-        } catch (AggregatorException e) {
-            throw e;
+            log.info("Credential " + activity.getId() + " exists.");
+            credential = updateCredential(credential, activity);
         }
 
         return credential;
