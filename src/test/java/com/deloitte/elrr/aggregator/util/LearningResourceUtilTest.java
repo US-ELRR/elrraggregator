@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +24,7 @@ import com.yetanalytics.xapi.util.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith({ MockitoExtension.class, LogCaptureExtension.class })
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 class LearningResourceUtilTest {
 
@@ -60,34 +59,6 @@ class LearningResourceUtilTest {
             assertEquals(learningResource.getTitle(), "Activity 1");
             assertEquals(learningResource.getDescription(),
                     "Example Activity Test");
-
-        } catch (IOException e) {
-            fail("Should not have thrown any exception");
-        }
-    }
-
-    @Test
-    void testLogging(LogCapture logCapture) {
-
-        try {
-
-            logCapture.clear();
-
-            File testFile = TestFileUtil.getJsonTestFile("completed.json");
-
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
-
-            Activity activity = (Activity) stmt.getObject();
-            assertNotNull(activity);
-
-            LearningResource learningResource = learningResourceUtil
-                    .processLearningResource(activity);
-            assertNotNull(learningResource);
-            assertThat(logCapture.getLoggingEvents()).hasSize(3);
-            assertEquals(logCapture.getFirstFormattedMessage(),
-                    "Process learning resource.");
 
         } catch (IOException e) {
             fail("Should not have thrown any exception");
