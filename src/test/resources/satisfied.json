@@ -1,0 +1,32 @@
+{
+    "id": "4ced3322-e1a5-411a-a67d-6a735c76f119",
+    "timestamp": "2015-12-18T12:17:00+00:00",
+    "actor": {
+      "objectType": "Agent",
+      "name": "Tom Brady",
+      "mbox": "mailto:brady.learner@adlnet.gov"
+    },
+    "verb": {
+      "id": "http://adlnet.gov/expapi/verbs/satisfied",
+      "display": { "en-us": "Satisfied" }
+    },
+    "object": {
+      "id": "http://example.adlnet.gov/xapi/example/simpleCBT3",
+      "definition": {
+        "name": {
+          "en-US": "simple CBT 3 course"
+        },
+        "description": {
+          "en-US": "A fictitious example CBT 3 course."
+        }
+      }
+    },
+    "result": {
+      "score": {
+        "scaled": 0.2
+      },
+      "success": true,
+      "completion": true,
+      "duration": "PT1234S"
+    }
+}

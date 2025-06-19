@@ -6,8 +6,7 @@
 
 /**
  * @author mnelakurti
- *
+ *         <p>
  *         This package info file for package com.deloitte.elrr
- *
  */
-package com.deloitte.elrr.elrraggregator.exception;
+package com.deloitte.elrr.aggregator.consumer;

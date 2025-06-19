@@ -1,0 +1,39 @@
+{
+  "actor": {
+    "mbox": "mailto:example@example.com",
+    "name": "John Doe",
+    "objectType": "Agent"
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/completed",
+    "display": {
+      "en-us": "completed",
+      "es-es": "completado",
+      "fr-fr": "terminé"
+    }
+  },
+  "object": {
+    "id": "http://example.com/activities/learning-module",
+    "definition": {
+      "name": {
+        "en-us": "Learning Module",
+        "es-es": "Módulo de Aprendizaje",
+        "fr-fr": "Module d'Apprentissage"
+      },
+      "description": {
+        "en-us": "A module to learn about xAPI.",
+        "es-es": "Un módulo para aprender sobre xAPI.",
+        "fr-fr": "Un module pour apprendre sur xAPI."
+      }
+    },
+    "objectType": "Activity"
+  },
+  "result": {
+    "completion": true,
+    "success": true,
+    "score": {
+      "scaled": 0.95
+    }
+  },
+  "timestamp": "2025-04-25T12:34:56Z"
+}
