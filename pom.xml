@@ -24,6 +24,8 @@
         <sonar.dynamicAnalysis>resuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sona.lauguage>java</sona.lauguage>
+        <spring-security.version>6.3.10</spring-security.version>
+        <spring-framework.version>6.2.8</spring-framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -61,6 +63,18 @@
             </exclusions>
         </dependency>
         <dependency>
+            <!--override for spring-security-saml2-service-provider-->
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <!--override for spring-security-saml2-service-provider-->
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
             <exclusions>
@@ -91,6 +105,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>10.1.42</version>
+        </dependency>
+        <dependency>
             <groupId>fr.spacefox</groupId>
             <artifactId>confusable-homoglyphs</artifactId>
             <version>1.1.1</version>
@@ -104,7 +123,16 @@
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -162,7 +190,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.4.0</version>
+            <version>3.9.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.xerial.snappy</groupId>
@@ -173,7 +201,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
-            <version>3.0.3</version>
+            <version>3.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
@@ -312,6 +340,18 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.owasp</groupId>
+              <artifactId>dependency-check-maven</artifactId>
+              <version>12.1.0</version>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>check</goal>
+                      </goals>
+                  </execution>
+              </executions>
             </plugin>
         </plugins>
     </build>
