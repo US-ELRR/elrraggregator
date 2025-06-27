@@ -28,8 +28,15 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         try {
+
             if (isApplicationJson(request) && request
+                    .getContentLengthLong() == -1) {
+                log.error("Request size is unknown but exceeds the limit.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "Request size is unknown but exceeds the limit.");
+            } else if (isApplicationJson(request) && request
                     .getContentLengthLong() < maxSizeLimit) {
                 filterChain.doFilter(request, response);
             } else {
@@ -37,6 +44,7 @@ public class JSONRequestSizeLimitFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         "Request size exceeds the limit.");
             }
+
         } catch (IOException | ServletException e) {
             log.error(e.getMessage());
             return;
