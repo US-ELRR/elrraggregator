@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,13 +17,46 @@ import lombok.extern.slf4j.Slf4j;
 public class LangMapUtil {
 
     @Value("${lang.codes}")
-    private ArrayList<String> languageCodes = new ArrayList<String>();
+    private ArrayList<String> prefLangCodes = new ArrayList<String>();
 
     /**
      * Constructor.
      */
     public LangMapUtil() {
-        this.languageCodes.add("en-us");
+        this.prefLangCodes.add("en-us");
+    }
+
+    /**
+     * Given a set of LangTags, find the first one that matches one of the
+     * prefLangCodes.
+     *
+     * @param tags
+     * @return matching LangTag
+     */
+    public LangTag getMatchingKey(Set<LangTag> tags) {
+        for (LangTag tag : new ArrayList<LangTag>(tags)) {
+            if (prefLangCodes.contains(tag.toString().toLowerCase())) {
+                return tag;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Given a set of LangTags and a string prefix, return the first one that
+     * matches the prefix.
+     *
+     * @param tags
+     * @param prefix
+     * @return Matching LangTag
+     */
+    public LangTag getCodeWithPrefix(Set<LangTag> tags, String prefix) {
+        for (LangTag tag : new ArrayList<LangTag>(tags)) {
+            if (tag.toString().startsWith("en")) {
+                return tag;
+            }
+        }
+        return null;
     }
 
     /**
@@ -34,60 +66,29 @@ public class LangMapUtil {
      */
     public String getLangMapValue(LangMap langMap) {
 
-        LangTag langCode = null;
-        Set<LangTag> langCodes = langMap.getKeys();
-
         try {
 
-            Iterator<LangTag> langCodesIterator = langCodes.iterator();
+            Set<LangTag> langCodes = langMap.getKeys();
 
             // Iterate and compare to lang.codes in .properties
-            while (langCodesIterator.hasNext()) {
-
-                LangTag code = langCodesIterator.next();
-
-                if (languageCodes.contains(code.toString().toLowerCase())) {
-                    langCode = code;
-                    break;
-                }
-            }
+            LangTag langCode = getMatchingKey(langMap.getKeys());
 
             // If langCode not found
             if (langCode == null) {
 
                 LangTag enUS = new LangTag("en-us");
-                LangTag en = new LangTag("en");
 
                 // Check for en-us
                 if (langCodes.contains(enUS)) {
-
                     langCode = enUS;
-
-                    // Check for begins with en
-                } else if (langCodes.contains(en)) {
-
-                    // Reset pointer
-                    langCodesIterator = langCodes.iterator();
-
-                    // Iterate and get 1st en*
-                    while (langCodesIterator.hasNext()) {
-
-                        LangTag code = langCodesIterator.next();
-
-                        if (code.toString().startsWith("en")) {
-                            langCode = code;
-                            break;
-                        }
-                    }
+                } else {
+                    langCode = getCodeWithPrefix(langMap.getKeys(), "en");
                 }
             }
 
             // Get 1st element
             if (langCode == null) {
-
-                LangTag firstElement = langCodes.stream().findFirst().orElse(
-                        null);
-                langCode = firstElement;
+                langCode = langCodes.stream().findFirst().orElse(null);
             }
 
             return langMap.get(langCode);
