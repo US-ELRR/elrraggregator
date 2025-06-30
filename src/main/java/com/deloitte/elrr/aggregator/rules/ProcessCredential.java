@@ -41,6 +41,8 @@ public class ProcessCredential implements Rule {
     @Autowired
     private PersonSvc personService;
 
+    private static final String CREDENTIAL_MESSAGE = "Credential";
+
     /**
      * @param statement
      * @return boolean
@@ -63,7 +65,8 @@ public class ProcessCredential implements Rule {
 
         // Is Verb Id = achieved and object type = competency
         return (statement.getVerb().getId().toString().equalsIgnoreCase(
-                VerbIdConstants.ACHIEVED_VERB_ID.toString()) && objType
+                VerbIdConstants.ACHIEVED_VERB_ID.toString())
+                && objType
                         .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
@@ -129,7 +132,7 @@ public class ProcessCredential implements Rule {
 
         } else {
 
-            log.info("Credential " + activity.getId() + " exists.");
+            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
             credential = updateCredential(credential, activity);
         }
 
@@ -161,7 +164,7 @@ public class ProcessCredential implements Rule {
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.save(credential);
-            log.info("Credential " + activity.getId() + " created.");
+            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
 
         } catch (AggregatorException e) {
             throw e;
@@ -193,7 +196,7 @@ public class ProcessCredential implements Rule {
             credential.setFrameworkTitle(activityName);
             credential.setFrameworkDescription(activityDescription);
             credentialService.update(credential);
-            log.info("Credential " + activity.getId() + " updated.");
+            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
 
         } catch (AggregatorException e) {
             throw e;

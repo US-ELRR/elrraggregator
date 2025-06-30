@@ -41,6 +41,8 @@ public class ProcessCompetency implements Rule {
     @Autowired
     private PersonSvc personService;
 
+    private static final String COMPETENCY_MESSAGE = "Competency";
+
     /**
      * @param statement
      * @return boolean
@@ -129,7 +131,7 @@ public class ProcessCompetency implements Rule {
 
         } else {
 
-            log.info("Competency " + activity.getId() + " exists.");
+            log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " exists.");
             competency = updateCompetency(competency, activity);
 
         }
@@ -162,7 +164,7 @@ public class ProcessCompetency implements Rule {
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.save(competency);
-            log.info("Competency " + activity.getId() + " created.");
+            log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " created.");
 
         } catch (AggregatorException e) {
             throw e;
@@ -195,7 +197,7 @@ public class ProcessCompetency implements Rule {
             competency.setFrameworkTitle(activityName);
             competency.setFrameworkDescription(activityDescription);
             competencyService.update(competency);
-            log.info("Competency " + activity.getId() + " updated.");
+            log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " updated.");
 
         } catch (AggregatorException e) {
             throw e;

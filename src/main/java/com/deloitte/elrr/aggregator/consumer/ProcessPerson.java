@@ -31,6 +31,8 @@ public class ProcessPerson {
     @Autowired
     private PersonSvc personService;
 
+    private static final String CREATED_MESSAGE = "created";
+
     /**
      * @param statement
      * @return Person
@@ -148,7 +150,7 @@ public class ProcessPerson {
 
         personService.save(person);
 
-        log.info("Person " + person.getName() + " created.");
+        log.info("Person " + person.getName() + " " + CREATED_MESSAGE + ".");
 
         return person;
     }
@@ -193,7 +195,7 @@ public class ProcessPerson {
 
         identityService.save(identity);
 
-        log.info("Identity " + identity.getIfi() + " created.");
+        log.info("Identity " + identity.getIfi() + " " + CREATED_MESSAGE + ".");
 
         return identity;
     }
@@ -208,7 +210,7 @@ public class ProcessPerson {
         email.setEmailAddress(emailAddress);
         email.setEmailAddressType("primary");
         emailService.save(email);
-        log.info("Email " + emailAddress + " created.");
+        log.info("Email " + emailAddress + " " + CREATED_MESSAGE + ".");
         return email;
     }
 }
