@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
+import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
@@ -147,6 +148,47 @@ class ProcessCompetencyTest {
             assertNotNull(personalCompetencyResult2);
             assertEquals(personalCompetencyResult2.getExpires(), expires);
 
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testBadExpires() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("competency_bad_date.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
+
+            Mockito.doReturn("Competency A").doReturn(
+                    "Object representing Competency A level").when(langMapUtil)
+                    .getLangMapValue(any());
+
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:testcompetency@gmail.com");
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Test Competency");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+
+            boolean fireRule = processCompetency.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Person personResult = processCompetency.processRule(person, stmt);
+
+        } catch (AggregatorException ae) {
+            assertEquals(ae.getMessage(), "Error invalid expires date.");
         } catch (IOException e) {
             fail("Should not have thrown any exception");
         }
