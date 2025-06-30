@@ -100,8 +100,8 @@ public class ProcessCredential implements Rule {
             Credential credential = processCredential(activity);
 
             // Process PersonalCredential
-            PersonalCredential personalCredential = processPersonalCredential(
-                    activity, person, credential, extensions);
+            processPersonalCredential(person, credential,
+                    extensions);
 
         } catch (AggregatorException e) {
             throw e;
@@ -206,14 +206,13 @@ public class ProcessCredential implements Rule {
     }
 
     /**
-     * @param activity
      * @param person
      * @param credential
      * @param extensions
      * @return PersonalCredential
      */
     private PersonalCredential processPersonalCredential(
-            final Activity activity, Person person, final Credential credential,
+            Person person, final Credential credential,
             Extensions extensions) {
 
         LocalDateTime expires = null;
@@ -254,7 +253,7 @@ public class ProcessCredential implements Rule {
             } else {
 
                 personalCredential = updatePersonalCredential(
-                        personalCredential, person, credential, expires);
+                        personalCredential, person, expires);
             }
 
         } catch (DateTimeParseException e) {
@@ -297,14 +296,13 @@ public class ProcessCredential implements Rule {
     /**
      * @param personalCredential
      * @param person
-     * @param credential
      * @param expires
      * @return PersonalCredential
      * @throws RuntimeServiceException
      */
     public PersonalCredential updatePersonalCredential(
             PersonalCredential personalCredential, final Person person,
-            final Credential credential, final LocalDateTime expires) {
+            final LocalDateTime expires) {
 
         try {
 

@@ -101,7 +101,7 @@ class ProcessSatisfiedTest {
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
-                    .processLearningRecord(activity, person, verb, result,
+                    .processLearningRecord(person, verb, result,
                             learningResource);
 
             boolean fireRule = processSatisfied.fireRule(stmt);

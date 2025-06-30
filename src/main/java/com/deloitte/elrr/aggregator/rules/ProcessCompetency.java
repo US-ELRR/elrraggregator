@@ -99,8 +99,8 @@ public class ProcessCompetency implements Rule {
             Competency competency = processCompetency(activity);
 
             // Process PersonalCompetency
-            PersonalCompetency personalCompetency = processPersonalCompetency(
-                    activity, person, competency, extensions);
+            processPersonalCompetency(
+                    person, competency, extensions);
 
         } catch (AggregatorException e) {
             throw e;
@@ -207,14 +207,13 @@ public class ProcessCompetency implements Rule {
     }
 
     /**
-     * @param activity
      * @param person
      * @param competency
      * @param extensions
      * @return personalCompetency
      */
     private PersonalCompetency processPersonalCompetency(
-            final Activity activity, Person person, final Competency competency,
+            Person person, final Competency competency,
             final Extensions extensions) {
 
         LocalDateTime expires = null;
@@ -255,7 +254,7 @@ public class ProcessCompetency implements Rule {
             } else {
 
                 personalCompetency = updatePersonalCompetency(
-                        personalCompetency, person, competency, expires);
+                        personalCompetency, person, expires);
             }
 
         } catch (DateTimeParseException e) {
@@ -299,14 +298,13 @@ public class ProcessCompetency implements Rule {
     /**
      * @param personalCompetency
      * @param person
-     * @param competency
      * @param expires
      * @return personalCompetency
      * @throws RuntimeServiceException
      */
     public PersonalCompetency updatePersonalCompetency(
             PersonalCompetency personalCompetency, final Person person,
-            final Competency competency, final LocalDateTime expires) {
+            final LocalDateTime expires) {
 
         try {
 

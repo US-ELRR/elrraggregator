@@ -10,9 +10,7 @@ import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.LearningStatus;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.LearningRecordSvc;
-import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Result;
-import com.yetanalytics.xapi.model.Score;
 import com.yetanalytics.xapi.model.Verb;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,6 @@ public class LearningRecordUtil {
     private LearningRecordSvc learningRecordService;
 
     /**
-     * @param activity
      * @param person
      * @param verb
      * @param result
@@ -33,8 +30,8 @@ public class LearningRecordUtil {
      * @return learningRccord
      * @throws RuntimeServiceException
      */
-    public LearningRecord processLearningRecord(final Activity activity,
-            final Person person, final Verb verb, final Result result,
+    public LearningRecord processLearningRecord(final Person person,
+            final Verb verb, final Result result,
             final LearningResource learningResource) {
 
         LearningRecord learningRecord = null;
@@ -88,15 +85,10 @@ public class LearningRecordUtil {
         learningRecord.setPerson(person);
         learningRecord.setRecordStatus(learningStatus);
 
-        if (result != null) {
-            Score score = result.getScore();
-            if (score != null) {
-                if (score.getScaled() != null) {
-                    learningRecord.setAcademicGrade(score.getScaled()
-                            .toString());
-                }
-            }
-
+        if (result != null && result.getScore() != null
+                && result.getScore().getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore()
+                    .getScaled().toString());
         }
 
         learningRecordService.save(learningRecord);
@@ -127,15 +119,10 @@ public class LearningRecordUtil {
 
             learningRecord.setRecordStatus(learningStatus);
 
-            if (result != null) {
-                Score score = result.getScore();
-                if (score != null) {
-                    if (score.getScaled() != null) {
-                        learningRecord.setAcademicGrade(score.getScaled()
-                                .toString());
-                    }
-                }
-
+            if (result != null && result.getScore() != null
+                    && result.getScore().getScaled() != null) {
+                learningRecord.setAcademicGrade(result.getScore()
+                        .getScaled().toString());
             }
 
             learningRecordService.update(learningRecord);
@@ -175,7 +162,8 @@ public class LearningRecordUtil {
             return LearningStatus.ATTEMPTED;
 
         } else if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.REGISTERED_VERB_ID.toString()) || verb.getId()
+                VerbIdConstants.REGISTERED_VERB_ID.toString())
+                || verb.getId()
                         .toString().equalsIgnoreCase(
                                 VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
 
