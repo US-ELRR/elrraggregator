@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import jakarta.servlet.ServletException;
 
@@ -82,9 +84,16 @@ public class FilterTest {
 
     @Test
     void testSanatizerOk() throws IOException, ServletException {
+
+        ReflectionTestUtils.setField(sl, "maxSizeLimit", 2000000L);
+        ReflectionTestUtils.setField(sl, "checkMediaTypeJson", false);
+
         MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         req.addParameter("anything", "goes");
-        http = new WrappedHttp(req, "{Unwise: nap}");
+        String requestBody = "{Unwise: napping during work}";
+        req.setContent(requestBody.getBytes());
+        http = new WrappedHttp(req, requestBody);
 
         // next lines are simply to increase coverage of wrappedhttp
         http.getInputStream().available();
@@ -93,16 +102,23 @@ public class FilterTest {
 
         MockHttpServletResponse res = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
-        sf.doFilter(http, res, chain);
+        sl.doFilter(http, res, chain);
         assertEquals(res.getErrorMessage(), null);
         assertFalse(res.isCommitted());
     }
 
     @Test
     void testSizeLimitOk() throws IOException, ServletException {
+
+        ReflectionTestUtils.setField(sl, "maxSizeLimit", 2000000L);
+        ReflectionTestUtils.setField(sl, "checkMediaTypeJson", false);
+
         MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         req.addParameter("anything", "goes");
-        http = new WrappedHttp(req, "{Unwise: nap}");
+        String requestBody = "{Unwise: napping during work}";
+        req.setContent(requestBody.getBytes());
+        http = new WrappedHttp(req, requestBody);
 
         // next lines are simply to increase coverage of wrappedhttp
         http.getInputStream().available();
@@ -119,8 +135,11 @@ public class FilterTest {
     @Test
     void testHeader() throws IOException, ServletException {
         MockHttpServletRequest req = new MockHttpServletRequest();
+        req.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         req.addParameter("anything", "goes");
-        http = new WrappedHttp(req, "{Unwise: nap}");
+        String requestBody = "{Unwise: napping during work}";
+        req.setContent(requestBody.getBytes());
+        http = new WrappedHttp(req, requestBody);
 
         // next lines are simply to increase coverage of wrappedhttp
         http.getInputStream().available();
