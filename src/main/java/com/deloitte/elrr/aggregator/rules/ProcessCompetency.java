@@ -14,7 +14,6 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCompetency;
-import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
@@ -79,30 +78,24 @@ public class ProcessCompetency implements Rule {
 
         Extensions extensions = null;
 
-        try {
+        log.info("Process competency.");
 
-            log.info("Process competency.");
+        // Get Activity
+        Activity activity = (Activity) statement.getObject();
 
-            // Get Activity
-            Activity activity = (Activity) statement.getObject();
+        // Get Extensions
+        Context context = statement.getContext();
 
-            // Get Extensions
-            Context context = statement.getContext();
-
-            if (context != null) {
-                extensions = context.getExtensions();
-            }
-
-            // Process Competency
-            Competency competency = processCompetency(activity);
-
-            // Process PersonalCompetency
-            PersonalCompetency personalCompetency = processPersonalCompetency(
-                    activity, person, competency, extensions);
-
-        } catch (AggregatorException e) {
-            throw e;
+        if (context != null) {
+            extensions = context.getExtensions();
         }
+
+        // Process Competency
+        Competency competency = processCompetency(activity);
+
+        // Process PersonalCompetency
+        PersonalCompetency personalCompetency = processPersonalCompetency(
+                activity, person, competency, extensions);
 
         return person;
     }
@@ -150,23 +143,17 @@ public class ProcessCompetency implements Rule {
         String activityName = "";
         String activityDescription = "";
 
-        try {
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                    .getName());
-            activityDescription = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getDescription());
-
-            competency = new Competency();
-            competency.setIdentifier(activity.getId().toString());
-            competency.setFrameworkTitle(activityName);
-            competency.setFrameworkDescription(activityDescription);
-            competencyService.save(competency);
-            log.info("Competency " + activity.getId() + " created.");
-
-        } catch (AggregatorException e) {
-            throw e;
-        }
+        competency = new Competency();
+        competency.setIdentifier(activity.getId().toString());
+        competency.setFrameworkTitle(activityName);
+        competency.setFrameworkDescription(activityDescription);
+        competencyService.save(competency);
+        log.info("Competency " + activity.getId() + " created.");
 
         return competency;
     }
@@ -185,21 +172,15 @@ public class ProcessCompetency implements Rule {
         String activityName = "";
         String activityDescription = "";
 
-        try {
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                    .getName());
-            activityDescription = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getDescription());
-
-            competency.setFrameworkTitle(activityName);
-            competency.setFrameworkDescription(activityDescription);
-            competencyService.update(competency);
-            log.info("Competency " + activity.getId() + " updated.");
-
-        } catch (AggregatorException e) {
-            throw e;
-        }
+        competency.setFrameworkTitle(activityName);
+        competency.setFrameworkDescription(activityDescription);
+        competencyService.update(competency);
+        log.info("Competency " + activity.getId() + " updated.");
 
         return competency;
     }
@@ -306,21 +287,15 @@ public class ProcessCompetency implements Rule {
             PersonalCompetency personalCompetency, final Person person,
             final Competency competency, final LocalDateTime expires) {
 
-        try {
+        if (expires != null) {
 
-            if (expires != null) {
+            personalCompetency.setExpires(expires);
+            personalCompetencyService.update(personalCompetency);
 
-                personalCompetency.setExpires(expires);
-                personalCompetencyService.update(personalCompetency);
+            log.info("Personal Competency for " + person.getName() + " - "
+                    + personalCompetency.getCompetency().getFrameworkTitle()
+                    + " updated.");
 
-                log.info("Personal Competency for " + person.getName() + " - "
-                        + personalCompetency.getCompetency().getFrameworkTitle()
-                        + " updated.");
-
-            }
-
-        } catch (RuntimeServiceException e) {
-            throw e;
         }
 
         return personalCompetency;
