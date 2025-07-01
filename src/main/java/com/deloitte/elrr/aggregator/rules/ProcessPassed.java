@@ -70,7 +70,7 @@ public class ProcessPassed implements Rule {
 
         // Process LearningRecord
         LearningRecord learningRecord = learningRecordUtil
-                .processLearningRecord(activity, person, statement.getVerb(),
+                .processLearningRecord(person, statement.getVerb(),
                         statement.getResult(), learningResource);
 
         if (person.getLearningRecords() == null) {

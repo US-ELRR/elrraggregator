@@ -71,7 +71,7 @@ class LearningRecordUtilTest {
             learningResource.setDescription("Example Activity Test");
 
             LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, verb, result,
+                    .processLearningRecord(person, verb, result,
                             learningResource);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
@@ -160,7 +160,7 @@ class LearningRecordUtilTest {
                     "A fictitious example CBT 2 course.");
 
             LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, verb, result,
+                    .processLearningRecord(person, verb, result,
                             learningResource);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
@@ -206,7 +206,7 @@ class LearningRecordUtilTest {
             learningResource.setDescription("A fictitious example CBT course.");
 
             LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, verb, result,
+                    .processLearningRecord(person, verb, result,
                             learningResource);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
@@ -252,7 +252,7 @@ class LearningRecordUtilTest {
             learningResource.setDescription("Example activity 10 description");
 
             LearningRecord learningRecord = learningRecordUtil
-                    .processLearningRecord(activity, person, verb, result,
+                    .processLearningRecord(person, verb, result,
                             learningResource);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());

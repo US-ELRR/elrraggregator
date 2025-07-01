@@ -40,6 +40,8 @@ public class ProcessCompetency implements Rule {
     @Autowired
     private PersonSvc personService;
 
+    private static final String COMPETENCY_MESSAGE = "Competency";
+
     /**
      * @param statement
      * @return boolean
@@ -94,8 +96,8 @@ public class ProcessCompetency implements Rule {
         Competency competency = processCompetency(activity);
 
         // Process PersonalCompetency
-        PersonalCompetency personalCompetency = processPersonalCompetency(
-                activity, person, competency, extensions);
+        processPersonalCompetency(
+                person, competency, extensions);
 
         return person;
     }
@@ -109,7 +111,6 @@ public class ProcessCompetency implements Rule {
             throws AggregatorException {
 
         Competency competency = null;
-        PersonalCompetency personalCompetency = null;
 
         // Get competency
         competency = competencyService.findByIdentifier(activity.getId()
@@ -122,7 +123,7 @@ public class ProcessCompetency implements Rule {
 
         } else {
 
-            log.info("Competency " + activity.getId() + " exists.");
+            log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " exists.");
             competency = updateCompetency(competency, activity);
 
         }
@@ -153,7 +154,7 @@ public class ProcessCompetency implements Rule {
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
         competencyService.save(competency);
-        log.info("Competency " + activity.getId() + " created.");
+        log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " created.");
 
         return competency;
     }
@@ -180,20 +181,19 @@ public class ProcessCompetency implements Rule {
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
         competencyService.update(competency);
-        log.info("Competency " + activity.getId() + " updated.");
+        log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " updated.");
 
         return competency;
     }
 
     /**
-     * @param activity
      * @param person
      * @param competency
      * @param extensions
      * @return personalCompetency
      */
     private PersonalCompetency processPersonalCompetency(
-            final Activity activity, Person person, final Competency competency,
+            Person person, final Competency competency,
             final Extensions extensions) {
 
         LocalDateTime expires = null;
@@ -234,7 +234,7 @@ public class ProcessCompetency implements Rule {
             } else {
 
                 personalCompetency = updatePersonalCompetency(
-                        personalCompetency, person, competency, expires);
+                        personalCompetency, person, expires);
             }
 
         } catch (DateTimeParseException e) {
@@ -278,14 +278,13 @@ public class ProcessCompetency implements Rule {
     /**
      * @param personalCompetency
      * @param person
-     * @param competency
      * @param expires
      * @return personalCompetency
      * @throws RuntimeServiceException
      */
     public PersonalCompetency updatePersonalCompetency(
             PersonalCompetency personalCompetency, final Person person,
-            final Competency competency, final LocalDateTime expires) {
+            final LocalDateTime expires) {
 
         if (expires != null) {
 

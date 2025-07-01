@@ -144,8 +144,7 @@ class ProcessCredentialTest {
                     DateTimeFormatter.ISO_DATE_TIME);
 
             PersonalCredential personalCredentialResult2 = processCredential
-                    .updatePersonalCredential(personalCredential, personResult,
-                            credentialResult, expires);
+                    .updatePersonalCredential(personalCredential, personResult, expires);
             assertNotNull(personalCredentialResult2);
             assertEquals(personalCredentialResult2.getExpires(), expires);
 

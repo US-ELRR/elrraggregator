@@ -144,7 +144,7 @@ class ProcessCompetencyTest {
 
             PersonalCompetency personalCompetencyResult2 = processCompetency
                     .updatePersonalCompetency(personalCompetencyResult,
-                            personResult, competencyResult, expires);
+                            personResult, expires);
             assertNotNull(personalCompetencyResult2);
             assertEquals(personalCompetencyResult2.getExpires(), expires);
 

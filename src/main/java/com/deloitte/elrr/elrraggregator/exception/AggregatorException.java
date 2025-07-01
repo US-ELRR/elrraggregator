@@ -9,6 +9,6 @@ public class AggregatorException extends RuntimeException {
      * @param e
      */
     public AggregatorException(String errorMessage, Exception e) {
-        super(errorMessage);
+        super(errorMessage, e);
     }
 }

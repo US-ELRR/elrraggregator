@@ -40,6 +40,8 @@ public class ProcessCredential implements Rule {
     @Autowired
     private PersonSvc personService;
 
+    private static final String CREDENTIAL_MESSAGE = "Credential";
+
     /**
      * @param statement
      * @return boolean
@@ -62,7 +64,8 @@ public class ProcessCredential implements Rule {
 
         // Is Verb Id = achieved and object type = competency
         return (statement.getVerb().getId().toString().equalsIgnoreCase(
-                VerbIdConstants.ACHIEVED_VERB_ID.toString()) && objType
+                VerbIdConstants.ACHIEVED_VERB_ID.toString())
+                && objType
                         .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
@@ -94,8 +97,8 @@ public class ProcessCredential implements Rule {
         Credential credential = processCredential(activity);
 
         // Process PersonalCredential
-        PersonalCredential personalCredential = processPersonalCredential(
-                activity, person, credential, extensions);
+        processPersonalCredential(
+                person, credential, extensions);
 
         return person;
     }
@@ -109,7 +112,6 @@ public class ProcessCredential implements Rule {
             throws AggregatorException {
 
         Credential credential = null;
-        PersonalCredential personalCredential = null;
 
         // Get credential
         credential = credentialService.findByIdentifier(activity.getId()
@@ -122,7 +124,7 @@ public class ProcessCredential implements Rule {
 
         } else {
 
-            log.info("Credential " + activity.getId() + " exists.");
+            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
             credential = updateCredential(credential, activity);
         }
 
@@ -152,7 +154,7 @@ public class ProcessCredential implements Rule {
         credential.setFrameworkTitle(activityName);
         credential.setFrameworkDescription(activityDescription);
         credentialService.save(credential);
-        log.info("Credential " + activity.getId() + " created.");
+        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
 
         return credential;
     }
@@ -179,20 +181,19 @@ public class ProcessCredential implements Rule {
         credential.setFrameworkTitle(activityName);
         credential.setFrameworkDescription(activityDescription);
         credentialService.update(credential);
-        log.info("Credential " + activity.getId() + " updated.");
+        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
 
         return credential;
     }
 
     /**
-     * @param activity
      * @param person
      * @param credential
      * @param extensions
      * @return PersonalCredential
      */
     private PersonalCredential processPersonalCredential(
-            final Activity activity, Person person, final Credential credential,
+            Person person, final Credential credential,
             Extensions extensions) {
 
         LocalDateTime expires = null;
@@ -233,7 +234,7 @@ public class ProcessCredential implements Rule {
             } else {
 
                 personalCredential = updatePersonalCredential(
-                        personalCredential, person, credential, expires);
+                        personalCredential, person, expires);
             }
 
         } catch (DateTimeParseException e) {
@@ -276,14 +277,13 @@ public class ProcessCredential implements Rule {
     /**
      * @param personalCredential
      * @param person
-     * @param credential
      * @param expires
      * @return PersonalCredential
      * @throws RuntimeServiceException
      */
     public PersonalCredential updatePersonalCredential(
             PersonalCredential personalCredential, final Person person,
-            final Credential credential, final LocalDateTime expires) {
+            final LocalDateTime expires) {
 
         if (expires != null) {
 
