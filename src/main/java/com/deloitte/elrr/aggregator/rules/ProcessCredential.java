@@ -14,7 +14,6 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.PersonalCredential;
-import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
@@ -82,30 +81,24 @@ public class ProcessCredential implements Rule {
 
         Extensions extensions = null;
 
-        try {
+        log.info("Process credential.");
 
-            log.info("Process credential.");
+        // Get Activity
+        Activity activity = (Activity) statement.getObject();
 
-            // Get Activity
-            Activity activity = (Activity) statement.getObject();
+        // Get Extensions
+        Context context = statement.getContext();
 
-            // Get Extensions
-            Context context = statement.getContext();
-
-            if (context != null) {
-                extensions = context.getExtensions();
-            }
-
-            // Process Credential
-            Credential credential = processCredential(activity);
-
-            // Process PersonalCredential
-            processPersonalCredential(person, credential,
-                    extensions);
-
-        } catch (AggregatorException e) {
-            throw e;
+        if (context != null) {
+            extensions = context.getExtensions();
         }
+
+        // Process Credential
+        Credential credential = processCredential(activity);
+
+        // Process PersonalCredential
+        processPersonalCredential(
+                person, credential, extensions);
 
         return person;
     }
@@ -151,23 +144,17 @@ public class ProcessCredential implements Rule {
         String activityName = "";
         String activityDescription = "";
 
-        try {
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                    .getName());
-            activityDescription = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getDescription());
-
-            credential = new Credential();
-            credential.setIdentifier(activity.getId().toString());
-            credential.setFrameworkTitle(activityName);
-            credential.setFrameworkDescription(activityDescription);
-            credentialService.save(credential);
-            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
-
-        } catch (AggregatorException e) {
-            throw e;
-        }
+        credential = new Credential();
+        credential.setIdentifier(activity.getId().toString());
+        credential.setFrameworkTitle(activityName);
+        credential.setFrameworkDescription(activityDescription);
+        credentialService.save(credential);
+        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
 
         return credential;
     }
@@ -185,21 +172,16 @@ public class ProcessCredential implements Rule {
 
         String activityName = "";
         String activityDescription = "";
-        try {
 
-            activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                    .getName());
-            activityDescription = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getDescription());
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-            credential.setFrameworkTitle(activityName);
-            credential.setFrameworkDescription(activityDescription);
-            credentialService.update(credential);
-            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
-
-        } catch (AggregatorException e) {
-            throw e;
-        }
+        credential.setFrameworkTitle(activityName);
+        credential.setFrameworkDescription(activityDescription);
+        credentialService.update(credential);
+        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
 
         return credential;
     }
@@ -303,21 +285,15 @@ public class ProcessCredential implements Rule {
             PersonalCredential personalCredential, final Person person,
             final LocalDateTime expires) {
 
-        try {
+        if (expires != null) {
 
-            if (expires != null) {
+            personalCredential.setExpires(expires);
+            personalCredentialService.update(personalCredential);
 
-                personalCredential.setExpires(expires);
-                personalCredentialService.update(personalCredential);
+            log.info("Personal Credential for " + person.getName() + " - "
+                    + personalCredential.getCredential().getFrameworkTitle()
+                    + " updated.");
 
-                log.info("Personal Credential for " + person.getName() + " - "
-                        + personalCredential.getCredential().getFrameworkTitle()
-                        + " updated.");
-
-            }
-
-        } catch (RuntimeServiceException e) {
-            throw e;
         }
 
         return personalCredential;

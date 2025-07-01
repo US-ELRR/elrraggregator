@@ -99,4 +99,56 @@ class ProcessPersonTest {
         }
     }
 
+    @Test
+    void testSha() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "completed_mboxsha.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Person person = processPerson.processPerson(stmt);
+            assertNotNull(person);
+            assertEquals(person.getName(), "Test Sha");
+
+            Set<Identity> identities = person.getIdentities();
+            assertNotNull(identities);
+            Identity identity = identities.stream().findFirst().orElse(null);
+            assertEquals(identity.getMboxSha1Sum(), "48010dcee68e9f9f4af7ff57569550e8b506a88d");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testOpenId() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "completed_openid.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Person person = processPerson.processPerson(stmt);
+            assertNotNull(person);
+            assertEquals(person.getName(), "Test OpenId");
+
+            Set<Identity> identities = person.getIdentities();
+            assertNotNull(identities);
+            Identity identity = identities.stream().findFirst().orElse(null);
+            assertEquals(identity.getOpenid(), "http://test.openid.example.org/");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
 }

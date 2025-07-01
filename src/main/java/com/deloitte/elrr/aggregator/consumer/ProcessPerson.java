@@ -67,11 +67,6 @@ public class ProcessPerson {
             person = createPerson(actor, account);
         }
 
-        // If error creating Person
-        if (person == null) {
-            throw new PersonNotFoundException("Person not found.");
-        }
-
         return person;
     }
 
