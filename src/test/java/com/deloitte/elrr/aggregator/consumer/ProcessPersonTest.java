@@ -118,7 +118,7 @@ class ProcessPersonTest {
             Set<Identity> identities = person.getIdentities();
             assertNotNull(identities);
             Identity identity = identities.stream().findFirst().orElse(null);
-            assertEquals(identity.getMboxSha1Sum(), "48010dcee68e9f9f4af7ff57569550e8b506a88d");
+            assertEquals(identity.getMboxSha1Sum(), "i-am-a-sha");
 
         } catch (IOException e) {
             fail("Should not have thrown any exception");
