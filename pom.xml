@@ -109,6 +109,11 @@
 			<version>10.1.42</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-websocket</artifactId>
+			<version>10.1.42</version>
+		</dependency>
+		<dependency>
 			<groupId>fr.spacefox</groupId>
 			<artifactId>confusable-homoglyphs</artifactId>
 			<version>1.1.1</version>
