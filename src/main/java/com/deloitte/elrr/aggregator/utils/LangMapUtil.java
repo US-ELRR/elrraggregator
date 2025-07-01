@@ -52,7 +52,7 @@ public class LangMapUtil {
      */
     public LangTag getCodeWithPrefix(Set<LangTag> tags, String prefix) {
         for (LangTag tag : new ArrayList<LangTag>(tags)) {
-            if (tag.toString().startsWith("en")) {
+            if (tag.toString().startsWith(prefix)) {
                 return tag;
             }
         }
