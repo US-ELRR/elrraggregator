@@ -119,7 +119,6 @@ public class ProcessCredential implements Rule {
             throws AggregatorException {
 
         Credential credential = null;
-        PersonalCredential personalCredential = null;
 
         // Get credential
         credential = credentialService.findByIdentifier(activity.getId()

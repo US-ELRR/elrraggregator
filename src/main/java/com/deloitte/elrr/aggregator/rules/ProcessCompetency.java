@@ -118,7 +118,6 @@ public class ProcessCompetency implements Rule {
             throws AggregatorException {
 
         Competency competency = null;
-        PersonalCompetency personalCompetency = null;
 
         // Get competency
         competency = competencyService.findByIdentifier(activity.getId()
