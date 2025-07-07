@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -79,8 +80,14 @@ public class ProcessCompetency implements Rule {
     public Person processRule(final Person person, final Statement statement) {
 
         Extensions extensions = null;
+        LocalDateTime expires = null;
+        LocalDate endDate = null;
 
         log.info("Process competency.");
+
+        // Get start date
+        // Convert from ZonedDateTime to LocalDate
+        LocalDate startDate = statement.getTimestamp().toLocalDate();
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -89,25 +96,47 @@ public class ProcessCompetency implements Rule {
         Context context = statement.getContext();
 
         if (context != null) {
+
             extensions = context.getExtensions();
+
+            if (extensions != null) {
+
+                String strExpires = (String) extensions.get(
+                        ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+                if (strExpires != null) {
+
+                    expires = LocalDateTime.parse(strExpires,
+                            DateTimeFormatter.ISO_DATE_TIME);
+
+                    // Get end date
+                    // Convert from LocalDateTime to LocalDate
+                    endDate = expires.toLocalDate();
+
+                }
+
+            }
+
         }
 
         // Process Competency
-        Competency competency = processCompetency(activity);
+        Competency competency = processCompetency(activity, startDate, endDate);
 
         // Process PersonalCompetency
-        processPersonalCompetency(
-                person, competency, extensions);
+        processPersonalCompetency(person, competency, expires);
 
         return person;
     }
 
     /**
      * @param activity
+     * @param startDate
+     * @param endDate
      * @return competency
      * @throws AggregatorException
      */
-    private Competency processCompetency(final Activity activity)
+    private Competency processCompetency(final Activity activity,
+            final LocalDate startDate, final LocalDate endDate)
             throws AggregatorException {
 
         Competency competency = null;
@@ -119,12 +148,13 @@ public class ProcessCompetency implements Rule {
         // If competency doesn't exist
         if (competency == null) {
 
-            competency = createCompetency(activity);
+            competency = createCompetency(activity, startDate, endDate);
 
         } else {
 
             log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " exists.");
-            competency = updateCompetency(competency, activity);
+            competency = updateCompetency(competency, activity, startDate,
+                    endDate);
 
         }
 
@@ -133,10 +163,13 @@ public class ProcessCompetency implements Rule {
 
     /**
      * @param activity
+     * @param startDate
+     * @param endDate
      * @return competency
      * @throws AggregatorException
      */
-    private Competency createCompetency(final Activity activity) {
+    private Competency createCompetency(final Activity activity,
+            final LocalDate startDate, final LocalDate endDate) {
 
         log.info("Creating new competency.");
 
@@ -153,6 +186,8 @@ public class ProcessCompetency implements Rule {
         competency.setIdentifier(activity.getId().toString());
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
+        competency.setValidStartDate(startDate);
+        competency.setValidEndDate(endDate);
         competencyService.save(competency);
         log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " created.");
 
@@ -162,11 +197,14 @@ public class ProcessCompetency implements Rule {
     /**
      * @param competency
      * @param activity
+     * @param startDate
+     * @param endDate
      * @return competency
      * @throws AggregatorException
      */
     public Competency updateCompetency(Competency competency,
-            final Activity activity) {
+            final Activity activity, final LocalDate startDate,
+            final LocalDate endDate) {
 
         log.info("Updating competency.");
 
@@ -180,6 +218,8 @@ public class ProcessCompetency implements Rule {
 
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
+        competency.setValidStartDate(startDate);
+        competency.setValidEndDate(endDate);
         competencyService.update(competency);
         log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " updated.");
 
@@ -189,14 +229,12 @@ public class ProcessCompetency implements Rule {
     /**
      * @param person
      * @param competency
-     * @param extensions
+     * @param expires
      * @return personalCompetency
      */
-    private PersonalCompetency processPersonalCompetency(
-            Person person, final Competency competency,
-            final Extensions extensions) {
+    private PersonalCompetency processPersonalCompetency(Person person,
+            final Competency competency, final LocalDateTime expires) {
 
-        LocalDateTime expires = null;
         PersonalCompetency personalCompetency = null;
 
         try {
@@ -205,18 +243,6 @@ public class ProcessCompetency implements Rule {
             personalCompetency = personalCompetencyService
                     .findByPersonIdAndCompetencyId(person.getId(), competency
                             .getId());
-
-            if (extensions != null) {
-
-                String strExpires = (String) extensions.get(
-                        ExtensionsConstants.CONTEXT_EXTENSIONS);
-
-                if (strExpires != null) {
-                    expires = LocalDateTime.parse(strExpires,
-                            DateTimeFormatter.ISO_DATE_TIME);
-                }
-
-            }
 
             // If PersonalCompetancy doesn't exist
             if (personalCompetency == null) {
@@ -280,7 +306,6 @@ public class ProcessCompetency implements Rule {
      * @param person
      * @param expires
      * @return personalCompetency
-     * @throws RuntimeServiceException
      */
     public PersonalCompetency updatePersonalCompetency(
             PersonalCompetency personalCompetency, final Person person,

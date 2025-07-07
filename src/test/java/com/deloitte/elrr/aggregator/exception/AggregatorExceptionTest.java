@@ -8,7 +8,6 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 
 /**
  * @author phleven
- * 
  */
 @SuppressWarnings("checkstyle:linelength")
 public class AggregatorExceptionTest {

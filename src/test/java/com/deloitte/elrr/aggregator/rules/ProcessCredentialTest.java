@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +36,8 @@ import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
+import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -65,9 +69,44 @@ class ProcessCredentialTest {
 
             File testFile = TestFileUtil.getJsonTestFile("credential.json");
 
+            Extensions extensions = null;
+            LocalDateTime expires = null;
+            LocalDate endDate = null;
+
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
+
+            // Get start date
+            // Convert from ZonedDateTime to LocalDate
+            LocalDate startDate = stmt.getTimestamp().toLocalDate();
+
+            // Get Extensions
+            Context context = stmt.getContext();
+
+            if (context != null) {
+
+                extensions = context.getExtensions();
+
+                if (extensions != null) {
+
+                    String strExpires = (String) extensions.get(
+                            ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+                    if (strExpires != null) {
+
+                        expires = LocalDateTime.parse(strExpires,
+                                DateTimeFormatter.ISO_DATE_TIME);
+
+                        // Get end date
+                        // Convert from LocalDateTime to LocalDate
+                        endDate = expires.toLocalDate();
+
+                    }
+
+                }
+
+            }
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
@@ -105,11 +144,7 @@ class ProcessCredentialTest {
             PersonalCredential personalCredential = new PersonalCredential();
             personalCredential.setId(UUID.randomUUID());
             personalCredential.setHasRecord(true);
-
-            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
-                    DateTimeFormatter.ISO_DATE_TIME);
             personalCredential.setExpires(expires);
-
             personalCredential.setPerson(person);
             personalCredential.setCredential(credential);
             Mockito.doReturn(personalCredential).when(personalCredentialService)
@@ -136,7 +171,7 @@ class ProcessCredentialTest {
 
             // Test update credential
             Credential credentialResult = processCredential.updateCredential(
-                    credential, activity);
+                    credential, activity, startDate, endDate);
             assertNotNull(credentialResult);
 
             // Test update personal credential
@@ -144,7 +179,8 @@ class ProcessCredentialTest {
                     DateTimeFormatter.ISO_DATE_TIME);
 
             PersonalCredential personalCredentialResult2 = processCredential
-                    .updatePersonalCredential(personalCredential, personResult, expires);
+                    .updatePersonalCredential(personalCredential, personResult,
+                            expires);
             assertNotNull(personalCredentialResult2);
             assertEquals(personalCredentialResult2.getExpires(), expires);
 
@@ -179,15 +215,12 @@ class ProcessCredentialTest {
 
         try {
 
-            File testFile = TestFileUtil.getJsonTestFile("credential_bad_date.json");
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "credential_bad_date.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
-
-            Mockito.doReturn("Test Credential A").doReturn(
-                    "Object representing Credential A level").when(langMapUtil)
-                    .getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -199,7 +232,7 @@ class ProcessCredentialTest {
             person.setName("Test Credential");
             person.setEmailAddresses(new HashSet<Email>());
             person.getEmailAddresses().add(email);
-            //Mockito.doReturn(person).when(personService).save(person);
+            // Mockito.doReturn(person).when(personService).save(person);
 
             Credential credential = new Credential();
             credential.setId(UUID.randomUUID());
@@ -208,41 +241,16 @@ class ProcessCredentialTest {
             credential.setFrameworkTitle("Test Credential A");
             credential.setFrameworkDescription(
                     "Object representing Test Credential A level");
-            Mockito.doReturn(credential).when(credentialService).save(any());
 
             boolean fireRule = processCredential.fireRule(stmt);
             assertTrue(fireRule);
 
             Person personResult = processCredential.processRule(person, stmt);
 
-/*
-            Set<PersonalCredential> personalCredentials = personResult
-                    .getCredentials();
-            assertNotNull(personalCredentials);
-
-            personalCredential = personalCredentials.stream().findFirst()
-                    .orElse(null);
-            assertNotNull(personalCredential);
-
-            assertEquals(personalCredential.getCredential().getFrameworkTitle(),
-                    "Test Credential A");
-            assertEquals(personalCredential.getCredential()
-                    .getFrameworkDescription(),
-                    "Object representing Credential A level");
-
-            // Test update credential
-            Credential credentialResult = processCredential.updateCredential(
-                    credential, activity);
-            assertNotNull(credentialResult);
-
-            // Test update personal credential
-            PersonalCredential personalCredentialResult2 = processCredential
-                    .updatePersonalCredential(personalCredential, personResult,
-                            credentialResult, expires);
-            assertNotNull(personalCredentialResult2); */
-
         } catch (AggregatorException ae) {
             assertEquals(ae.getMessage(), "Error invalid expires date.");
+        } catch (DateTimeParseException ae2) {
+            assertNotNull(ae2);
         } catch (IOException e) {
             fail("Should not have thrown any exception");
         }

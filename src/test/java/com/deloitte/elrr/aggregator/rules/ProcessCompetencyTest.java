@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +36,8 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
+import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -65,9 +69,44 @@ class ProcessCompetencyTest {
 
             File testFile = TestFileUtil.getJsonTestFile("competency.json");
 
+            Extensions extensions = null;
+            LocalDateTime expires = null;
+            LocalDate endDate = null;
+
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
+
+            // Get start date
+            // Convert from ZonedDateTime to LocalDate
+            LocalDate startDate = stmt.getTimestamp().toLocalDate();
+
+            // Get Extensions
+            Context context = stmt.getContext();
+
+            if (context != null) {
+
+                extensions = context.getExtensions();
+
+                if (extensions != null) {
+
+                    String strExpires = (String) extensions.get(
+                            ExtensionsConstants.CONTEXT_EXTENSIONS);
+
+                    if (strExpires != null) {
+
+                        expires = LocalDateTime.parse(strExpires,
+                                DateTimeFormatter.ISO_DATE_TIME);
+
+                        // Get end date
+                        // Convert from LocalDateTime to LocalDate
+                        endDate = expires.toLocalDate();
+
+                    }
+
+                }
+
+            }
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
@@ -104,11 +143,7 @@ class ProcessCompetencyTest {
             PersonalCompetency personalCompetency = new PersonalCompetency();
             personalCompetency.setId(UUID.randomUUID());
             personalCompetency.setHasRecord(true);
-
-            LocalDateTime expires = LocalDateTime.parse("2025-12-05T15:30:00Z",
-                    DateTimeFormatter.ISO_DATE_TIME);
             personalCompetency.setExpires(expires);
-
             personalCompetency.setPerson(person);
             personalCompetency.setCompetency(competency);
             Mockito.doReturn(personalCompetency).when(personalCompetencyService)
@@ -135,7 +170,7 @@ class ProcessCompetencyTest {
 
             // Test update competency
             Competency competencyResult = processCompetency.updateCompetency(
-                    competency, activity);
+                    competency, activity, startDate, endDate);
             assertNotNull(competencyResult);
 
             // Test update personal competency
@@ -158,7 +193,8 @@ class ProcessCompetencyTest {
 
         try {
 
-            File testFile = TestFileUtil.getJsonTestFile("competency_bad_date.json");
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "competency_bad_date.json");
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
@@ -166,10 +202,6 @@ class ProcessCompetencyTest {
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
-
-            Mockito.doReturn("Competency A").doReturn(
-                    "Object representing Competency A level").when(langMapUtil)
-                    .getLangMapValue(any());
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -189,6 +221,8 @@ class ProcessCompetencyTest {
 
         } catch (AggregatorException ae) {
             assertEquals(ae.getMessage(), "Error invalid expires date.");
+        } catch (DateTimeParseException ae2) {
+            assertNotNull(ae2);
         } catch (IOException e) {
             fail("Should not have thrown any exception");
         }

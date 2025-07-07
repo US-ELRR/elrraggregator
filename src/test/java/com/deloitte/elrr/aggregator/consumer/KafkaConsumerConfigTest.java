@@ -15,12 +15,16 @@ import lombok.extern.slf4j.Slf4j;
 class KafkaConsumerConfigTest {
 
     @Test
+    @SuppressWarnings("checkstyle:linelength")
     void test() {
 
         KafkaConsumerConfig kafkaConsumerConfig = new KafkaConsumerConfig();
-        ReflectionTestUtils.setField(kafkaConsumerConfig, "brokerUrl", "localhost:9999");
-        ReflectionTestUtils.setField(kafkaConsumerConfig, "groupIdConfig", "testGroup");
-        ConsumerFactory<String, String> factory = kafkaConsumerConfig.consumerFactory();
+        ReflectionTestUtils.setField(kafkaConsumerConfig, "brokerUrl",
+                "localhost:9999");
+        ReflectionTestUtils.setField(kafkaConsumerConfig, "groupIdConfig",
+                "testGroup");
+        ConsumerFactory<String, String> factory = kafkaConsumerConfig
+                .consumerFactory();
         assertNotNull(kafkaConsumerConfig);
         assertNotNull(factory);
     }

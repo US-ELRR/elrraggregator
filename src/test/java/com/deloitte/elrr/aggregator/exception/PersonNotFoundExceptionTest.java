@@ -8,12 +8,12 @@ import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 
 /**
  * @author phleven
- * 
  */
 @SuppressWarnings("checkstyle:linelength")
 public class PersonNotFoundExceptionTest {
 
-    private final String message = "PersonNotFoundException" + "Exception Message";
+    private final String message = "PersonNotFoundException"
+            + "Exception Message";
 
     private PersonNotFoundException personNotFoundException = new PersonNotFoundException(
             message);
