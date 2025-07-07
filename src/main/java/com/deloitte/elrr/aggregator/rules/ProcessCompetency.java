@@ -153,8 +153,7 @@ public class ProcessCompetency implements Rule {
         } else {
 
             log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " exists.");
-            competency = updateCompetency(competency, activity, startDate,
-                    endDate);
+            competency = updateCompetency(competency, activity, endDate);
 
         }
 
@@ -197,14 +196,12 @@ public class ProcessCompetency implements Rule {
     /**
      * @param competency
      * @param activity
-     * @param startDate
      * @param endDate
      * @return competency
      * @throws AggregatorException
      */
     public Competency updateCompetency(Competency competency,
-            final Activity activity, final LocalDate startDate,
-            final LocalDate endDate) {
+            final Activity activity, final LocalDate endDate) {
 
         log.info("Updating competency.");
 
@@ -218,7 +215,6 @@ public class ProcessCompetency implements Rule {
 
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
-        competency.setValidStartDate(startDate);
         competency.setValidEndDate(endDate);
         competencyService.update(competency);
         log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " updated.");

@@ -171,7 +171,7 @@ class ProcessCredentialTest {
 
             // Test update credential
             Credential credentialResult = processCredential.updateCredential(
-                    credential, activity, startDate, endDate);
+                    credential, activity, endDate);
             assertNotNull(credentialResult);
 
             // Test update personal credential

@@ -153,8 +153,7 @@ public class ProcessCredential implements Rule {
         } else {
 
             log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
-            credential = updateCredential(credential, activity, startDate,
-                    endDate);
+            credential = updateCredential(credential, activity, endDate);
         }
 
         return credential;
@@ -196,14 +195,12 @@ public class ProcessCredential implements Rule {
     /**
      * @param credential
      * @param activity
-     * @param startDate
      * @param endDate
      * @return credential
      * @throws AggregatorException
      */
     public Credential updateCredential(Credential credential,
-            final Activity activity, final LocalDate startDate,
-            final LocalDate endDate) {
+            final Activity activity, final LocalDate endDate) {
 
         log.info("Updating credential.");
 
@@ -217,7 +214,6 @@ public class ProcessCredential implements Rule {
 
         credential.setFrameworkTitle(activityName);
         credential.setFrameworkDescription(activityDescription);
-        credential.setValidStartDate(startDate);
         credential.setValidEndDate(endDate);
         credentialService.update(credential);
         log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");

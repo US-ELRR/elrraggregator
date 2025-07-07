@@ -170,7 +170,7 @@ class ProcessCompetencyTest {
 
             // Test update competency
             Competency competencyResult = processCompetency.updateCompetency(
-                    competency, activity, startDate, endDate);
+                    competency, activity, endDate);
             assertNotNull(competencyResult);
 
             // Test update personal competency
