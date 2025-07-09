@@ -20,8 +20,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
-import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
+import com.deloitte.elrr.aggregator.utils.RegisteredLearningRecordUtil;
 import com.deloitte.elrr.entity.Email;
 import com.deloitte.elrr.entity.Identity;
 import com.deloitte.elrr.entity.LearningRecord;
@@ -48,7 +48,7 @@ class ProcessRegisteredTest {
     private LearningResourceUtil learningResourceUtil;
 
     @Mock
-    private LearningRecordUtil learningRecordUtil;
+    private RegisteredLearningRecordUtil registeredLearningRecordUtil;
 
     @InjectMocks
     private ProcessRegistered processRegistered;
@@ -100,9 +100,10 @@ class ProcessRegisteredTest {
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
-            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+            Mockito.doReturn(learningRecord).when(registeredLearningRecordUtil)
                     .processLearningRecord(person, verb, result,
-                            learningResource);
+                            learningResource, stmt.getTimestamp()
+                                    .toLocalDate());
 
             boolean fireRule = processRegistered.fireRule(stmt);
             assertTrue(fireRule);
