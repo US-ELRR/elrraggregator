@@ -153,22 +153,22 @@ class ProcessRegisteredTest {
             Email email = new Email();
             email.setId(UUID.randomUUID());
             email.setEmailAddressType("primary");
-            email.setEmailAddress("mailto:email37@example.com");
+            email.setEmailAddress("mailto:luke@jedi.com");
 
             Person person = new Person();
             person.setId(UUID.randomUUID());
-            person.setName("Chief Warrant Officer 2 Kameron Koepp");
+            person.setName("Luke Skywalker");
             person.setEmailAddresses(new HashSet<Email>());
             person.getEmailAddresses().add(email);
 
             UUID identityUUID = UUID.randomUUID();
             Identity identity = new Identity();
             identity.setId(identityUUID);
-            identity.setMbox("mailto:email37@example.com");
+            identity.setMbox("mailto:luke@jedi.com");
 
             LearningResource learningResource = new LearningResource();
             learningResource.setId(UUID.randomUUID());
-            learningResource.setTitle("USNCC-NAV-103-Naval Force Design");
+            learningResource.setTitle("Example Registered Activity");
             Mockito.doReturn(learningResource).when(learningResourceUtil)
                     .processLearningResource(activity);
 
@@ -186,8 +186,7 @@ class ProcessRegisteredTest {
             assertTrue(fireRule);
 
             Person personResult = processRegistered.processRule(person, stmt);
-            assertEquals(personResult.getName(),
-                    "Chief Warrant Officer 2 Kameron Koepp");
+            assertEquals(personResult.getName(), "Luke Skywalker");
 
             Set<LearningRecord> learningRecords = personResult
                     .getLearningRecords();
@@ -200,7 +199,7 @@ class ProcessRegisteredTest {
             assertEquals(learningRecord.getRecordStatus(),
                     LearningStatus.COMPLETED);
             assertEquals(learningRecord.getLearningResource().getTitle(),
-                    "USNCC-NAV-103-Naval Force Design");
+                    "Example Registered Activity");
             assertEquals(learningRecord.getLearningResource().getDescription(),
                     null);
 

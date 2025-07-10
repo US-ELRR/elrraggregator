@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 class KafkaConsumerConfigTest {
 
     @Test
-    @SuppressWarnings("checkstyle:linelength")
     void test() {
 
         KafkaConsumerConfig kafkaConsumerConfig = new KafkaConsumerConfig();
