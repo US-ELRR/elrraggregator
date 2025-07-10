@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -71,7 +70,6 @@ class ProcessCredentialTest {
 
             Extensions extensions = null;
             LocalDateTime expires = null;
-            LocalDate endDate = null;
 
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
@@ -79,7 +77,7 @@ class ProcessCredentialTest {
 
             // Get start date
             // Convert from ZonedDateTime to LocalDate
-            LocalDate startDate = stmt.getTimestamp().toLocalDate();
+            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
 
             // Get Extensions
             Context context = stmt.getContext();
@@ -94,14 +92,8 @@ class ProcessCredentialTest {
                             ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                     if (strExpires != null) {
-
                         expires = LocalDateTime.parse(strExpires,
                                 DateTimeFormatter.ISO_DATE_TIME);
-
-                        // Get end date
-                        // Convert from LocalDateTime to LocalDate
-                        endDate = expires.toLocalDate();
-
                     }
 
                 }
@@ -171,7 +163,7 @@ class ProcessCredentialTest {
 
             // Test update credential
             Credential credentialResult = processCredential.updateCredential(
-                    credential, activity, endDate);
+                    credential, activity, expires);
             assertNotNull(credentialResult);
 
             // Test update personal credential

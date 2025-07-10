@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -81,13 +80,12 @@ public class ProcessCompetency implements Rule {
 
         Extensions extensions = null;
         LocalDateTime expires = null;
-        LocalDate endDate = null;
 
         log.info("Process competency.");
 
         // Get start date
         // Convert from ZonedDateTime to LocalDate
-        LocalDate startDate = statement.getTimestamp().toLocalDate();
+        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -109,10 +107,6 @@ public class ProcessCompetency implements Rule {
                     expires = LocalDateTime.parse(strExpires,
                             DateTimeFormatter.ISO_DATE_TIME);
 
-                    // Get end date
-                    // Convert from LocalDateTime to LocalDate
-                    endDate = expires.toLocalDate();
-
                 }
 
             }
@@ -120,7 +114,7 @@ public class ProcessCompetency implements Rule {
         }
 
         // Process Competency
-        Competency competency = processCompetency(activity, startDate, endDate);
+        Competency competency = processCompetency(activity, startDate, expires);
 
         // Process PersonalCompetency
         processPersonalCompetency(person, competency, expires);
@@ -136,7 +130,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     private Competency processCompetency(final Activity activity,
-            final LocalDate startDate, final LocalDate endDate)
+            final LocalDateTime startDate, final LocalDateTime endDate)
             throws AggregatorException {
 
         Competency competency = null;
@@ -168,7 +162,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     private Competency createCompetency(final Activity activity,
-            final LocalDate startDate, final LocalDate endDate) {
+            final LocalDateTime startDate, final LocalDateTime endDate) {
 
         log.info("Creating new competency.");
 
@@ -201,7 +195,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     public Competency updateCompetency(Competency competency,
-            final Activity activity, final LocalDate endDate) {
+            final Activity activity, final LocalDateTime endDate) {
 
         log.info("Updating competency.");
 

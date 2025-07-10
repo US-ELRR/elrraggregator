@@ -79,7 +79,7 @@ class ProcessCompetencyTest {
 
             // Get start date
             // Convert from ZonedDateTime to LocalDate
-            LocalDate startDate = stmt.getTimestamp().toLocalDate();
+            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
 
             // Get Extensions
             Context context = stmt.getContext();
@@ -94,14 +94,8 @@ class ProcessCompetencyTest {
                             ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                     if (strExpires != null) {
-
                         expires = LocalDateTime.parse(strExpires,
                                 DateTimeFormatter.ISO_DATE_TIME);
-
-                        // Get end date
-                        // Convert from LocalDateTime to LocalDate
-                        endDate = expires.toLocalDate();
-
                     }
 
                 }
@@ -170,7 +164,7 @@ class ProcessCompetencyTest {
 
             // Test update competency
             Competency competencyResult = processCompetency.updateCompetency(
-                    competency, activity, endDate);
+                    competency, activity, expires);
             assertNotNull(competencyResult);
 
             // Test update personal competency

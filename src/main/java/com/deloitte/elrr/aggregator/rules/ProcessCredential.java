@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -81,13 +80,12 @@ public class ProcessCredential implements Rule {
 
         Extensions extensions = null;
         LocalDateTime expires = null;
-        LocalDate endDate = null;
 
         log.info("Process credential.");
 
         // Get start date
-        // Convert from ZonedDateTime to LocalDate
-        LocalDate startDate = statement.getTimestamp().toLocalDate();
+        // Convert from ZonedDateTime to LocalDateTime
+        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -105,14 +103,8 @@ public class ProcessCredential implements Rule {
                         ExtensionsConstants.CONTEXT_EXTENSIONS);
 
                 if (strExpires != null) {
-
                     expires = LocalDateTime.parse(strExpires,
                             DateTimeFormatter.ISO_DATE_TIME);
-
-                    // Get end date
-                    // Convert from LocalDateTime to LocalDate
-                    endDate = expires.toLocalDate();
-
                 }
 
             }
@@ -120,7 +112,7 @@ public class ProcessCredential implements Rule {
         }
 
         // Process Credential
-        Credential credential = processCredential(activity, startDate, endDate);
+        Credential credential = processCredential(activity, startDate, expires);
 
         // Process PersonalCredential
         processPersonalCredential(person, credential, expires);
@@ -136,7 +128,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     private Credential processCredential(final Activity activity,
-            final LocalDate startDate, final LocalDate endDate)
+            final LocalDateTime startDate, final LocalDateTime endDate)
             throws AggregatorException {
 
         Credential credential = null;
@@ -167,7 +159,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     private Credential createCredential(final Activity activity,
-            final LocalDate startDate, final LocalDate endDate) {
+            final LocalDateTime startDate, final LocalDateTime endDate) {
 
         log.info("Creating new credential.");
 
@@ -200,7 +192,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     public Credential updateCredential(Credential credential,
-            final Activity activity, final LocalDate endDate) {
+            final Activity activity, final LocalDateTime endDate) {
 
         log.info("Updating credential.");
 
