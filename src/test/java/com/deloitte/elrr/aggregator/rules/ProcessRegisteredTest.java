@@ -54,7 +54,7 @@ class ProcessRegisteredTest {
     private ProcessRegistered processRegistered;
 
     @Test
-    void test() {
+    void testWithObjectNameAndDescription() {
 
         try {
 
@@ -127,6 +127,85 @@ class ProcessRegisteredTest {
                     "Example Registered Activity Description");
 
         } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testWithObjectNameNoDescription() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "registered_No_Object_Description.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            Email email = new Email();
+            email.setId(UUID.randomUUID());
+            email.setEmailAddressType("primary");
+            email.setEmailAddress("mailto:email37@example.com");
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Chief Warrant Officer 2 Kameron Koepp");
+            person.setEmailAddresses(new HashSet<Email>());
+            person.getEmailAddresses().add(email);
+
+            UUID identityUUID = UUID.randomUUID();
+            Identity identity = new Identity();
+            identity.setId(identityUUID);
+            identity.setMbox("mailto:email37@example.com");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("USNCC-NAV-103-Naval Force Design");
+            Mockito.doReturn(learningResource).when(learningResourceUtil)
+                    .processLearningResource(activity);
+
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setRecordStatus(LearningStatus.COMPLETED);
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+            Mockito.doReturn(learningRecord).when(learningRecordUtil)
+                    .processLearningRecord(person, verb, result,
+                            learningResource, stmt.getTimestamp()
+                                    .toLocalDate());
+
+            boolean fireRule = processRegistered.fireRule(stmt);
+            assertTrue(fireRule);
+
+            Person personResult = processRegistered.processRule(person, stmt);
+            assertEquals(personResult.getName(),
+                    "Chief Warrant Officer 2 Kameron Koepp");
+
+            Set<LearningRecord> learningRecords = personResult
+                    .getLearningRecords();
+            assertNotNull(learningRecords);
+            learningRecord = learningRecords.stream().findFirst().orElse(null);
+
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.COMPLETED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "USNCC-NAV-103-Naval Force Design");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    null);
+
+        } catch (IOException e) {
+            e.printStackTrace();
             fail("Should not have thrown any exception");
         }
     }

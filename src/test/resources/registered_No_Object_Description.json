@@ -1,0 +1,50 @@
+{
+    "id": "5654cc22-2817-4e26-94f6-9f947c26de8f",
+    "actor": {
+      "name": "Chief Warrant Officer 2 Kameron Koepp",
+      "mbox": "mailto:email37@example.com"
+    },
+    "verb": {
+      "id": "http://adlnet.gov/expapi/verbs/registered",
+      "display": {
+        "en-us": "Registered"
+      }
+    },
+    "context": {
+      "registration": "ac43a8fa-ce0e-4174-9c5e-0a588f73c8ea",
+      "contextActivities": {
+        "parent": [
+          {
+            "id": "https://example.org/program/348936591",
+            "definition": {
+              "type": "https://xapi.edlm/profiles/cg/activitytypes/program"
+            }
+          }
+        ],
+        "category": [
+          {
+            "id": "https://xapi.edlm/profiles/cg-data-sim/draft-e3162edd-4015-4fb1-99c0-64f405df530c"
+          }
+        ]
+      }
+    },
+    "object": {
+      "id": "https://xapi.edlm/profiles/cg/activities/USNCC-NAV-103",
+      "definition": {
+        "name": {
+          "en-us": "USNCC-NAV-103-Naval Force Design"
+        },
+        "type": "https://xapi.edlm/profiles/cg/activitytypes/course"
+      }
+    },
+    "authority": {
+      "objectType": "Agent",
+      "account": {
+        "homePage": "http://example.org",
+        "name": "019718ec-9755-8a4d-82de-139fb6a38045"
+      }
+    },
+    "timestamp": "2025-07-10T14:12:20.843Z",
+    "stored": "2025-07-10T18:10:33.194Z",
+    "version": "1.0.0"
+}
