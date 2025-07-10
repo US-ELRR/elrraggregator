@@ -1,5 +1,7 @@
 package com.deloitte.elrr.aggregator.utils;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -67,6 +69,51 @@ public class LearningRecordUtil {
 
     /**
      * @param person
+     * @param verb
+     * @param result
+     * @param learningResource
+     * @param enrolledDate
+     * @return learningRccord
+     * @throws RuntimeServiceException
+     */
+    public LearningRecord processLearningRecord(final Person person,
+            final Verb verb, final Result result,
+            final LearningResource learningResource,
+            final LocalDate enrolledDate) {
+
+        LearningRecord learningRecord = null;
+
+        try {
+
+            log.info("Process learning record.");
+
+            // Get LearningRecord
+            learningRecord = learningRecordService
+                    .findByPersonIdAndLearningResourceId(person.getId(),
+                            learningResource.getId());
+
+            // If LearningRecord doesn't exist
+            if (learningRecord == null) {
+
+                learningRecord = createLearningRecord(person, learningResource,
+                        verb, result, enrolledDate);
+
+                // If learningRecord already exists
+            } else {
+
+                learningRecord = updateLearningRecord(person, learningRecord,
+                        verb, result);
+            }
+
+        } catch (RuntimeServiceException e) {
+            throw e;
+        }
+
+        return learningRecord;
+    }
+
+    /**
+     * @param person
      * @param learningResource
      * @param verb
      * @param result
@@ -85,10 +132,46 @@ public class LearningRecordUtil {
         learningRecord.setPerson(person);
         learningRecord.setRecordStatus(learningStatus);
 
-        if (result != null && result.getScore() != null
-                && result.getScore().getScaled() != null) {
-            learningRecord.setAcademicGrade(result.getScore()
-                    .getScaled().toString());
+        if (result != null && result.getScore() != null && result.getScore()
+                .getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore().getScaled()
+                    .toString());
+        }
+
+        learningRecordService.save(learningRecord);
+
+        log.info("Learning Record for " + person.getName() + " - "
+                + learningResource.getTitle() + " created.");
+
+        return learningRecord;
+    }
+
+    /**
+     * @param person
+     * @param learningResource
+     * @param verb
+     * @param result
+     * @param enrolledDate
+     * @return learningRecord
+     */
+    private LearningRecord createLearningRecord(final Person person,
+            final LearningResource learningResource, final Verb verb,
+            final Result result, LocalDate enrolledDate) {
+
+        log.info("Creating new learning record.");
+        LearningRecord learningRecord = new LearningRecord();
+
+        LearningStatus learningStatus = getStatus(verb, result);
+
+        learningRecord.setEnrollmentDate(enrolledDate);
+        learningRecord.setLearningResource(learningResource);
+        learningRecord.setPerson(person);
+        learningRecord.setRecordStatus(learningStatus);
+
+        if (result != null && result.getScore() != null && result.getScore()
+                .getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore().getScaled()
+                    .toString());
         }
 
         learningRecordService.save(learningRecord);
@@ -119,10 +202,10 @@ public class LearningRecordUtil {
 
             learningRecord.setRecordStatus(learningStatus);
 
-            if (result != null && result.getScore() != null
-                    && result.getScore().getScaled() != null) {
-                learningRecord.setAcademicGrade(result.getScore()
-                        .getScaled().toString());
+            if (result != null && result.getScore() != null && result.getScore()
+                    .getScaled() != null) {
+                learningRecord.setAcademicGrade(result.getScore().getScaled()
+                        .toString());
             }
 
             learningRecordService.update(learningRecord);
@@ -162,8 +245,7 @@ public class LearningRecordUtil {
             return LearningStatus.ATTEMPTED;
 
         } else if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.REGISTERED_VERB_ID.toString())
-                || verb.getId()
+                VerbIdConstants.REGISTERED_VERB_ID.toString()) || verb.getId()
                         .toString().equalsIgnoreCase(
                                 VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
 

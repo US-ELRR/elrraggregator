@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
-import com.deloitte.elrr.aggregator.utils.RegisteredLearningRecordUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningRecord;
 import com.deloitte.elrr.entity.LearningResource;
@@ -26,7 +26,7 @@ public class ProcessRegistered implements Rule {
     private LearningResourceUtil learningResourceUtil;
 
     @Autowired
-    private RegisteredLearningRecordUtil registeredLearningRecordUtil;
+    private LearningRecordUtil learningRecordUtil;
 
     @Autowired
     private PersonSvc personService;
@@ -69,7 +69,7 @@ public class ProcessRegistered implements Rule {
                 .processLearningResource(activity);
 
         // Process LearningRecord
-        LearningRecord learningRecord = registeredLearningRecordUtil
+        LearningRecord learningRecord = learningRecordUtil
                 .processLearningRecord(person, statement.getVerb(), statement
                         .getResult(), learningResource, statement.getTimestamp()
                                 .toLocalDate());
