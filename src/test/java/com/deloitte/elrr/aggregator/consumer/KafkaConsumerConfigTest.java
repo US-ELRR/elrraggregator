@@ -18,9 +18,12 @@ class KafkaConsumerConfigTest {
     void test() {
 
         KafkaConsumerConfig kafkaConsumerConfig = new KafkaConsumerConfig();
-        ReflectionTestUtils.setField(kafkaConsumerConfig, "brokerUrl", "localhost:9999");
-        ReflectionTestUtils.setField(kafkaConsumerConfig, "groupIdConfig", "testGroup");
-        ConsumerFactory<String, String> factory = kafkaConsumerConfig.consumerFactory();
+        ReflectionTestUtils.setField(kafkaConsumerConfig, "brokerUrl",
+                "localhost:9999");
+        ReflectionTestUtils.setField(kafkaConsumerConfig, "groupIdConfig",
+                "testGroup");
+        ConsumerFactory<String, String> factory = kafkaConsumerConfig
+                .consumerFactory();
         assertNotNull(kafkaConsumerConfig);
         assertNotNull(factory);
     }

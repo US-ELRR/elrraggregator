@@ -68,6 +68,10 @@ public class LangMapUtil {
 
         try {
 
+            if (langMap == null) {
+                return null;
+            }
+
             Set<LangTag> langCodes = langMap.getKeys();
 
             // Iterate and compare to lang.codes in .properties

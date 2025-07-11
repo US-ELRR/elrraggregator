@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class VerbIdConstantsTest {
 
     @Test
-    void testConstants_Extensions() {
+    void testConstantsExtensions() {
 
         try {
             URI uri = new URI("http://adlnet.gov/expapi/verbs/achieved");

@@ -107,8 +107,7 @@ class ProcessSatisfiedTest {
             boolean fireRule = processSatisfied.fireRule(stmt);
             assertTrue(fireRule);
 
-            Person personResult = person = processSatisfied.processRule(person,
-                    stmt);
+            Person personResult = processSatisfied.processRule(person, stmt);
             assertEquals(personResult.getName(), "Tom Brady");
 
             Set<LearningRecord> learningRecords = personResult

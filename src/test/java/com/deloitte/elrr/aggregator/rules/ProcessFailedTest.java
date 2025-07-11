@@ -106,8 +106,7 @@ class ProcessFailedTest {
             boolean fireRule = processFailed.fireRule(stmt);
             assertTrue(fireRule);
 
-            Person personResult = person = processFailed.processRule(person,
-                    stmt);
+            Person personResult = processFailed.processRule(person, stmt);
             assertEquals(personResult.getName(), "Example Learner");
 
             Set<LearningRecord> learningRecords = personResult

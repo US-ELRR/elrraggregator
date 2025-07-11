@@ -56,6 +56,7 @@ class ELRRMessageListenerTest {
     private ELRRMessageListener elrrMessageListener;
 
     @Test
+    @SuppressWarnings("checkstyle:linelength")
     void test() {
 
         try {
@@ -69,6 +70,7 @@ class ELRRMessageListenerTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:linelength")
     void testInvalid() {
 
         try {
