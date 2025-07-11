@@ -79,7 +79,6 @@ public class ProcessCredential implements Rule {
     public Person processRule(final Person person, final Statement statement) {
 
         Extensions extensions = null;
-        LocalDateTime expires = null;
 
         log.info("Process credential.");
 
@@ -89,6 +88,8 @@ public class ProcessCredential implements Rule {
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
+
+        LocalDateTime expires = null;
 
         // Get Extensions
         Context context = statement.getContext();

@@ -79,7 +79,6 @@ public class ProcessCompetency implements Rule {
     public Person processRule(final Person person, final Statement statement) {
 
         Extensions extensions = null;
-        LocalDateTime expires = null;
 
         log.info("Process competency.");
 
@@ -89,6 +88,8 @@ public class ProcessCompetency implements Rule {
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
+
+        LocalDateTime expires = null;
 
         // Get Extensions
         Context context = statement.getContext();
