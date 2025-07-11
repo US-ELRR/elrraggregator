@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,10 @@ public class ProcessRegistered implements Rule {
         // Get Activity
         Activity activity = (Activity) statement.getObject();
 
+        // Get enrollment date
+        LocalDateTime enrollmentDate = statement.getTimestamp()
+                .toLocalDateTime();
+
         // Process LearningResource
         LearningResource learningResource = learningResourceUtil
                 .processLearningResource(activity);
@@ -71,8 +76,7 @@ public class ProcessRegistered implements Rule {
         // Process LearningRecord
         LearningRecord learningRecord = learningRecordUtil
                 .processLearningRecord(person, statement.getVerb(), statement
-                        .getResult(), learningResource, statement.getTimestamp()
-                                .toLocalDate());
+                        .getResult(), learningResource, enrollmentDate);
 
         if (person.getLearningRecords() == null) {
             person.setLearningRecords(new HashSet<LearningRecord>());

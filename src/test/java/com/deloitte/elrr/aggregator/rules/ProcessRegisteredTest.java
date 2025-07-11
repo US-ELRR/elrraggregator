@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -71,6 +72,9 @@ class ProcessRegisteredTest {
 
             Result result = stmt.getResult();
 
+            LocalDateTime enrollmentDate = stmt.getTimestamp()
+                    .toLocalDateTime();
+
             Email email = new Email();
             email.setId(UUID.randomUUID());
             email.setEmailAddressType("primary");
@@ -102,8 +106,7 @@ class ProcessRegisteredTest {
             learningRecord.setLearningResource(learningResource);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
-                            learningResource, stmt.getTimestamp()
-                                    .toLocalDate());
+                            learningResource, enrollmentDate);
 
             boolean fireRule = processRegistered.fireRule(stmt);
             assertTrue(fireRule);
@@ -150,6 +153,9 @@ class ProcessRegisteredTest {
 
             Result result = stmt.getResult();
 
+            LocalDateTime enrollmentDate = stmt.getTimestamp()
+                    .toLocalDateTime();
+
             Email email = new Email();
             email.setId(UUID.randomUUID());
             email.setEmailAddressType("primary");
@@ -179,8 +185,7 @@ class ProcessRegisteredTest {
             learningRecord.setLearningResource(learningResource);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
-                            learningResource, stmt.getTimestamp()
-                                    .toLocalDate());
+                            learningResource, enrollmentDate);
 
             boolean fireRule = processRegistered.fireRule(stmt);
             assertTrue(fireRule);

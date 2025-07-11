@@ -1,6 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -79,7 +79,7 @@ public class LearningRecordUtil {
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
             final LearningResource learningResource,
-            final LocalDate enrolledDate) {
+            final LocalDateTime enrolledDate) {
 
         LearningRecord learningRecord = null;
 
@@ -156,7 +156,7 @@ public class LearningRecordUtil {
      */
     private LearningRecord createLearningRecord(final Person person,
             final LearningResource learningResource, final Verb verb,
-            final Result result, LocalDate enrolledDate) {
+            final Result result, LocalDateTime enrolledDate) {
 
         log.info("Creating new learning record.");
         LearningRecord learningRecord = new LearningRecord();
