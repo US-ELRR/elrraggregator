@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class ExtensionsConstantsTest {
 
     @Test
-    void testConstants_Extensions() {
+    void testConstantsExtensions() {
         assertEquals(ExtensionsConstants.CONTEXT_EXTENSIONS,
                 "https://w3id.org/xapi/comp/contextextensions/expires");
     }

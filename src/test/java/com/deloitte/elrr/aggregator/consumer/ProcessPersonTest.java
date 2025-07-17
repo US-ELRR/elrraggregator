@@ -126,6 +126,7 @@ class ProcessPersonTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:linelength")
     void testOpenId() {
 
         try {
@@ -144,7 +145,8 @@ class ProcessPersonTest {
             Set<Identity> identities = person.getIdentities();
             assertNotNull(identities);
             Identity identity = identities.stream().findFirst().orElse(null);
-            assertEquals(identity.getOpenid(), "http://test.openid.example.org/");
+            assertEquals(identity.getOpenid(),
+                    "http://test.openid.example.org/");
 
         } catch (IOException e) {
             fail("Should not have thrown any exception");

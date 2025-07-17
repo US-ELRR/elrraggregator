@@ -1,0 +1,24 @@
+{
+    "id": "9ded3322-e1a4-311a-a67d-6a735c76f119",
+    "timestamp": "2016-12-18T12:17:00+00:00",
+    "actor": {
+        "objectType": "Agent",
+        "name": "Luke Skywalker",
+        "mbox": "mailto:luke@jedi.com"
+    },
+    "verb": {
+        "id": "http://adlnet.gov/expapi/verbs/registered",
+        "display": {
+            "en-US": "registered"
+        }
+    },
+    "object": {
+        "id": "http://adlnet.gov/expapi/activities/registeredexample",
+        "definition": {
+            "name": {
+                "en-US": "Example Registered Activity"
+            }
+        },
+        "objectType": "Activity"
+    }
+}
