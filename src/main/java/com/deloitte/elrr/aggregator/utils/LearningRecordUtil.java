@@ -104,9 +104,11 @@ public class LearningRecordUtil {
                 // If learningRecord already exists
             } else {
 
-                // Get existing status and timestamp
+                // Get existing status
                 LearningStatus originalStatus = learningRecord
                         .getRecordStatus();
+
+                // Get existing timestamp
                 LocalDateTime originalTimestamp = learningRecord
                         .getInsertedDate();
 
