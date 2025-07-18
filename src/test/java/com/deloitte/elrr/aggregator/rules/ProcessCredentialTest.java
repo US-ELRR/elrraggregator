@@ -89,7 +89,7 @@ class ProcessCredentialTest {
                 if (extensions != null) {
 
                     String strExpires = (String) extensions.get(
-                            ExtensionsConstants.CONTEXT_EXTENSIONS);
+                            ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
 
                     if (strExpires != null) {
                         expires = LocalDateTime.parse(strExpires,
