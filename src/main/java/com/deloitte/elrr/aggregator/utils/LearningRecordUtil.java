@@ -104,29 +104,23 @@ public class LearningRecordUtil {
                 // If learningRecord already exists
             } else {
 
-                // Get existing status
-                LearningStatus originalStatus = learningRecord
-                        .getRecordStatus();
-
-                // Get existing timestamp
-                LocalDateTime originalTimestamp = learningRecord
-                        .getInsertedDate();
-
                 // If existing LearningRecord is COMPLETED
-                if (originalStatus.equals(LearningStatus.COMPLETED)) {
+                if (learningRecord.getRecordStatus().equals(
+                        LearningStatus.COMPLETED)) {
 
                     // If new registered enrollmentDate <= existing timestamp
-                    if (enrollmentDate.isEqual(originalTimestamp)
-                            || enrollmentDate.isBefore(originalTimestamp)) {
+                    if (enrollmentDate.isEqual(learningRecord.getInsertedDate())
+                            || enrollmentDate.isBefore(learningRecord
+                                    .getInsertedDate())) {
                         log.error(
                                 "Error trying to re-register a completed activity. Learning Record for "
                                         + person.getName() + " - "
                                         + learningRecord.getLearningResource()
                                                 .getTitle() + ".");
-                        log.error("Original status = " + originalStatus);
-                        log.error("Re-register status = " + getStatus(verb,
-                                result));
-                        log.error("Original time stamp = " + originalTimestamp);
+                        log.error("Original status = " + learningRecord
+                                .getRecordStatus());
+                        log.error("Original time stamp = " + learningRecord
+                                .getInsertedDate());
                         log.error("New enrollment date = " + enrollmentDate);
                         return learningRecord;
                     }
