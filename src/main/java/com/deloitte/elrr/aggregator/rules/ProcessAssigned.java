@@ -1,7 +1,10 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,7 +65,7 @@ public class ProcessAssigned implements Rule {
             throws URISyntaxException {
 
         Extensions extensions = null;
-        String extKey = null;
+        URI extKey = null;
         String extValue = null;
 
         log.info("Process activity assigned");
@@ -78,9 +81,15 @@ public class ProcessAssigned implements Rule {
             extensions = context.getExtensions();
 
             if (extensions != null) {
-                extKey = ExtensionsConstants.CONTEXT_EXTENSIONS_TO;
-                extValue = (String) extensions.get(
-                        ExtensionsConstants.CONTEXT_EXTENSIONS_TO);
+
+                Map<URI, Object> map = new HashMap<URI, Object>();
+                map = extensions.getMap();
+
+                for (Map.Entry<URI, Object> entry : map.entrySet()) {
+                    extKey = entry.getKey();
+                    extValue = (String) entry.getValue();
+                }
+
             }
 
         }

@@ -158,7 +158,7 @@ public class LearningRecordUtil {
     @SuppressWarnings("checkstyle:linelength")
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
-            final LearningResource learningResource, final String extKey,
+            final LearningResource learningResource, final URI extKey,
             final String extValue) throws URISyntaxException {
 
         LearningRecord learningRecord = null;
@@ -277,7 +277,7 @@ public class LearningRecordUtil {
      */
     private LearningRecord createLearningRecord(final Person person,
             final LearningResource learningResource, final Verb verb,
-            final Result result, final String extKey, final String extValue)
+            final Result result, final URI extKey, final String extValue)
             throws URISyntaxException {
 
         log.info("Creating new learning record.");
@@ -287,8 +287,7 @@ public class LearningRecordUtil {
 
         if (extKey != null) {
             Map<URI, Object> extMap = new HashMap<>();
-            URI uri1 = new URI(extKey);
-            extMap.put(uri1, extValue);
+            extMap.put(extKey, extValue);
             learningRecord.setExtensions(extMap);
         }
 
@@ -404,8 +403,7 @@ public class LearningRecordUtil {
      */
     public LearningRecord updateLearningRecord(Person person,
             LearningRecord learningRecord, final Verb verb, final Result result,
-            final String extKey, final String extValue)
-            throws URISyntaxException {
+            final URI extKey, final String extValue) throws URISyntaxException {
 
         log.info("Update learning record.");
 
@@ -415,8 +413,7 @@ public class LearningRecordUtil {
 
             if (extKey != null) {
                 Map<URI, Object> extMap = new HashMap<>();
-                URI uri1 = new URI(extKey);
-                extMap.put(uri1, extValue);
+                extMap.put(extKey, extValue);
                 learningRecord.setExtensions(extMap);
             }
 
