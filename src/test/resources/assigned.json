@@ -1,0 +1,22 @@
+{
+        "id": "7c8054a4-2d0c-48da-986e-b82223730eb5",
+        "actor": {
+            "name": "Robert Po",
+            "mbox": "mailto:po@gmail.com"
+        },
+        "verb": {
+            "id": "http://adlnet.gov/expapi/verbs/assigned",
+            "display": { "en-us": "Assigned" }
+        },
+        "object": {
+            "id": "http://example.edlm/credentials/credential-400a",
+                "definition": {
+                "name": { "en-us": "Extension to" },
+                "description": { "en-us": "Example to" }
+            }
+        },
+            "context": {
+                "extensions": {"https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to": "assign to Phil."}
+        },
+        "timestamp": "2025-03-07T09:15:12-05:00"
+    }
