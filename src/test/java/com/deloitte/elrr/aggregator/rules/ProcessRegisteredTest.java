@@ -104,6 +104,7 @@ class ProcessRegisteredTest {
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
+            learningRecord.setEnrollmentDate(enrollmentDate);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
                             learningResource, enrollmentDate);
@@ -183,6 +184,7 @@ class ProcessRegisteredTest {
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
+            learningRecord.setEnrollmentDate(enrollmentDate);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
                             learningResource, enrollmentDate);
