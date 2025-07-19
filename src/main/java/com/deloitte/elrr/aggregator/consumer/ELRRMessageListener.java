@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
@@ -135,7 +137,9 @@ public class ELRRMessageListener {
             }
 
         } catch (AggregatorException | PersonNotFoundException
-                | JsonProcessingException e) {
+                | JsonProcessingException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
 
             log.error("Error processing Kafka message", e);
             throw new AggregatorException("Error processing Kafka message.", e);

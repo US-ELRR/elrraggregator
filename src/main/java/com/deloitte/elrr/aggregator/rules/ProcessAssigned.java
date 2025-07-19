@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URISyntaxException;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
+import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,15 +54,36 @@ public class ProcessAssigned implements Rule {
      * @param person
      * @param statement
      * @return person
+     * @throws URISyntaxException
      */
     @Override
     @Transactional
-    public Person processRule(final Person person, final Statement statement) {
+    public Person processRule(final Person person, final Statement statement)
+            throws URISyntaxException {
+
+        Extensions extensions = null;
+        String extKey = null;
+        String extValue = null;
 
         log.info("Process activity assigned");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
+
+        // Get Extensions
+        Context context = statement.getContext();
+
+        if (context != null) {
+
+            extensions = context.getExtensions();
+
+            if (extensions != null) {
+                extKey = ExtensionsConstants.CONTEXT_EXTENSIONS_TO;
+                extValue = (String) extensions.get(
+                        ExtensionsConstants.CONTEXT_EXTENSIONS_TO);
+            }
+
+        }
 
         // Process LearningResource
         LearningResource learningResource = learningResourceUtil
@@ -68,7 +92,7 @@ public class ProcessAssigned implements Rule {
         // Process LearningRecord
         LearningRecord learningRecord = learningRecordUtil
                 .processLearningRecord(person, statement.getVerb(), statement
-                        .getResult(), learningResource);
+                        .getResult(), learningResource, extKey, extValue);
 
         if (person.getLearningRecords() == null) {
             person.setLearningRecords(new HashSet<LearningRecord>());
