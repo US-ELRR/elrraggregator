@@ -8,7 +8,7 @@ public class ExtensionsConstantsTest {
 
     @Test
     void testConstantsExtensions() {
-        assertEquals(ExtensionsConstants.CONTEXT_EXTENSIONS,
+        assertEquals(ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES,
                 "https://w3id.org/xapi/comp/contextextensions/expires");
     }
 

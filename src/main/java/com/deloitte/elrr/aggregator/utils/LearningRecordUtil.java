@@ -1,6 +1,9 @@
 package com.deloitte.elrr.aggregator.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -139,6 +142,55 @@ public class LearningRecordUtil {
     }
 
     /**
+     * For Extensions.
+     *
+     * @param person
+     * @param verb
+     * @param result
+     * @param learningResource
+     * @param extensionsMap
+     * @return learningRccord
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     */
+    @SuppressWarnings("checkstyle:linelength")
+    public LearningRecord processLearningRecord(final Person person,
+            final Verb verb, final Result result,
+            final LearningResource learningResource, final Map<URI,
+                    Object> extensionsMap) throws URISyntaxException {
+
+        LearningRecord learningRecord = null;
+
+        try {
+
+            log.info("Process learning record.");
+
+            // Get LearningRecord
+            learningRecord = learningRecordService
+                    .findByPersonIdAndLearningResourceId(person.getId(),
+                            learningResource.getId());
+
+            // If LearningRecord doesn't exist
+            if (learningRecord == null) {
+
+                learningRecord = createLearningRecord(person, learningResource,
+                        verb, result, extensionsMap);
+
+                // If learningRecord already exists
+            } else {
+
+                learningRecord = updateLearningRecord(person, learningRecord,
+                        verb, result, extensionsMap);
+            }
+
+        } catch (RuntimeServiceException | URISyntaxException e) {
+            throw e;
+        }
+
+        return learningRecord;
+    }
+
+    /**
      * @param person
      * @param learningResource
      * @param verb
@@ -192,6 +244,48 @@ public class LearningRecordUtil {
         LearningStatus learningStatus = getStatus(verb, result);
 
         learningRecord.setEnrollmentDate(enrollmentDate);
+        learningRecord.setLearningResource(learningResource);
+        learningRecord.setPerson(person);
+        learningRecord.setRecordStatus(learningStatus);
+
+        if (result != null && result.getScore() != null && result.getScore()
+                .getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore().getScaled()
+                    .toString());
+        }
+
+        learningRecordService.save(learningRecord);
+
+        log.info("Learning Record for " + person.getName() + " - "
+                + learningResource.getTitle() + " created.");
+
+        return learningRecord;
+    }
+
+    /**
+     * For Extensions.
+     *
+     * @param person
+     * @param learningResource
+     * @param verb
+     * @param result
+     * @param extensionsMap
+     * @return learningRecord
+     */
+    private LearningRecord createLearningRecord(final Person person,
+            final LearningResource learningResource, final Verb verb,
+            final Result result, final Map<URI, Object> extensionsMap)
+            throws URISyntaxException {
+
+        log.info("Creating new learning record.");
+        LearningRecord learningRecord = new LearningRecord();
+
+        LearningStatus learningStatus = getStatus(verb, result);
+
+        if (extensionsMap != null) {
+            learningRecord.setExtensions(extensionsMap);
+        }
+
         learningRecord.setLearningResource(learningResource);
         learningRecord.setPerson(person);
         learningRecord.setRecordStatus(learningStatus);
@@ -271,6 +365,51 @@ public class LearningRecordUtil {
 
             learningRecord.setRecordStatus(learningStatus);
             learningRecord.setEnrollmentDate(enrollmentDate);
+
+            if (result != null && result.getScore() != null && result.getScore()
+                    .getScaled() != null) {
+                learningRecord.setAcademicGrade(result.getScore().getScaled()
+                        .toString());
+            }
+
+            learningRecordService.update(learningRecord);
+
+            log.info("Learning Record for " + person.getName() + " - "
+                    + learningRecord.getLearningResource().getTitle()
+                    + " updated.");
+
+        } catch (RuntimeServiceException e) {
+            throw e;
+        }
+        return learningRecord;
+    }
+
+    /**
+     * For Extensions.
+     *
+     * @param person
+     * @param learningRecord
+     * @param verb
+     * @param result
+     * @param extensionsMap
+     * @return learningRecord
+     * @throws RuntimeServiceException
+     */
+    public LearningRecord updateLearningRecord(Person person,
+            LearningRecord learningRecord, final Verb verb, final Result result,
+            final Map<URI, Object> extensionsMap) throws URISyntaxException {
+
+        log.info("Update learning record.");
+
+        try {
+
+            LearningStatus learningStatus = getStatus(verb, result);
+
+            if (extensionsMap != null) {
+                learningRecord.setExtensions(extensionsMap);
+            }
+
+            learningRecord.setRecordStatus(learningStatus);
 
             if (result != null && result.getScore() != null && result.getScore()
                     .getScaled() != null) {

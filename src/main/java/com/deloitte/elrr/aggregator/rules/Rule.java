@@ -1,5 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URISyntaxException;
+
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.exception.RuntimeServiceException;
@@ -21,8 +23,9 @@ public interface Rule {
      * @throws ClassCastException
      * @throws NullPointerException
      * @throws RuntimeServiceException
+     * @throws URISyntaxException
      */
     Person processRule(Person person, Statement statement)
             throws AggregatorException, ClassCastException,
-            NullPointerException, RuntimeServiceException;
+            NullPointerException, RuntimeServiceException, URISyntaxException;
 }

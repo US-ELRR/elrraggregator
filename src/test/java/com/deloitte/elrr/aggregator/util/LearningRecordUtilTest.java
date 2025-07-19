@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -427,4 +431,117 @@ class LearningRecordUtilTest {
             fail("Should not have thrown any exception");
         }
     }
+
+    @Test
+    void testAssigned() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("assigned.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            LocalDateTime enrollmentDate = stmt.getTimestamp()
+                    .toLocalDateTime();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Robert Po");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Extension to");
+            learningResource.setDescription("Example to");
+
+            Map<URI, Object> map = new HashMap<URI, Object>();
+            URI uri1 = new URI(
+                    "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to");
+            map.put(uri1, "assign to Phil.");
+
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(person, verb, result,
+                            learningResource, map);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.ATTEMPTED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Extension to");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example to");
+
+        } catch (IOException | URISyntaxException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testAssignedUpdate() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("assigned.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            LocalDateTime enrollmentDate = stmt.getTimestamp()
+                    .toLocalDateTime();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Robert Po");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Extension to");
+            learningResource.setDescription("Example to");
+
+            Map<URI, Object> map = new HashMap<URI, Object>();
+            URI uri1 = new URI(
+                    "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to");
+            map.put(uri1, "assign to Phil.");
+
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+
+            learningRecord = learningRecordUtil.updateLearningRecord(person,
+                    learningRecord, verb, result, map);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.ATTEMPTED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Extension to");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example to");
+
+        } catch (IOException | URISyntaxException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
 }
