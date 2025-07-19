@@ -3,7 +3,6 @@ package com.deloitte.elrr.aggregator.utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,14 +142,13 @@ public class LearningRecordUtil {
     }
 
     /**
-     * For Assigned.
+     * For Extensions.
      *
      * @param person
      * @param verb
      * @param result
      * @param learningResource
-     * @param extKey
-     * @param extValue
+     * @param extensionsMap
      * @return learningRccord
      * @throws URISyntaxException
      * @throws RuntimeServiceException
@@ -158,8 +156,8 @@ public class LearningRecordUtil {
     @SuppressWarnings("checkstyle:linelength")
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
-            final LearningResource learningResource, final URI extKey,
-            final String extValue) throws URISyntaxException {
+            final LearningResource learningResource, final Map<URI,
+                    Object> extensionsMap) throws URISyntaxException {
 
         LearningRecord learningRecord = null;
 
@@ -176,13 +174,13 @@ public class LearningRecordUtil {
             if (learningRecord == null) {
 
                 learningRecord = createLearningRecord(person, learningResource,
-                        verb, result, extKey, extValue);
+                        verb, result, extensionsMap);
 
                 // If learningRecord already exists
             } else {
 
                 learningRecord = updateLearningRecord(person, learningRecord,
-                        verb, result, extKey, extValue);
+                        verb, result, extensionsMap);
             }
 
         } catch (RuntimeServiceException | URISyntaxException e) {
@@ -265,19 +263,18 @@ public class LearningRecordUtil {
     }
 
     /**
-     * For Assigned.
+     * For Extensions.
      *
      * @param person
      * @param learningResource
      * @param verb
      * @param result
-     * @param extKey
-     * @param extValue
+     * @param extensionsMap
      * @return learningRecord
      */
     private LearningRecord createLearningRecord(final Person person,
             final LearningResource learningResource, final Verb verb,
-            final Result result, final URI extKey, final String extValue)
+            final Result result, final Map<URI, Object> extensionsMap)
             throws URISyntaxException {
 
         log.info("Creating new learning record.");
@@ -285,10 +282,8 @@ public class LearningRecordUtil {
 
         LearningStatus learningStatus = getStatus(verb, result);
 
-        if (extKey != null) {
-            Map<URI, Object> extMap = new HashMap<>();
-            extMap.put(extKey, extValue);
-            learningRecord.setExtensions(extMap);
+        if (extensionsMap != null) {
+            learningRecord.setExtensions(extensionsMap);
         }
 
         learningRecord.setLearningResource(learningResource);
@@ -390,20 +385,19 @@ public class LearningRecordUtil {
     }
 
     /**
-     * For Assigned.
+     * For Extensions.
      *
      * @param person
      * @param learningRecord
      * @param verb
      * @param result
-     * @param extKey
-     * @param extValue
+     * @param extensionsMap
      * @return learningRecord
      * @throws RuntimeServiceException
      */
     public LearningRecord updateLearningRecord(Person person,
             LearningRecord learningRecord, final Verb verb, final Result result,
-            final URI extKey, final String extValue) throws URISyntaxException {
+            final Map<URI, Object> extensionsMap) throws URISyntaxException {
 
         log.info("Update learning record.");
 
@@ -411,10 +405,8 @@ public class LearningRecordUtil {
 
             LearningStatus learningStatus = getStatus(verb, result);
 
-            if (extKey != null) {
-                Map<URI, Object> extMap = new HashMap<>();
-                extMap.put(extKey, extValue);
-                learningRecord.setExtensions(extMap);
+            if (extensionsMap != null) {
+                learningRecord.setExtensions(extensionsMap);
             }
 
             learningRecord.setRecordStatus(learningStatus);

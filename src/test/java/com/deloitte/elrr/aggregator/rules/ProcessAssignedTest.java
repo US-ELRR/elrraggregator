@@ -21,9 +21,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
+import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.entity.Email;
@@ -53,6 +55,9 @@ class ProcessAssignedTest {
 
     @Mock
     private LearningRecordUtil learningRecordUtil;
+
+    @Spy
+    private ExtensionsUtil extensionsUtil;
 
     @InjectMocks
     private ProcessAssigned processAssigned;
@@ -102,14 +107,14 @@ class ProcessAssignedTest {
             learningRecord.setRecordStatus(LearningStatus.ATTEMPTED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
-            Map<URI, Object> map = new HashMap<URI, Object>();
+            Map<URI, Object> map = new HashMap();
             URI uri1 = new URI(
                     "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to");
             map.put(uri1, "assign to Phil.");
             learningRecord.setExtensions(map);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
-                            learningResource, uri1, "assign to Phil.");
+                            learningResource, map);
 
             boolean fireRule = processAssigned.fireRule(stmt);
             assertTrue(fireRule);
@@ -120,8 +125,8 @@ class ProcessAssignedTest {
             Set<LearningRecord> learningRecords = personResult
                     .getLearningRecords();
             assertNotNull(learningRecords);
-            learningRecord = learningRecords.stream().findFirst().orElse(null);
 
+            learningRecord = learningRecords.stream().findFirst().orElse(null);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());

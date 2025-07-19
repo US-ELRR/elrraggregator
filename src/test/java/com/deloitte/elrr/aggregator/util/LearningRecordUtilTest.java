@@ -470,7 +470,7 @@ class LearningRecordUtilTest {
 
             LearningRecord learningRecord = learningRecordUtil
                     .processLearningRecord(person, verb, result,
-                            learningResource, uri1, "assign to Phil.");
+                            learningResource, map);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());
@@ -528,7 +528,7 @@ class LearningRecordUtilTest {
             learningRecord.setLearningResource(learningResource);
 
             learningRecord = learningRecordUtil.updateLearningRecord(person,
-                    learningRecord, verb, result, uri1, "assign to Phil.");
+                    learningRecord, verb, result, map);
             assertNotNull(learningRecord);
             assertNotNull(learningRecord.getPerson());
             assertNotNull(learningRecord.getLearningResource());
