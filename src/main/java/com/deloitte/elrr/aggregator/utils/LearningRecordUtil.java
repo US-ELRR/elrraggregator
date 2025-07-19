@@ -143,7 +143,7 @@ public class LearningRecordUtil {
     }
 
     /**
-     * For Registered.
+     * For Assigned.
      *
      * @param person
      * @param verb
