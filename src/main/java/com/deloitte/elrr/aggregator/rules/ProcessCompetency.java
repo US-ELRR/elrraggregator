@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
@@ -18,7 +18,6 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 
@@ -36,6 +35,9 @@ public class ProcessCompetency implements Rule {
 
     @Autowired
     private LangMapUtil langMapUtil;
+
+    @Autowired
+    private ExtensionsUtil extensionsUtil;
 
     @Autowired
     private PersonSvc personService;
@@ -89,30 +91,9 @@ public class ProcessCompetency implements Rule {
         // Get Activity
         Activity activity = (Activity) statement.getObject();
 
-        LocalDateTime expires = null;
-
-        // Get Extensions
-        Context context = statement.getContext();
-
-        if (context != null) {
-
-            extensions = context.getExtensions();
-
-            if (extensions != null) {
-
-                String strExpires = (String) extensions.get(
-                        ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
-
-                if (strExpires != null) {
-
-                    expires = LocalDateTime.parse(strExpires,
-                            DateTimeFormatter.ISO_DATE_TIME);
-
-                }
-
-            }
-
-        }
+        // Get expires
+        LocalDateTime expires = extensionsUtil.getExpired(statement
+                .getContext());
 
         // Process Competency
         Competency competency = processCompetency(activity, startDate, expires);

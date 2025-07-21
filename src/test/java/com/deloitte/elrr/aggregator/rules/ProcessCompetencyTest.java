@@ -22,9 +22,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
+import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Competency;
@@ -58,6 +60,9 @@ class ProcessCompetencyTest {
 
     @Mock
     private PersonalCompetencySvc personalCompetencyService;
+
+    @Spy
+    private ExtensionsUtil extensionsUtil;
 
     @InjectMocks
     private ProcessCompetency processCompetency;
