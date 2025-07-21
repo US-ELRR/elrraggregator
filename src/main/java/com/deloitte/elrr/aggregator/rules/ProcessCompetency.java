@@ -18,7 +18,6 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,8 +79,6 @@ public class ProcessCompetency implements Rule {
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
 
-        Extensions extensions = null;
-
         log.info("Process competency.");
 
         // Get start date
@@ -92,8 +89,8 @@ public class ProcessCompetency implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get expires
-        LocalDateTime expires = extensionsUtil.getExpired(statement
-                .getContext());
+        LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
+                statement.getContext(), "LocalDateTime");
 
         // Process Competency
         Competency competency = processCompetency(activity, startDate, expires);

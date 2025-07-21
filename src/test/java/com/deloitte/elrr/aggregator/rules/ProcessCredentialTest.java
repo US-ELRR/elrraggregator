@@ -37,8 +37,6 @@ import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Context;
-import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -73,37 +71,13 @@ class ProcessCredentialTest {
 
             File testFile = TestFileUtil.getJsonTestFile("credential.json");
 
-            Extensions extensions = null;
-            LocalDateTime expires = null;
-
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
 
-            // Get start date
-            // Convert from ZonedDateTime to LocalDate
-            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
-
-            // Get Extensions
-            Context context = stmt.getContext();
-
-            if (context != null) {
-
-                extensions = context.getExtensions();
-
-                if (extensions != null) {
-
-                    String strExpires = (String) extensions.get(
-                            ExtensionsConstants.CONTEXT_EXTENSIONS);
-
-                    if (strExpires != null) {
-                        expires = LocalDateTime.parse(strExpires,
-                                DateTimeFormatter.ISO_DATE_TIME);
-                    }
-
-                }
-
-            }
+            // Get expires
+            LocalDateTime expires = (LocalDateTime) extensionsUtil
+                    .getExtensions(stmt.getContext(), "LocalDateTime");
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();

@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,8 +37,6 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Context;
-import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -74,38 +71,13 @@ class ProcessCompetencyTest {
 
             File testFile = TestFileUtil.getJsonTestFile("competency.json");
 
-            Extensions extensions = null;
-            LocalDateTime expires = null;
-            LocalDate endDate = null;
-
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
 
-            // Get start date
-            // Convert from ZonedDateTime to LocalDate
-            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
-
-            // Get Extensions
-            Context context = stmt.getContext();
-
-            if (context != null) {
-
-                extensions = context.getExtensions();
-
-                if (extensions != null) {
-
-                    String strExpires = (String) extensions.get(
-                            ExtensionsConstants.CONTEXT_EXTENSIONS);
-
-                    if (strExpires != null) {
-                        expires = LocalDateTime.parse(strExpires,
-                                DateTimeFormatter.ISO_DATE_TIME);
-                    }
-
-                }
-
-            }
+            // Get expires
+            LocalDateTime expires = (LocalDateTime) extensionsUtil
+                    .getExtensions(stmt.getContext(), "LocalDateTime");
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
@@ -198,9 +170,6 @@ class ProcessCompetencyTest {
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
-
-            // Get Activity
-            Activity activity = (Activity) stmt.getObject();
 
             Email email = new Email();
             email.setId(UUID.randomUUID());

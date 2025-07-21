@@ -18,7 +18,6 @@ import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
-import com.yetanalytics.xapi.model.Extensions;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -80,8 +79,6 @@ public class ProcessCredential implements Rule {
     @Transactional
     public Person processRule(final Person person, final Statement statement) {
 
-        Extensions extensions = null;
-
         log.info("Process credential.");
 
         // Get start date
@@ -92,8 +89,8 @@ public class ProcessCredential implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get expires
-        LocalDateTime expires = extensionsUtil.getExpired(statement
-                .getContext());
+        LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
+                statement.getContext(), "LocalDateTime");
 
         // Process Credential
         Credential credential = processCredential(activity, startDate, expires);

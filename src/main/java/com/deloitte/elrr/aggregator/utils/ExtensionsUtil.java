@@ -20,9 +20,10 @@ public class ExtensionsUtil {
 
     /**
      * @param context
-     * @return Map<URI, Object>
+     * @param returnObject
+     * @return extensionsMap or LocalDateTime
      */
-    public Map<URI, Object> getExtensions(Context context) {
+    public Object getExtensions(Context context, String returnObject) {
 
         Map<URI, Object> extensionsMap = new HashMap<>();
 
@@ -31,41 +32,29 @@ public class ExtensionsUtil {
             Extensions extensions = context.getExtensions();
 
             if (extensions != null) {
-                extensionsMap = extensions.getMap();
-            }
 
-        }
+                if (returnObject.equalsIgnoreCase("Map")) {
 
-        return extensionsMap;
-    }
+                    extensionsMap = extensions.getMap();
+                    return extensionsMap;
 
-    /**
-     * @param context
-     * @return expires
-     */
-    public LocalDateTime getExpired(Context context) {
+                } else if (returnObject.equalsIgnoreCase("LocalDateTime")) {
 
-        LocalDateTime expires = null;
+                    String strLocalDateTime = (String) extensions.get(
+                            ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
 
-        if (context != null) {
+                    if (strLocalDateTime != null) {
+                        return LocalDateTime.parse(strLocalDateTime,
+                                DateTimeFormatter.ISO_DATE_TIME);
+                    }
 
-            Extensions extensions = context.getExtensions();
-
-            if (extensions != null) {
-
-                String strExpires = (String) extensions.get(
-                        ExtensionsConstants.CONTEXT_EXTENSIONS);
-
-                if (strExpires != null) {
-                    expires = LocalDateTime.parse(strExpires,
-                            DateTimeFormatter.ISO_DATE_TIME);
                 }
 
             }
 
         }
 
-        return expires;
-
+        return null;
     }
+
 }
