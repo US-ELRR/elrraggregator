@@ -28,6 +28,9 @@ public final class VerbIdConstants {
     public static final URI SCHEDULED_VERB_ID = URI.create(
             "http://adlnet.gov/expapi/verbs/scheduled");
 
+    public static final URI ASSIGNED_VERB_ID = URI.create(
+            "http://adlnet.gov/expapi/verbs/assigned");
+
     private VerbIdConstants() {
         throw new UnsupportedOperationException(
                 "This is a utility class and cannot be instantiated");

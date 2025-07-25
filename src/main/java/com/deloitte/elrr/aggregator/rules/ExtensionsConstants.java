@@ -4,6 +4,7 @@ package com.deloitte.elrr.aggregator.rules;
 public final class ExtensionsConstants {
 
     public static final String CONTEXT_EXTENSIONS_EXPIRES = "https://w3id.org/xapi/comp/contextextensions/expires";
+    public static final String CONTEXT_EXTENSIONS_ACTOR = "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to";
 
     private ExtensionsConstants() {
         throw new UnsupportedOperationException(
