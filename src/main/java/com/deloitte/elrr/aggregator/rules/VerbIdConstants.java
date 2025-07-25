@@ -29,7 +29,7 @@ public final class VerbIdConstants {
             "http://adlnet.gov/expapi/verbs/scheduled");
 
     public static final URI ASSIGNED_VERB_ID = URI.create(
-            "http://adlnet.gov/expapi/verbs/assigned");
+            "https://w3id.org/xapi/tla/verbs/assigned");
 
     private VerbIdConstants() {
         throw new UnsupportedOperationException(
