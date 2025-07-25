@@ -24,6 +24,8 @@ public class LearningRecordUtil {
     @Autowired
     private LearningRecordSvc learningRecordService;
 
+    private static final String LEARNING_RECORD_FOR = "Learning Record for ";
+
     /**
      * @param person
      * @param verb
@@ -150,7 +152,7 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        log.info("Learning Record for " + person.getName() + " - "
+        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
                 + learningResource.getTitle() + " created.");
 
         return learningRecord;
@@ -186,7 +188,7 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        log.info("Learning Record for " + person.getName() + " - "
+        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
                 + learningResource.getTitle() + " created.");
 
         return learningRecord;
@@ -218,11 +220,11 @@ public class LearningRecordUtil {
 
         learningRecordService.update(learningRecord);
 
-        log.info("Learning Record for " + person.getName() + " - "
-                + learningRecord.getLearningResource().getTitle()
-                + " updated.");
+        log.info(LEARNING_RECORD_FOR + person.getName() + " - " + learningRecord
+                .getLearningResource().getTitle() + " updated.");
 
         return learningRecord;
+
     }
 
     /**
