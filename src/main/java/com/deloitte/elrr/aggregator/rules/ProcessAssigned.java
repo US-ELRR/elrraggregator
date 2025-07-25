@@ -1,20 +1,27 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
+import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+import com.deloitte.elrr.entity.Goal;
+import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.entity.types.GoalType;
+import com.deloitte.elrr.jpa.svc.GoalSvc;
 import com.yetanalytics.xapi.model.AbstractActor;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessAssigned implements Rule {
 
     @Autowired
+    private LangMapUtil langMapUtil;
+
+    @Autowired
+    private GoalSvc goalService;
+
+    @Autowired
     private LearningResourceUtil learningResourceUtil;
 
     @Autowired
@@ -31,6 +44,8 @@ public class ProcessAssigned implements Rule {
 
     @Autowired
     private ExtensionsUtil extensionsUtil;
+
+    private static final String GOAL_MESSAGE = "Goal";
 
     /**
      * @param statement
@@ -63,15 +78,99 @@ public class ProcessAssigned implements Rule {
 
         log.info("Process assigned");
 
-        Map<URI, Object> extensionsMap = new HashMap<>();
-        String requestStatement = null;
-        Statement responseStatement = null;
+        // Get start date
+        // Convert from ZonedDateTime to LocalDate
+        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+
+        // Get Activity
+        Activity activity = (Activity) statement.getObject();
 
         AbstractActor assignedToActor = (AbstractActor) extensionsUtil
                 .getExtensions(statement.getContext(), "Actor");
 
-        log.info("Name = " + assignedToActor.getName());
+        // Process Goal
+        Goal goal = processGoal(statement.getContext(), activity, startDate);
 
-        return null;
+        return person;
     }
+
+    /**
+     * @param context
+     * @param activity
+     * @param startDate
+     * @return goal
+     * @throws AggregatorException
+     */
+    public Goal processGoal(final Context context, final Activity activity,
+            final LocalDateTime startDate) throws AggregatorException {
+
+        List<LearningResource> learningResources = new ArrayList<
+                LearningResource>();
+        Goal goal = null;
+
+        // Process LearningResource
+        learningResources = learningResourceUtil.processLearningResource(
+                context);
+
+        // Get goal
+        goal = goalService.findByIdentifier(activity.getId().toString());
+
+        // If goal doesn't exist
+        if (goal == null) {
+
+            goal = createGoal(activity, startDate, learningResources);
+
+        } else {
+
+            log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
+            // goal = updateGoal(goal, activity);
+
+        }
+
+        return goal;
+    }
+
+    /**
+     * @param activity
+     * @param startDate
+     * @param learningResources
+     * @return goal
+     * @throws AggregatorException
+     */
+    public Goal createGoal(final Activity activity,
+            final LocalDateTime startDate, final List<
+                    LearningResource> learningResources) {
+
+        log.info("Creating new goal.");
+
+        GoalType goalType = null;
+        Goal goal = null;
+        String activityName = "";
+        String activityDescription = "";
+
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
+
+        // Get goalType
+        if (activity != null && activity.getDefinition()
+                .getExtensions() != null) {
+
+            goalType = (GoalType) activity.getDefinition().getExtensions().get(
+                    ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
+
+        }
+
+        goal = new Goal();
+        goal.setDescription(activityDescription);
+        goal.setName(activityName);
+        goal.setType(goalType);
+        goal.setLearningResources(new HashSet<>(learningResources));
+        goalService.save(goal);
+        log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
+
+        return goal;
+    }
+
 }

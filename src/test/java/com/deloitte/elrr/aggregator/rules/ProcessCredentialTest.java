@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
@@ -59,7 +58,7 @@ class ProcessCredentialTest {
     @Mock
     private PersonalCredentialSvc personalCredentialService;
 
-    @Spy
+    @Mock
     private ExtensionsUtil extensionsUtil;
 
     @Mock
@@ -68,7 +67,7 @@ class ProcessCredentialTest {
     @InjectMocks
     private ProcessCredential processCredential;
 
-    // @Test
+    @Test
     void test() {
 
         try {
@@ -159,7 +158,8 @@ class ProcessCredentialTest {
             assertNotNull(personalCredentialResult2);
             assertEquals(personalCredentialResult2.getExpires(), expires);
 
-        } catch (IOException e) {
+        } catch (AggregatorException | IOException e) {
+            e.printStackTrace();
             fail("Should not have thrown any exception");
         }
     }

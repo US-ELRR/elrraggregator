@@ -1,5 +1,8 @@
 package com.deloitte.elrr.aggregator.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +10,7 @@ import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +55,50 @@ public class LearningResourceUtil {
         }
 
         return learningResource;
+    }
+
+    /**
+     * @param activity
+     * @return learningResources
+     * @throws AggregatorException
+     */
+    public List<LearningResource> processLearningResource(
+            final Context context) {
+
+        log.info("Process learning resources.");
+
+        List<LearningResource> learningResources = new ArrayList<
+                LearningResource>();
+
+        // Get learningResources
+        List<Activity> activities = context.getContextActivities().getOther();
+
+        for (Activity activity : activities) {
+
+            LearningResource learningResource = learningResourceService
+                    .findByIri(activity.getId().toString());
+
+            // If LearningResource already exists
+            if (learningResource != null) {
+
+                log.info("Learning Resource " + learningResource.getTitle()
+                        + " exists.");
+
+            } else {
+
+                try {
+
+                    learningResource = createLearningResource(activity);
+                    learningResources.add(learningResource);
+
+                } catch (AggregatorException e) {
+                    throw e;
+                }
+            }
+
+        }
+
+        return learningResources;
     }
 
     /**

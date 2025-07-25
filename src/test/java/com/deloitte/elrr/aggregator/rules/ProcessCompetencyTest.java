@@ -21,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
@@ -59,7 +58,7 @@ class ProcessCompetencyTest {
     @Mock
     private PersonalCompetencySvc personalCompetencyService;
 
-    @Spy
+    @Mock
     private ExtensionsUtil extensionsUtil;
 
     @Mock
@@ -68,7 +67,7 @@ class ProcessCompetencyTest {
     @InjectMocks
     private ProcessCompetency processCompetency;
 
-    // @Test
+    @Test
     void test() {
 
         try {
@@ -158,7 +157,8 @@ class ProcessCompetencyTest {
             assertNotNull(personalCompetencyResult2);
             assertEquals(personalCompetencyResult2.getExpires(), expires);
 
-        } catch (IOException e) {
+        } catch (AggregatorException | IOException e) {
+            e.printStackTrace();
             fail("Should not have thrown any exception");
         }
     }
