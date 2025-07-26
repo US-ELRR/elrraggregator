@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
@@ -18,6 +17,7 @@ import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.entity.types.GoalType;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.GoalSvc;
 import com.yetanalytics.xapi.model.AbstractActor;
 import com.yetanalytics.xapi.model.Activity;
@@ -47,12 +47,8 @@ public class ProcessAssigned implements Rule {
 
     private static final String GOAL_MESSAGE = "Goal";
 
-    /**
-     * @param statement
-     * @return boolean
-     */
     @Override
-    public boolean fireRule(final Statement statement) {
+    public boolean fireRule(Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -62,7 +58,6 @@ public class ProcessAssigned implements Rule {
         // Is Verb Id = assigned
         return (statement.getVerb().getId().toString().equalsIgnoreCase(
                 VerbIdConstants.ASSIGNED_VERB_ID.toString()));
-
     }
 
     /**
@@ -72,11 +67,9 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      */
     @Override
-    @Transactional
-    public Person processRule(Person person, final Statement statement)
-            throws AggregatorException {
-
-        log.info("Process assigned");
+    public Person processRule(Person person, Statement statement)
+            throws AggregatorException, ClassCastException,
+            NullPointerException, RuntimeServiceException {
 
         // Get start date
         // Convert from ZonedDateTime to LocalDate
@@ -142,7 +135,7 @@ public class ProcessAssigned implements Rule {
      * @param activity
      * @param startDate
      * @param learningResources
-     * @param assignedActor
+     * @param assignedPerson
      * @return goal
      * @throws AggregatorException
      */
@@ -164,14 +157,17 @@ public class ProcessAssigned implements Rule {
                 .getDefinition().getDescription());
 
         // Get goalType
-        // if (activity != null && activity.getDefinition()
-        // .getExtensions() != null) {
+        if (activity != null && activity.getDefinition()
+                .getExtensions() != null) {
 
-        // goalType = (GoalType) activity.getDefinition().getExtensions().get(
-        // ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+            String type = (String) activity.getDefinition().getExtensions().get(
+                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-        // }
-        goalType = GoalType.ASSIGNED;
+            if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+                goalType = GoalType.ASSIGNED;
+            }
+
+        }
 
         goal = new Goal();
         goal.setDescription(activityDescription);

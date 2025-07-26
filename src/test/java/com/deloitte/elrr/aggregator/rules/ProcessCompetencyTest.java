@@ -154,7 +154,6 @@ class ProcessCompetencyTest {
             assertEquals(personalCompetencyResult2.getExpires(), expires);
 
         } catch (AggregatorException | IOException e) {
-            e.printStackTrace();
             fail("Should not have thrown any exception");
         }
     }
