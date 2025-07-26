@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
-import com.deloitte.elrr.aggregator.utils.LearningRecordUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Goal;
@@ -31,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessAssigned implements Rule {
 
     @Autowired
+    private ProcessPerson processPerson;
+
+    @Autowired
     private LangMapUtil langMapUtil;
 
     @Autowired
@@ -38,9 +41,6 @@ public class ProcessAssigned implements Rule {
 
     @Autowired
     private LearningResourceUtil learningResourceUtil;
-
-    @Autowired
-    private LearningRecordUtil learningRecordUtil;
 
     @Autowired
     private ExtensionsUtil extensionsUtil;
@@ -85,11 +85,16 @@ public class ProcessAssigned implements Rule {
         // Get Activity
         Activity activity = (Activity) statement.getObject();
 
-        AbstractActor assignedToActor = (AbstractActor) extensionsUtil
+        // Get assigned actor
+        AbstractActor assignedActor = (AbstractActor) extensionsUtil
                 .getExtensions(statement.getContext(), "Actor");
 
+        // Get assigned person
+        Person assignedPerson = processPerson.processPerson(assignedActor);
+
         // Process Goal
-        Goal goal = processGoal(statement.getContext(), activity, startDate);
+        Goal goal = processGoal(statement.getContext(), activity, startDate,
+                assignedPerson);
 
         return person;
     }
@@ -98,11 +103,13 @@ public class ProcessAssigned implements Rule {
      * @param context
      * @param activity
      * @param startDate
+     * @param assignedPerson
      * @return goal
      * @throws AggregatorException
      */
     public Goal processGoal(final Context context, final Activity activity,
-            final LocalDateTime startDate) throws AggregatorException {
+            final LocalDateTime startDate, final Person assignedPerson)
+            throws AggregatorException {
 
         List<LearningResource> learningResources = new ArrayList<
                 LearningResource>();
@@ -113,19 +120,20 @@ public class ProcessAssigned implements Rule {
                 context);
 
         // Get goal
-        goal = goalService.findByIdentifier(activity.getId().toString());
+        // goal = goalService.findByIdentifier(activity.getId().toString());
 
         // If goal doesn't exist
-        if (goal == null) {
+        // if (goal == null) {
 
-            goal = createGoal(activity, startDate, learningResources);
+        goal = createGoal(activity, startDate, learningResources,
+                assignedPerson);
 
-        } else {
+        // } else {
 
-            log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-            // goal = updateGoal(goal, activity);
+        // log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
+        // goal = updateGoal(goal, activity);
 
-        }
+        // }
 
         return goal;
     }
@@ -134,12 +142,14 @@ public class ProcessAssigned implements Rule {
      * @param activity
      * @param startDate
      * @param learningResources
+     * @param assignedActor
      * @return goal
      * @throws AggregatorException
      */
     public Goal createGoal(final Activity activity,
             final LocalDateTime startDate, final List<
-                    LearningResource> learningResources) {
+                    LearningResource> learningResources,
+            final Person assignedPerson) {
 
         log.info("Creating new goal.");
 
@@ -154,19 +164,21 @@ public class ProcessAssigned implements Rule {
                 .getDefinition().getDescription());
 
         // Get goalType
-        if (activity != null && activity.getDefinition()
-                .getExtensions() != null) {
+        // if (activity != null && activity.getDefinition()
+        // .getExtensions() != null) {
 
-            goalType = (GoalType) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
+        // goalType = (GoalType) activity.getDefinition().getExtensions().get(
+        // ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-        }
+        // }
+        goalType = GoalType.ASSIGNED;
 
         goal = new Goal();
         goal.setDescription(activityDescription);
         goal.setName(activityName);
         goal.setType(goalType);
         goal.setLearningResources(new HashSet<>(learningResources));
+        goal.setPerson(assignedPerson);
         goalService.save(goal);
         log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
 

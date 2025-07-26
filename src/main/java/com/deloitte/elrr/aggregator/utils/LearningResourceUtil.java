@@ -58,7 +58,7 @@ public class LearningResourceUtil {
     }
 
     /**
-     * @param activity
+     * @param context
      * @return learningResources
      * @throws AggregatorException
      */

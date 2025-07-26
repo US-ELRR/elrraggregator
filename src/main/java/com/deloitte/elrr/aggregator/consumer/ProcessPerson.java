@@ -72,6 +72,29 @@ public class ProcessPerson {
 
     /**
      * @param actor
+     * @return Person
+     * @throws PersonNotFoundException
+     */
+    public Person processPerson(AbstractActor actor) {
+
+        Person person = null;
+        Account account = null;
+
+        log.info("Process person.");
+
+        // Get Person
+        person = getPerson(actor, account);
+
+        // If Person doesn't exist
+        if (person == null) {
+            person = createPerson(actor, account);
+        }
+
+        return person;
+    }
+
+    /**
+     * @param actor
      * @param account
      * @return person
      */

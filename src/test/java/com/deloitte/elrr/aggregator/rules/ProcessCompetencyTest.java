@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.deloitte.elrr.aggregator.util.TestFileUtil;
-import com.deloitte.elrr.aggregator.utils.CompetencyUtil;
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
@@ -60,9 +59,6 @@ class ProcessCompetencyTest {
 
     @Mock
     private ExtensionsUtil extensionsUtil;
-
-    @Mock
-    private CompetencyUtil competencyUtil;
 
     @InjectMocks
     private ProcessCompetency processCompetency;
@@ -143,7 +139,7 @@ class ProcessCompetencyTest {
                     "Object representing Competency A level");
 
             // Test update competency
-            Competency competencyResult = competencyUtil.updateCompetency(
+            Competency competencyResult = processCompetency.updateCompetency(
                     competency, activity, expires);
             assertNotNull(competencyResult);
 
@@ -151,7 +147,7 @@ class ProcessCompetencyTest {
             expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
                     DateTimeFormatter.ISO_DATE_TIME);
 
-            PersonalCompetency personalCompetencyResult2 = competencyUtil
+            PersonalCompetency personalCompetencyResult2 = processCompetency
                     .updatePersonalCompetency(personalCompetencyResult,
                             personResult, expires);
             assertNotNull(personalCompetencyResult2);
