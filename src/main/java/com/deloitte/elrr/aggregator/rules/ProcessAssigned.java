@@ -15,6 +15,7 @@ import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+import com.deloitte.elrr.entity.Competency;
 import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.LearningResource;
@@ -49,6 +50,9 @@ public class ProcessAssigned implements Rule {
     private ProcessCredential processCredential;
 
     @Autowired
+    private ProcessCompetency processCompetency;
+
+    @Autowired
     private ExtensionsUtil extensionsUtil;
 
     private static final String GOAL_MESSAGE = "Goal";
@@ -57,7 +61,9 @@ public class ProcessAssigned implements Rule {
      * @param statement
      * @return boolean
      */
-    public boolean fireRule(Statement statement) {
+    public
+            boolean
+            fireRule(Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -76,9 +82,16 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public Person processRule(Person person, Statement statement)
-            throws AggregatorException, ClassCastException,
-            NullPointerException, RuntimeServiceException, URISyntaxException {
+    public
+            Person
+            processRule(Person person, Statement statement)
+                    throws AggregatorException,
+                    ClassCastException,
+                    NullPointerException,
+                    RuntimeServiceException,
+                    URISyntaxException {
+
+        log.info("Process competency.");
 
         // Get start date
         // Convert from ZonedDateTime to LocalDate
@@ -111,15 +124,20 @@ public class ProcessAssigned implements Rule {
      * @throws URISyntaxException
      */
     @Transactional
-    public Goal processGoal(final Context context, final Activity activity,
-            final LocalDateTime startDate, final Person assignedPerson)
-            throws AggregatorException, URISyntaxException {
+    public
+            Goal
+            processGoal(
+                    final Context context,
+                    final Activity activity,
+                    final LocalDateTime startDate,
+                    final Person assignedPerson)
+                    throws AggregatorException,
+                    URISyntaxException {
 
         List<LearningResource> learningResources = new ArrayList<
                 LearningResource>();
-
         List<Credential> credentials = new ArrayList<Credential>();
-
+        List<Competency> competencies = new ArrayList<Competency>();
         Goal goal = null;
 
         // Process LearningResource
@@ -128,6 +146,10 @@ public class ProcessAssigned implements Rule {
 
         // Process Credential
         credentials = (List<Credential>) processCredential.processCredential(
+                context, startDate, null);
+
+        // Process Competencies
+        competencies = (List<Competency>) processCompetency.processCompetency(
                 context, startDate, null);
 
         // Get name
@@ -142,7 +164,7 @@ public class ProcessAssigned implements Rule {
         if (goal == null) {
 
             goal = createGoal(activity, startDate, learningResources,
-                    credentials, assignedPerson);
+                    credentials, competencies, assignedPerson);
 
         } else {
 
@@ -159,15 +181,20 @@ public class ProcessAssigned implements Rule {
      * @param startDate
      * @param learningResources
      * @param credentials
+     * @param competencies
      * @param assignedPerson
      * @return goal
      * @throws AggregatorException
      */
-    public Goal createGoal(final Activity activity,
-            final LocalDateTime startDate, final List<
-                    LearningResource> learningResources, final List<
-                            Credential> credentials,
-            final Person assignedPerson) {
+    public
+            Goal
+            createGoal(
+                    final Activity activity,
+                    final LocalDateTime startDate,
+                    final List<LearningResource> learningResources,
+                    final List<Credential> credentials,
+                    final List<Competency> competencies,
+                    final Person assignedPerson) {
 
         log.info("Creating new goal.");
 
@@ -210,6 +237,7 @@ public class ProcessAssigned implements Rule {
         goal.setType(goalType);
         goal.setLearningResources(new HashSet<>(learningResources));
         goal.setCredentials(new HashSet<>(credentials));
+        goal.setCompetencies(new HashSet<>(competencies));
         goal.setPerson(assignedPerson);
         goalService.save(goal);
         log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");

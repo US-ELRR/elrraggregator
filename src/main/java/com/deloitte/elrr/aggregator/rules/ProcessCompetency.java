@@ -1,8 +1,12 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +22,7 @@ import com.deloitte.elrr.jpa.svc.CompetencySvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCompetencySvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -131,6 +136,59 @@ public class ProcessCompetency implements Rule {
         }
 
         return competency;
+    }
+
+    /**
+     * @param context
+     * @param startDate
+     * @param endDate
+     * @return competencies
+     * @throws AggregatorException
+     * @throws URISyntaxException
+     */
+    public List<Competency> processCompetency(final Context context,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException, URISyntaxException {
+
+        log.info("Process competencies.");
+
+        List<Competency> competencies = new ArrayList<Competency>();
+
+        // Get Activities
+        List<Activity> activities = context.getContextActivities().getOther();
+
+        for (Activity activity : activities) {
+
+            URI type = activity.getDefinition().getType();
+
+            URI otherCompetencyURI = new URI(
+                    "https://w3id.org/xapi/comp/activities/competency");
+
+            // If Competency
+            if (type.equals(otherCompetencyURI)) {
+
+                Competency competency = competencyService.findByIdentifier(
+                        activity.getId().toString());
+
+                // If Competency already exists
+                if (competency != null) {
+
+                    log.info(COMPETENCY_MESSAGE + " " + activity.getId()
+                            + " exists.");
+
+                    // If Competency doesn't exist
+                } else {
+
+                    competency = createCompetency(activity, startDate, endDate);
+                    competencies.add(competency);
+
+                }
+
+            }
+
+        }
+
+        return competencies;
     }
 
     /**
