@@ -4,6 +4,7 @@ package com.deloitte.elrr.aggregator.rules;
 public final class ObjectTypeConstants {
 
     public static final String CREDENTIAL = "https://w3id.org/xapi/tla/activity-types/credential";
+    public static final String OTHER_CREDENTIAL = "https://w3id.org/xapi/cred/activity/credential";
 
     private ObjectTypeConstants() {
         throw new UnsupportedOperationException(

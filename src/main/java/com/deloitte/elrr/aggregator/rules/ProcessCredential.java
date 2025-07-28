@@ -1,8 +1,12 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +22,7 @@ import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.PersonSvc;
 import com.deloitte.elrr.jpa.svc.PersonalCredentialSvc;
 import com.yetanalytics.xapi.model.Activity;
+import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
@@ -130,6 +135,59 @@ public class ProcessCredential implements Rule {
         }
 
         return credential;
+    }
+
+    /**
+     * @param context
+     * @param startDate
+     * @param endDate
+     * @return credential
+     * @throws AggregatorException
+     * @throws URISyntaxException
+     */
+    public List<Credential> processCredential(final Context context,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException, URISyntaxException {
+
+        log.info("Process credentials.");
+
+        List<Credential> credentials = new ArrayList<Credential>();
+
+        // Get Activities
+        List<Activity> activities = context.getContextActivities().getOther();
+
+        for (Activity activity : activities) {
+
+            URI type = activity.getDefinition().getType();
+
+            URI otherCredentialURI = new URI(
+                    "https://w3id.org/xapi/cred/activities/credential");
+
+            // If Credential
+            if (type.equals(otherCredentialURI)) {
+
+                Credential credential = credentialService.findByIdentifier(
+                        activity.getId().toString());
+
+                // If Credential already exists
+                if (credential != null) {
+
+                    log.info(CREDENTIAL_MESSAGE + " " + activity.getId()
+                            + " exists.");
+
+                    // If Credential doesn't exist
+                } else {
+
+                    credential = createCredential(activity, startDate, endDate);
+                    credentials.add(credential);
+
+                }
+
+            }
+
+        }
+
+        return credentials;
     }
 
     /**

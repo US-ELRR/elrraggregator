@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import com.deloitte.elrr.aggregator.rules.Rule;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
@@ -68,11 +70,16 @@ public class ELRRMessageListener {
 
     /**
      * @param message
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
      * @throws AggregatorException
      */
     @Transactional
     @KafkaListener(topics = "${kafka.topic}")
-    public void listen(final String message) {
+    public void listen(final String message) throws ClassCastException,
+            NullPointerException, RuntimeServiceException, URISyntaxException {
 
         log.info("\n\n Received Messasge in group - group-id== \n" + message);
 
@@ -96,10 +103,15 @@ public class ELRRMessageListener {
 
     /**
      * @param payload
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
      * @throws AggregatorException
      */
     @Transactional
-    public void processMessage(final String payload) {
+    public void processMessage(final String payload) throws ClassCastException,
+            NullPointerException, RuntimeServiceException, URISyntaxException {
 
         log.info(" \n\n ===============Process Kafka message===============");
 

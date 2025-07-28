@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,12 +8,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+import com.deloitte.elrr.entity.Credential;
 import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.entity.Person;
@@ -43,11 +46,17 @@ public class ProcessAssigned implements Rule {
     private LearningResourceUtil learningResourceUtil;
 
     @Autowired
+    private ProcessCredential processCredential;
+
+    @Autowired
     private ExtensionsUtil extensionsUtil;
 
     private static final String GOAL_MESSAGE = "Goal";
 
-    @Override
+    /**
+     * @param statement
+     * @return boolean
+     */
     public boolean fireRule(Statement statement) {
 
         // If not an activity
@@ -63,13 +72,13 @@ public class ProcessAssigned implements Rule {
     /**
      * @param person
      * @param statement
-     * @return
+     * @return person
      * @throws AggregatorException
+     * @throws URISyntaxException
      */
-    @Override
     public Person processRule(Person person, Statement statement)
             throws AggregatorException, ClassCastException,
-            NullPointerException, RuntimeServiceException {
+            NullPointerException, RuntimeServiceException, URISyntaxException {
 
         // Get start date
         // Convert from ZonedDateTime to LocalDate
@@ -86,7 +95,7 @@ public class ProcessAssigned implements Rule {
         Person assignedPerson = processPerson.processPerson(assignedActor);
 
         // Process Goal
-        Goal goal = processGoal(statement.getContext(), activity, startDate,
+        processGoal(statement.getContext(), activity, startDate,
                 assignedPerson);
 
         return person;
@@ -99,34 +108,48 @@ public class ProcessAssigned implements Rule {
      * @param assignedPerson
      * @return goal
      * @throws AggregatorException
+     * @throws URISyntaxException
      */
+    @Transactional
     public Goal processGoal(final Context context, final Activity activity,
             final LocalDateTime startDate, final Person assignedPerson)
-            throws AggregatorException {
+            throws AggregatorException, URISyntaxException {
 
         List<LearningResource> learningResources = new ArrayList<
                 LearningResource>();
+
+        List<Credential> credentials = new ArrayList<Credential>();
+
         Goal goal = null;
 
         // Process LearningResource
         learningResources = learningResourceUtil.processLearningResource(
                 context);
 
+        // Process Credential
+        credentials = (List<Credential>) processCredential.processCredential(
+                context, startDate, null);
+
+        // Get name
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
+
         // Get goal
-        // goal = goalService.findByIdentifier(activity.getId().toString());
+        goal = goalService.findByPersonIdAndName(assignedPerson.getId(),
+                activityName);
 
         // If goal doesn't exist
-        // if (goal == null) {
+        if (goal == null) {
 
-        goal = createGoal(activity, startDate, learningResources,
-                assignedPerson);
+            goal = createGoal(activity, startDate, learningResources,
+                    credentials, assignedPerson);
 
-        // } else {
+        } else {
 
-        // log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-        // goal = updateGoal(goal, activity);
+            log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
+            // goal = updateGoal(goal, activity);
 
-        // }
+        }
 
         return goal;
     }
@@ -135,13 +158,15 @@ public class ProcessAssigned implements Rule {
      * @param activity
      * @param startDate
      * @param learningResources
+     * @param credentials
      * @param assignedPerson
      * @return goal
      * @throws AggregatorException
      */
     public Goal createGoal(final Activity activity,
             final LocalDateTime startDate, final List<
-                    LearningResource> learningResources,
+                    LearningResource> learningResources, final List<
+                            Credential> credentials,
             final Person assignedPerson) {
 
         log.info("Creating new goal.");
@@ -164,7 +189,17 @@ public class ProcessAssigned implements Rule {
                     ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
             if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+
                 goalType = GoalType.ASSIGNED;
+
+            } else if (type.toString().equalsIgnoreCase("SELF")) {
+
+                goalType = GoalType.SELF;
+
+            } else {
+
+                goalType = GoalType.ASSIGNED;
+
             }
 
         }
@@ -174,6 +209,7 @@ public class ProcessAssigned implements Rule {
         goal.setName(activityName);
         goal.setType(goalType);
         goal.setLearningResources(new HashSet<>(learningResources));
+        goal.setCredentials(new HashSet<>(credentials));
         goal.setPerson(assignedPerson);
         goalService.save(goal);
         log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");

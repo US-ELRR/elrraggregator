@@ -83,7 +83,7 @@ public class ProcessPerson {
         log.info("Process person.");
 
         // Get Person
-        person = getPerson(actor, account);
+        person = getPerson(actor, actor.getAccount());
 
         // If Person doesn't exist
         if (person == null) {

@@ -3,6 +3,8 @@ package com.deloitte.elrr.aggregator.consumer;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertNotNull;
 
+import java.net.URISyntaxException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -67,7 +69,7 @@ class ELRRMessageListenerTest {
             String content = "{\"statement\":{\"id\":\"d9f1328b-bcc2-4b9c-b954-03cb88a240c8\",\"actor\":{\"objectType\":\"Agent\",\"name\":\"Sophia Lewis\",\"mbox\":\"mailto:sophia.lewis@us.navy.mil\"},\"verb\":{\"id\":\"https://adlnet.gov/expapi/verbs/achieved\",\"display\":{\"en-us\":\"Achieved\"}},\"object\":{\"id\":\"https://w3id.org/xapi/credential/GIAC%20Security%20Essentials%20Certification%20%28GSEC%29\",\"definition\":{\"name\":{\"en-us\":\"GIAC Security Essentials Certification (GSEC)\"},\"type\":\"https://yetanalytics.com/deloitte-edlm/demo-profile/certificate\"}},\"authority\":{\"objectType\":\"Agent\",\"account\":{\"homePage\":\"http://example.org\",\"name\":\"0194609d-5948-87ff-b11a-0eec04f384c2\"}},\"timestamp\":\"2024-09-20T21:37:23.835Z\",\"stored\":\"2025-01-13T17:34:37.277Z\",\"version\":\"1.0.0\"}}";
             elrrMessageListener.listen(content);
 
-        } catch (AggregatorException e) {
+        } catch (AggregatorException | URISyntaxException e) {
             fail("Should not have thrown any exception");
         }
     }
@@ -81,7 +83,7 @@ class ELRRMessageListenerTest {
             String content = "{\"statement\":{\"id\":\"הושלם28b-bcc2-4b9c-b954-03cb88a240c8\",\"actor\":{\"objectType\":\"Agent\",\"name\":\"Sophia Lewis\",\"mbox\":\"mailto:sophia.lewis@us.navy.mil\"},\"verb\":{\"id\":\"https://adlnet.gov/expapi/verbs/achieved\",\"display\":{\"en-us\":\"Achieved\"}},\"object\":{\"id\":\"https://w3id.org/xapi/credential/GIAC%20Security%20Essentials%20Certification%20%28GSEC%29\",\"definition\":{\"name\":{\"en-us\":\"GIAC Security Essentials Certification (GSEC)\"},\"type\":\"https://yetanalytics.com/deloitte-edlm/demo-profile/certificate\"}},\"authority\":{\"objectType\":\"Agent\",\"account\":{\"homePage\":\"http://example.org\",\"name\":\"0194609d-5948-87ff-b11a-0eec04f384c2\"}},\"timestamp\":\"2024-09-20T21:37:23.835Z\",\"stored\":\"2025-01-13T17:34:37.277Z\",\"version\":\"1.0.0\"}}";
             elrrMessageListener.listen(content);
 
-        } catch (AggregatorException e) {
+        } catch (AggregatorException | URISyntaxException e) {
             assertNotNull(e);
         }
     }
