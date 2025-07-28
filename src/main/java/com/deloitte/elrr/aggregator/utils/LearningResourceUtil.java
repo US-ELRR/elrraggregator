@@ -1,5 +1,7 @@
 package com.deloitte.elrr.aggregator.utils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,10 +62,11 @@ public class LearningResourceUtil {
     /**
      * @param context
      * @return learningResources
+     * @throws URISyntaxException
      * @throws AggregatorException
      */
-    public List<LearningResource> processLearningResource(
-            final Context context) {
+    public List<LearningResource> processLearningResource(final Context context)
+            throws URISyntaxException {
 
         log.info("Process learning resources.");
 
@@ -74,6 +77,21 @@ public class LearningResourceUtil {
         List<Activity> activities = context.getContextActivities().getOther();
 
         for (Activity activity : activities) {
+
+            // Get type
+            URI type = activity.getDefinition().getType();
+
+            URI otherCredentialURI = new URI(
+                    "https://w3id.org/xapi/cred/activities/credential");
+
+            URI otherCompetencyURI = new URI(
+                    "https://w3id.org/xapi/comp/activities/competency");
+
+            // If Credential or Competency
+            if (type.equals(otherCredentialURI) || type.equals(
+                    otherCompetencyURI)) {
+                return learningResources;
+            }
 
             LearningResource learningResource = learningResourceService
                     .findByIri(activity.getId().toString());
