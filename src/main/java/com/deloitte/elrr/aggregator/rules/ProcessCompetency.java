@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -53,7 +52,9 @@ public class ProcessCompetency implements Rule {
      * @return boolean
      */
     @Override
-    public boolean fireRule(final Statement statement) {
+    public
+            boolean
+            fireRule(final Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -82,7 +83,9 @@ public class ProcessCompetency implements Rule {
      */
     @Override
     @Transactional
-    public Person processRule(final Person person, final Statement statement) {
+    public
+            Person
+            processRule(final Person person, final Statement statement) {
 
         log.info("Process competency.");
 
@@ -113,9 +116,13 @@ public class ProcessCompetency implements Rule {
      * @return competency
      * @throws AggregatorException
      */
-    private Competency processCompetency(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+    private
+            Competency
+            processCompetency(
+                    final Activity activity,
+                    final LocalDateTime startDate,
+                    final LocalDateTime endDate)
+                    throws AggregatorException {
 
         Competency competency = null;
 
@@ -146,9 +153,13 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public List<Competency> processCompetency(final Context context,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException, URISyntaxException {
+    public
+            List<Competency>
+            processCompetency(
+                    final Context context,
+                    final LocalDateTime startDate,
+                    final LocalDateTime endDate)
+                    throws AggregatorException, URISyntaxException {
 
         log.info("Process competencies.");
 
@@ -159,13 +170,9 @@ public class ProcessCompetency implements Rule {
 
         for (Activity activity : activities) {
 
-            URI type = activity.getDefinition().getType();
-
-            URI otherCompetencyURI = new URI(
-                    "https://w3id.org/xapi/comp/activities/competency");
-
             // If Competency
-            if (type.equals(otherCompetencyURI)) {
+            if (activity.getDefinition().getType().equals(
+                    ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
 
                 Competency competency = competencyService.findByIdentifier(
                         activity.getId().toString());
@@ -198,8 +205,12 @@ public class ProcessCompetency implements Rule {
      * @return competency
      * @throws AggregatorException
      */
-    private Competency createCompetency(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate) {
+    private
+            Competency
+            createCompetency(
+                    final Activity activity,
+                    final LocalDateTime startDate,
+                    final LocalDateTime endDate) {
 
         log.info("Creating new competency.");
 
@@ -231,8 +242,12 @@ public class ProcessCompetency implements Rule {
      * @return competency
      * @throws AggregatorException
      */
-    public Competency updateCompetency(Competency competency,
-            final Activity activity, final LocalDateTime endDate) {
+    public
+            Competency
+            updateCompetency(
+                    Competency competency,
+                    final Activity activity,
+                    final LocalDateTime endDate) {
 
         log.info("Updating competency.");
 
@@ -259,8 +274,12 @@ public class ProcessCompetency implements Rule {
      * @param expires
      * @return personalCompetency
      */
-    private PersonalCompetency processPersonalCompetency(Person person,
-            final Competency competency, final LocalDateTime expires) {
+    private
+            PersonalCompetency
+            processPersonalCompetency(
+                    Person person,
+                    final Competency competency,
+                    final LocalDateTime expires) {
 
         PersonalCompetency personalCompetency = null;
 
@@ -305,8 +324,12 @@ public class ProcessCompetency implements Rule {
      * @param expires
      * @return personalCompetency
      */
-    private PersonalCompetency createPersonalCompetency(final Person person,
-            final Competency competency, final LocalDateTime expires) {
+    private
+            PersonalCompetency
+            createPersonalCompetency(
+                    final Person person,
+                    final Competency competency,
+                    final LocalDateTime expires) {
 
         log.info("Creating new personal competency record.");
         PersonalCompetency personalCompetency = new PersonalCompetency();
@@ -334,9 +357,12 @@ public class ProcessCompetency implements Rule {
      * @param expires
      * @return personalCompetency
      */
-    public PersonalCompetency updatePersonalCompetency(
-            PersonalCompetency personalCompetency, final Person person,
-            final LocalDateTime expires) {
+    public
+            PersonalCompetency
+            updatePersonalCompetency(
+                    PersonalCompetency personalCompetency,
+                    final Person person,
+                    final LocalDateTime expires) {
 
         if (expires != null) {
 

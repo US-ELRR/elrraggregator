@@ -1,6 +1,5 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -53,7 +52,9 @@ public class ProcessCredential implements Rule {
      * @return boolean
      */
     @Override
-    public boolean fireRule(final Statement statement) {
+    public
+            boolean
+            fireRule(final Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -82,7 +83,9 @@ public class ProcessCredential implements Rule {
      */
     @Override
     @Transactional
-    public Person processRule(final Person person, final Statement statement) {
+    public
+            Person
+            processRule(final Person person, final Statement statement) {
 
         log.info("Process credential.");
 
@@ -113,9 +116,11 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private Credential processCredential(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+    private
+            Credential
+            processCredential(final Activity activity,
+                    final LocalDateTime startDate, final LocalDateTime endDate)
+                    throws AggregatorException {
 
         Credential credential = null;
 
@@ -145,9 +150,11 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public List<Credential> processCredential(final Context context,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException, URISyntaxException {
+    public
+            List<Credential>
+            processCredential(final Context context,
+                    final LocalDateTime startDate, final LocalDateTime endDate)
+                    throws AggregatorException, URISyntaxException {
 
         log.info("Process credentials.");
 
@@ -158,13 +165,9 @@ public class ProcessCredential implements Rule {
 
         for (Activity activity : activities) {
 
-            URI type = activity.getDefinition().getType();
-
-            URI otherCredentialURI = new URI(
-                    "https://w3id.org/xapi/cred/activities/credential");
-
-            // If Credential
-            if (type.equals(otherCredentialURI)) {
+            // If Competency
+            if (activity.getDefinition().getType().equals(
+                    ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)) {
 
                 Credential credential = credentialService.findByIdentifier(
                         activity.getId().toString());
@@ -197,8 +200,11 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private Credential createCredential(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate) {
+    private
+            Credential
+            createCredential(final Activity activity,
+                    final LocalDateTime startDate,
+                    final LocalDateTime endDate) {
 
         log.info("Creating new credential.");
 
@@ -230,8 +236,10 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    public Credential updateCredential(Credential credential,
-            final Activity activity, final LocalDateTime endDate) {
+    public
+            Credential
+            updateCredential(Credential credential,
+                    final Activity activity, final LocalDateTime endDate) {
 
         log.info("Updating credential.");
 
@@ -258,8 +266,10 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return PersonalCredential
      */
-    private PersonalCredential processPersonalCredential(Person person,
-            final Credential credential, final LocalDateTime expires) {
+    private
+            PersonalCredential
+            processPersonalCredential(Person person,
+                    final Credential credential, final LocalDateTime expires) {
 
         PersonalCredential personalCredential = null;
 
@@ -303,8 +313,10 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return personalCredential
      */
-    private PersonalCredential createPersonalCredential(final Person person,
-            final Credential credential, final LocalDateTime expires) {
+    private
+            PersonalCredential
+            createPersonalCredential(final Person person,
+                    final Credential credential, final LocalDateTime expires) {
 
         log.info("Creating new personal credential record.");
         PersonalCredential personalCredential = new PersonalCredential();
@@ -332,9 +344,11 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return PersonalCredential
      */
-    public PersonalCredential updatePersonalCredential(
-            PersonalCredential personalCredential, final Person person,
-            final LocalDateTime expires) {
+    public
+            PersonalCredential
+            updatePersonalCredential(
+                    PersonalCredential personalCredential, final Person person,
+                    final LocalDateTime expires) {
 
         if (expires != null) {
 

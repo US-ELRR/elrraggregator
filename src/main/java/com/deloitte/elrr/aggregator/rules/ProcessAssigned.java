@@ -30,8 +30,7 @@ import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Component
-@Slf4j
+@Component @Slf4j
 public class ProcessAssigned implements Rule {
 
     @Autowired
@@ -61,7 +60,9 @@ public class ProcessAssigned implements Rule {
      * @param statement
      * @return boolean
      */
-    public boolean fireRule(Statement statement) {
+    public
+            boolean
+            fireRule(Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -80,9 +81,12 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public Person processRule(Person person, Statement statement)
-            throws AggregatorException, ClassCastException,
-            NullPointerException, RuntimeServiceException, URISyntaxException {
+    public
+            Person
+            processRule(Person person, Statement statement)
+                    throws AggregatorException, ClassCastException,
+                    NullPointerException, RuntimeServiceException,
+                    URISyntaxException {
 
         log.info("Process competency.");
 
@@ -117,9 +121,11 @@ public class ProcessAssigned implements Rule {
      * @throws URISyntaxException
      */
     @Transactional
-    public Goal processGoal(final Context context, final Activity activity,
-            final LocalDateTime startDate, final Person assignedPerson)
-            throws AggregatorException, URISyntaxException {
+    public
+            Goal
+            processGoal(final Context context, final Activity activity,
+                    final LocalDateTime startDate, final Person assignedPerson)
+                    throws AggregatorException, URISyntaxException {
 
         List<LearningResource> learningResources = new ArrayList<
                 LearningResource>();
@@ -138,10 +144,6 @@ public class ProcessAssigned implements Rule {
         // Process Competencies
         competencies = (List<Competency>) processCompetency.processCompetency(
                 context, startDate, null);
-
-        // Get name
-        String activityName = langMapUtil.getLangMapValue(activity
-                .getDefinition().getName());
 
         // Get goal
         goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
@@ -173,12 +175,14 @@ public class ProcessAssigned implements Rule {
      * @return goal
      * @throws AggregatorException
      */
-    public Goal createGoal(final Activity activity,
-            final LocalDateTime startDate, final List<
-                    LearningResource> learningResources, final List<
-                            Credential> credentials, final List<
-                                    Competency> competencies,
-            final Person assignedPerson) {
+    public
+            Goal
+            createGoal(final Activity activity,
+                    final LocalDateTime startDate,
+                    final List<LearningResource> learningResources,
+                    final List<Credential> credentials,
+                    final List<Competency> competencies,
+                    final Person assignedPerson) {
 
         log.info("Creating new goal.");
 
@@ -220,6 +224,7 @@ public class ProcessAssigned implements Rule {
         goal.setDescription(activityDescription);
         goal.setName(activityName);
         goal.setType(goalType);
+        goal.setStartDate(startDate);
         goal.setLearningResources(new HashSet<>(learningResources));
         goal.setCredentials(new HashSet<>(credentials));
         goal.setCompetencies(new HashSet<>(competencies));
