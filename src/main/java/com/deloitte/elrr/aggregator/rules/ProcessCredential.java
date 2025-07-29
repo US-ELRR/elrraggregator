@@ -30,337 +30,320 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessCredential implements Rule {
 
-    @Autowired
-    private CredentialSvc credentialService;
+  @Autowired
+  private CredentialSvc credentialService;
 
-    @Autowired
-    private PersonalCredentialSvc personalCredentialService;
+  @Autowired
+  private PersonalCredentialSvc personalCredentialService;
 
-    @Autowired
-    private LangMapUtil langMapUtil;
+  @Autowired
+  private LangMapUtil langMapUtil;
 
-    @Autowired
-    private ExtensionsUtil extensionsUtil;
+  @Autowired
+  private ExtensionsUtil extensionsUtil;
 
-    @Autowired
-    private PersonSvc personService;
+  @Autowired
+  private PersonSvc personService;
 
-    private static final String CREDENTIAL_MESSAGE = "Credential";
+  private static final String CREDENTIAL_MESSAGE = "Credential";
 
-    /**
-     * @param statement
-     * @return boolean
-     */
-    @Override
-    public
-            boolean
-            fireRule(final Statement statement) {
+  /**
+   * @param statement
+   * @return boolean
+   */
+  @Override
+  public boolean fireRule(final Statement statement) {
 
-        // If not an activity
-        if (!(statement.getObject() instanceof Activity)) {
-            return false;
-        }
-
-        String objType = null;
-
-        Activity obj = (Activity) statement.getObject();
-
-        if (obj.getDefinition().getType() != null) {
-            objType = obj.getDefinition().getType().toString();
-        }
-
-        // Is Verb Id = achieved and object type = competency
-        return (statement.getVerb().getId().toString().equalsIgnoreCase(
-                VerbIdConstants.ACHIEVED_VERB_ID.toString()) && objType
-                        .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
-
+    // If not an activity
+    if (!(statement.getObject() instanceof Activity)) {
+      return false;
     }
 
-    /**
-     * @param person
-     * @param statement
-     * @throws AggregatorException
-     */
-    @Override
-    @Transactional
-    public
-            Person
-            processRule(final Person person, final Statement statement) {
+    String objType = null;
 
-        log.info("Process credential.");
+    Activity obj = (Activity) statement.getObject();
 
-        // Get start date
-        // Convert from ZonedDateTime to LocalDateTime
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
-
-        // Get Activity
-        Activity activity = (Activity) statement.getObject();
-
-        // Get expires
-        LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
-                statement.getContext(), "LocalDateTime");
-
-        // Process Credential
-        Credential credential = processCredential(activity, startDate, expires);
-
-        // Process PersonalCredential
-        processPersonalCredential(person, credential, expires);
-
-        return person;
+    if (obj.getDefinition().getType() != null) {
+      objType = obj.getDefinition().getType().toString();
     }
 
-    /**
-     * @param activity
-     * @param startDate
-     * @param endDate
-     * @return credential
-     * @throws AggregatorException
-     */
-    private
-            Credential
-            processCredential(final Activity activity,
-                    final LocalDateTime startDate, final LocalDateTime endDate)
-                    throws AggregatorException {
+    // Is Verb Id = achieved and object type = competency
+    return (statement.getVerb().getId().toString().equalsIgnoreCase(
+        VerbIdConstants.ACHIEVED_VERB_ID.toString())
+        && objType
+            .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
-        Credential credential = null;
+  }
 
-        // Get credential
-        credential = credentialService.findByIdentifier(activity.getId()
-                .toString());
+  /**
+   * @param person
+   * @param statement
+   * @throws AggregatorException
+   */
+  @Override
+  @Transactional
+  public Person processRule(final Person person, final Statement statement) {
 
-        // If credential doesn't exist
-        if (credential == null) {
+    log.info("Process credential.");
 
-            credential = createCredential(activity, startDate, endDate);
+    // Get start date
+    // Convert from ZonedDateTime to LocalDateTime
+    LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
 
+    // Get Activity
+    Activity activity = (Activity) statement.getObject();
+
+    // Get expires
+    LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
+        statement.getContext(), "LocalDateTime");
+
+    // Process Credential
+    Credential credential = processCredential(activity, startDate, expires);
+
+    // Process PersonalCredential
+    processPersonalCredential(person, credential, expires);
+
+    return person;
+  }
+
+  /**
+   * @param activity
+   * @param startDate
+   * @param endDate
+   * @return credential
+   * @throws AggregatorException
+   */
+  private Credential processCredential(final Activity activity,
+      final LocalDateTime startDate, final LocalDateTime endDate)
+      throws AggregatorException {
+
+    Credential credential = null;
+
+    // Get credential
+    credential = credentialService.findByIdentifier(activity.getId()
+        .toString());
+
+    // If credential doesn't exist
+    if (credential == null) {
+
+      credential = createCredential(activity, startDate, endDate);
+
+    } else {
+
+      log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
+      credential = updateCredential(credential, activity, endDate);
+    }
+
+    return credential;
+  }
+
+  /**
+   * @param context
+   * @param startDate
+   * @param endDate
+   * @return credential
+   * @throws AggregatorException
+   * @throws URISyntaxException
+   */
+  public List<Credential> processCredential(final Context context,
+      final LocalDateTime startDate, final LocalDateTime endDate)
+      throws AggregatorException, URISyntaxException {
+
+    log.info("Process credentials.");
+
+    List<Credential> credentials = new ArrayList<Credential>();
+
+    // Get Activities
+    List<Activity> activities = context.getContextActivities().getOther();
+
+    for (Activity activity : activities) {
+
+      // If Competency
+      if (activity.getDefinition().getType().equals(
+          ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)) {
+
+        Credential credential = credentialService.findByIdentifier(
+            activity.getId().toString());
+
+        // If Credential already exists
+        if (credential != null) {
+
+          log.info(CREDENTIAL_MESSAGE + " " + activity.getId()
+              + " exists.");
+
+          // If Credential doesn't exist
         } else {
 
-            log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
-            credential = updateCredential(credential, activity, endDate);
-        }
-
-        return credential;
-    }
-
-    /**
-     * @param context
-     * @param startDate
-     * @param endDate
-     * @return credential
-     * @throws AggregatorException
-     * @throws URISyntaxException
-     */
-    public
-            List<Credential>
-            processCredential(final Context context,
-                    final LocalDateTime startDate, final LocalDateTime endDate)
-                    throws AggregatorException, URISyntaxException {
-
-        log.info("Process credentials.");
-
-        List<Credential> credentials = new ArrayList<Credential>();
-
-        // Get Activities
-        List<Activity> activities = context.getContextActivities().getOther();
-
-        for (Activity activity : activities) {
-
-            // If Competency
-            if (activity.getDefinition().getType().equals(
-                    ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)) {
-
-                Credential credential = credentialService.findByIdentifier(
-                        activity.getId().toString());
-
-                // If Credential already exists
-                if (credential != null) {
-
-                    log.info(CREDENTIAL_MESSAGE + " " + activity.getId()
-                            + " exists.");
-
-                    // If Credential doesn't exist
-                } else {
-
-                    credential = createCredential(activity, startDate, endDate);
-                    credentials.add(credential);
-
-                }
-
-            }
+          credential = createCredential(activity, startDate, endDate);
+          credentials.add(credential);
 
         }
 
-        return credentials;
+      }
+
     }
 
-    /**
-     * @param activity
-     * @param startDate
-     * @param endDate
-     * @return credential
-     * @throws AggregatorException
-     */
-    private
-            Credential
-            createCredential(final Activity activity,
-                    final LocalDateTime startDate,
-                    final LocalDateTime endDate) {
+    return credentials;
+  }
 
-        log.info("Creating new credential.");
+  /**
+   * @param activity
+   * @param startDate
+   * @param endDate
+   * @return credential
+   * @throws AggregatorException
+   */
+  private Credential createCredential(final Activity activity,
+      final LocalDateTime startDate,
+      final LocalDateTime endDate) {
 
-        Credential credential = null;
-        String activityName = "";
-        String activityDescription = "";
+    log.info("Creating new credential.");
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
-                .getDefinition().getDescription());
+    Credential credential = null;
+    String activityName = "";
+    String activityDescription = "";
 
-        credential = new Credential();
-        credential.setIdentifier(activity.getId().toString());
-        credential.setFrameworkTitle(activityName);
-        credential.setFrameworkDescription(activityDescription);
-        credential.setValidStartDate(startDate);
-        credential.setValidEndDate(endDate);
-        credentialService.save(credential);
-        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
+    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+        .getName());
+    activityDescription = langMapUtil.getLangMapValue(activity
+        .getDefinition().getDescription());
 
-        return credential;
-    }
+    credential = new Credential();
+    credential.setIdentifier(activity.getId().toString());
+    credential.setFrameworkTitle(activityName);
+    credential.setFrameworkDescription(activityDescription);
+    credential.setValidStartDate(startDate);
+    credential.setValidEndDate(endDate);
+    credentialService.save(credential);
+    log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
 
-    /**
-     * @param credential
-     * @param activity
-     * @param endDate
-     * @return credential
-     * @throws AggregatorException
-     */
-    public
-            Credential
-            updateCredential(Credential credential,
-                    final Activity activity, final LocalDateTime endDate) {
+    return credential;
+  }
 
-        log.info("Updating credential.");
+  /**
+   * @param credential
+   * @param activity
+   * @param endDate
+   * @return credential
+   * @throws AggregatorException
+   */
+  public Credential updateCredential(Credential credential,
+      final Activity activity, final LocalDateTime endDate) {
 
-        String activityName = "";
-        String activityDescription = "";
+    log.info("Updating credential.");
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
-                .getDefinition().getDescription());
+    String activityName = "";
+    String activityDescription = "";
 
-        credential.setFrameworkTitle(activityName);
-        credential.setFrameworkDescription(activityDescription);
-        credential.setValidEndDate(endDate);
-        credentialService.update(credential);
-        log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
+    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+        .getName());
+    activityDescription = langMapUtil.getLangMapValue(activity
+        .getDefinition().getDescription());
 
-        return credential;
-    }
+    credential.setFrameworkTitle(activityName);
+    credential.setFrameworkDescription(activityDescription);
+    credential.setValidEndDate(endDate);
+    credentialService.update(credential);
+    log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
 
-    /**
-     * @param person
-     * @param credential
-     * @param expires
-     * @return PersonalCredential
-     */
-    private
-            PersonalCredential
-            processPersonalCredential(Person person,
-                    final Credential credential, final LocalDateTime expires) {
+    return credential;
+  }
 
-        PersonalCredential personalCredential = null;
+  /**
+   * @param person
+   * @param credential
+   * @param expires
+   * @return PersonalCredential
+   */
+  private PersonalCredential processPersonalCredential(Person person,
+      final Credential credential, final LocalDateTime expires) {
 
-        try {
+    PersonalCredential personalCredential = null;
 
-            // Get PersonalCredential
-            personalCredential = personalCredentialService
-                    .findByPersonIdAndCredentialId(person.getId(), credential
-                            .getId());
+    try {
 
-            // If PersonalCredential doesn't exist
-            if (personalCredential == null) {
+      // Get PersonalCredential
+      personalCredential = personalCredentialService
+          .findByPersonIdAndCredentialId(person.getId(), credential
+              .getId());
 
-                personalCredential = createPersonalCredential(person,
-                        credential, expires);
+      // If PersonalCredential doesn't exist
+      if (personalCredential == null) {
 
-                if (person.getCredentials() == null) {
-                    person.setCredentials(new HashSet<PersonalCredential>());
-                }
+        personalCredential = createPersonalCredential(person,
+            credential, expires);
 
-                person.getCredentials().add(personalCredential);
-                personService.save(person);
-
-            } else {
-
-                personalCredential = updatePersonalCredential(
-                        personalCredential, person, expires);
-            }
-
-        } catch (DateTimeParseException e) {
-            log.error("Error invalid expires date", e);
-            throw new AggregatorException("Error invalid expires date.", e);
+        if (person.getCredentials() == null) {
+          person.setCredentials(new HashSet<PersonalCredential>());
         }
 
-        return personalCredential;
+        person.getCredentials().add(personalCredential);
+        personService.save(person);
+
+      } else {
+
+        personalCredential = updatePersonalCredential(
+            personalCredential, person, expires);
+      }
+
+    } catch (DateTimeParseException e) {
+      log.error("Error invalid expires date", e);
+      throw new AggregatorException("Error invalid expires date.", e);
     }
 
-    /**
-     * @param person
-     * @param credential
-     * @param expires
-     * @return personalCredential
-     */
-    private
-            PersonalCredential
-            createPersonalCredential(final Person person,
-                    final Credential credential, final LocalDateTime expires) {
+    return personalCredential;
+  }
 
-        log.info("Creating new personal credential record.");
-        PersonalCredential personalCredential = new PersonalCredential();
+  /**
+   * @param person
+   * @param credential
+   * @param expires
+   * @return personalCredential
+   */
+  private PersonalCredential createPersonalCredential(final Person person,
+      final Credential credential, final LocalDateTime expires) {
 
-        personalCredential.setPerson(person);
-        personalCredential.setCredential(credential);
-        personalCredential.setHasRecord(true);
+    log.info("Creating new personal credential record.");
+    PersonalCredential personalCredential = new PersonalCredential();
 
-        if (expires != null) {
-            personalCredential.setExpires(expires);
-        }
+    personalCredential.setPerson(person);
+    personalCredential.setCredential(credential);
+    personalCredential.setHasRecord(true);
 
-        personalCredentialService.save(personalCredential);
-
-        log.info("Personal Credential for " + person.getName() + " - "
-                + personalCredential.getCredential().getFrameworkTitle()
-                + " created.");
-
-        return personalCredential;
+    if (expires != null) {
+      personalCredential.setExpires(expires);
     }
 
-    /**
-     * @param personalCredential
-     * @param person
-     * @param expires
-     * @return PersonalCredential
-     */
-    public
-            PersonalCredential
-            updatePersonalCredential(
-                    PersonalCredential personalCredential, final Person person,
-                    final LocalDateTime expires) {
+    personalCredentialService.save(personalCredential);
 
-        if (expires != null) {
+    log.info("Personal Credential for " + person.getName() + " - "
+        + personalCredential.getCredential().getFrameworkTitle()
+        + " created.");
 
-            personalCredential.setExpires(expires);
-            personalCredentialService.update(personalCredential);
+    return personalCredential;
+  }
 
-            log.info("Personal Credential for " + person.getName() + " - "
-                    + personalCredential.getCredential().getFrameworkTitle()
-                    + " updated.");
+  /**
+   * @param personalCredential
+   * @param person
+   * @param expires
+   * @return PersonalCredential
+   */
+  public PersonalCredential updatePersonalCredential(
+      PersonalCredential personalCredential, final Person person,
+      final LocalDateTime expires) {
 
-        }
+    if (expires != null) {
 
-        return personalCredential;
+      personalCredential.setExpires(expires);
+      personalCredentialService.update(personalCredential);
+
+      log.info("Personal Credential for " + person.getName() + " - "
+          + personalCredential.getCredential().getFrameworkTitle()
+          + " updated.");
+
     }
+
+    return personalCredential;
+  }
 }

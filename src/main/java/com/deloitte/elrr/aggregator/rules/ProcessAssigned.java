@@ -30,209 +30,201 @@ import com.yetanalytics.xapi.model.Statement;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Component @Slf4j
+@Component
+@Slf4j
 public class ProcessAssigned implements Rule {
 
-    @Autowired
-    private ProcessPerson processPerson;
+  @Autowired
+  private ProcessPerson processPerson;
 
-    @Autowired
-    private LangMapUtil langMapUtil;
+  @Autowired
+  private LangMapUtil langMapUtil;
 
-    @Autowired
-    private GoalSvc goalService;
+  @Autowired
+  private GoalSvc goalService;
 
-    @Autowired
-    private LearningResourceUtil learningResourceUtil;
+  @Autowired
+  private LearningResourceUtil learningResourceUtil;
 
-    @Autowired
-    private ProcessCredential processCredential;
+  @Autowired
+  private ProcessCredential processCredential;
 
-    @Autowired
-    private ProcessCompetency processCompetency;
+  @Autowired
+  private ProcessCompetency processCompetency;
 
-    @Autowired
-    private ExtensionsUtil extensionsUtil;
+  @Autowired
+  private ExtensionsUtil extensionsUtil;
 
-    private static final String GOAL_MESSAGE = "Goal";
+  private static final String GOAL_MESSAGE = "Goal";
 
-    /**
-     * @param statement
-     * @return boolean
-     */
-    public
-            boolean
-            fireRule(Statement statement) {
+  /**
+   * @param statement
+   * @return boolean
+   */
+  public boolean fireRule(Statement statement) {
 
-        // If not an activity
-        if (!(statement.getObject() instanceof Activity)) {
-            return false;
-        }
-
-        // Is Verb Id = assigned
-        return (statement.getVerb().getId().toString().equalsIgnoreCase(
-                VerbIdConstants.ASSIGNED_VERB_ID.toString()));
+    // If not an activity
+    if (!(statement.getObject() instanceof Activity)) {
+      return false;
     }
 
-    /**
-     * @param person
-     * @param statement
-     * @return person
-     * @throws AggregatorException
-     * @throws URISyntaxException
-     */
-    public
-            Person
-            processRule(Person person, Statement statement)
-                    throws AggregatorException, ClassCastException,
-                    NullPointerException, RuntimeServiceException,
-                    URISyntaxException {
+    // Is Verb Id = assigned
+    return (statement.getVerb().getId().toString().equalsIgnoreCase(
+        VerbIdConstants.ASSIGNED_VERB_ID.toString()));
+  }
 
-        log.info("Process competency.");
+  /**
+   * @param person
+   * @param statement
+   * @return person
+   * @throws AggregatorException
+   * @throws URISyntaxException
+   */
+  public Person processRule(Person person, Statement statement)
+      throws AggregatorException, ClassCastException,
+      NullPointerException, RuntimeServiceException,
+      URISyntaxException {
 
-        // Get start date
-        // Convert from ZonedDateTime to LocalDate
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+    log.info("Process competency.");
 
-        // Get Activity
-        Activity activity = (Activity) statement.getObject();
+    // Get start date
+    // Convert from ZonedDateTime to LocalDate
+    LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
 
-        // Get assigned actor
-        AbstractActor assignedActor = (AbstractActor) extensionsUtil
-                .getExtensions(statement.getContext(), "Actor");
+    // Get Activity
+    Activity activity = (Activity) statement.getObject();
 
-        // Get assigned person
-        Person assignedPerson = processPerson.processPerson(assignedActor);
+    // Get assigned actor
+    AbstractActor assignedActor = (AbstractActor) extensionsUtil
+        .getExtensions(statement.getContext(), "Actor");
 
-        // Process Goal
-        processGoal(statement.getContext(), activity, startDate,
-                assignedPerson);
+    // Get assigned person
+    Person assignedPerson = processPerson.processPerson(assignedActor);
 
-        return person;
+    // Process Goal
+    processGoal(statement.getContext(), activity, startDate,
+        assignedPerson);
+
+    return person;
+  }
+
+  /**
+   * @param context
+   * @param activity
+   * @param startDate
+   * @param assignedPerson
+   * @return goal
+   * @throws AggregatorException
+   * @throws URISyntaxException
+   */
+  @Transactional
+  public Goal processGoal(final Context context, final Activity activity,
+      final LocalDateTime startDate, final Person assignedPerson)
+      throws AggregatorException, URISyntaxException {
+
+    List<LearningResource> learningRes = new ArrayList<LearningResource>();
+    List<Credential> credentials = new ArrayList<Credential>();
+    List<Competency> competencies = new ArrayList<Competency>();
+    Goal goal = null;
+
+    // Process LearningResource
+    learningRes = learningResourceUtil.processLearningResource(
+        context);
+
+    // Process Credential
+    credentials = (List<Credential>) processCredential.processCredential(
+        context, startDate, null);
+
+    // Process Competencies
+    competencies = (List<Competency>) processCompetency.processCompetency(
+        context, startDate, null);
+
+    // Get goal
+    goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
+        activity.getId().toString());
+
+    // If goal doesn't exist
+    if (goal == null) {
+
+      goal = createGoal(activity, startDate, learningRes,
+          credentials, competencies, assignedPerson);
+
+    } else {
+
+      log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
+      // goal = updateGoal(goal, activity);
+
     }
 
-    /**
-     * @param context
-     * @param activity
-     * @param startDate
-     * @param assignedPerson
-     * @return goal
-     * @throws AggregatorException
-     * @throws URISyntaxException
-     */
-    @Transactional
-    public
-            Goal
-            processGoal(final Context context, final Activity activity,
-                    final LocalDateTime startDate, final Person assignedPerson)
-                    throws AggregatorException, URISyntaxException {
+    return goal;
+  }
 
-        List<LearningResource> learningResources = new ArrayList<
-                LearningResource>();
-        List<Credential> credentials = new ArrayList<Credential>();
-        List<Competency> competencies = new ArrayList<Competency>();
-        Goal goal = null;
+  /**
+   * @param activity
+   * @param startDate
+   * @param learningResources
+   * @param credentials
+   * @param competencies
+   * @param assignedPerson
+   * @return goal
+   * @throws AggregatorException
+   */
+  public Goal createGoal(final Activity activity,
+      final LocalDateTime startDate,
+      final List<LearningResource> learningResources,
+      final List<Credential> credentials,
+      final List<Competency> competencies,
+      final Person assignedPerson) {
 
-        // Process LearningResource
-        learningResources = learningResourceUtil.processLearningResource(
-                context);
+    log.info("Creating new goal.");
 
-        // Process Credential
-        credentials = (List<Credential>) processCredential.processCredential(
-                context, startDate, null);
+    GoalType goalType = null;
+    Goal goal = null;
+    String activityName = "";
+    String activityDescription = "";
 
-        // Process Competencies
-        competencies = (List<Competency>) processCompetency.processCompetency(
-                context, startDate, null);
+    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+        .getName());
+    activityDescription = langMapUtil.getLangMapValue(activity
+        .getDefinition().getDescription());
 
-        // Get goal
-        goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
-                activity.getId().toString());
+    // Get goalType
+    if (activity != null && activity.getDefinition()
+        .getExtensions() != null) {
 
-        // If goal doesn't exist
-        if (goal == null) {
+      String type = (String) activity.getDefinition().getExtensions().get(
+          ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-            goal = createGoal(activity, startDate, learningResources,
-                    credentials, competencies, assignedPerson);
+      if (type.toString().equalsIgnoreCase("ASSIGNED")) {
 
-        } else {
+        goalType = GoalType.ASSIGNED;
 
-            log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-            // goal = updateGoal(goal, activity);
+      } else if (type.toString().equalsIgnoreCase("SELF")) {
 
-        }
+        goalType = GoalType.SELF;
 
-        return goal;
+      } else {
+
+        goalType = GoalType.ASSIGNED;
+
+      }
+
     }
 
-    /**
-     * @param activity
-     * @param startDate
-     * @param learningResources
-     * @param credentials
-     * @param competencies
-     * @param assignedPerson
-     * @return goal
-     * @throws AggregatorException
-     */
-    public
-            Goal
-            createGoal(final Activity activity,
-                    final LocalDateTime startDate,
-                    final List<LearningResource> learningResources,
-                    final List<Credential> credentials,
-                    final List<Competency> competencies,
-                    final Person assignedPerson) {
+    goal = new Goal();
+    goal.setGoalId(activity.getId().toString());
+    goal.setDescription(activityDescription);
+    goal.setName(activityName);
+    goal.setType(goalType);
+    goal.setStartDate(startDate);
+    goal.setLearningResources(new HashSet<>(learningResources));
+    goal.setCredentials(new HashSet<>(credentials));
+    goal.setCompetencies(new HashSet<>(competencies));
+    goal.setPerson(assignedPerson);
+    goalService.save(goal);
+    log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
 
-        log.info("Creating new goal.");
-
-        GoalType goalType = null;
-        Goal goal = null;
-        String activityName = "";
-        String activityDescription = "";
-
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
-                .getDefinition().getDescription());
-
-        // Get goalType
-        if (activity != null && activity.getDefinition()
-                .getExtensions() != null) {
-
-            String type = (String) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
-
-            if (type.toString().equalsIgnoreCase("ASSIGNED")) {
-
-                goalType = GoalType.ASSIGNED;
-
-            } else if (type.toString().equalsIgnoreCase("SELF")) {
-
-                goalType = GoalType.SELF;
-
-            } else {
-
-                goalType = GoalType.ASSIGNED;
-
-            }
-
-        }
-
-        goal = new Goal();
-        goal.setGoalId(activity.getId().toString());
-        goal.setDescription(activityDescription);
-        goal.setName(activityName);
-        goal.setType(goalType);
-        goal.setStartDate(startDate);
-        goal.setLearningResources(new HashSet<>(learningResources));
-        goal.setCredentials(new HashSet<>(credentials));
-        goal.setCompetencies(new HashSet<>(competencies));
-        goal.setPerson(assignedPerson);
-        goalService.save(goal);
-        log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
-
-        return goal;
-    }
+    return goal;
+  }
 
 }
