@@ -144,8 +144,8 @@ public class ProcessAssigned implements Rule {
                 .getDefinition().getName());
 
         // Get goal
-        goal = goalService.findByPersonIdAndName(assignedPerson.getId(),
-                activityName);
+        goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
+                activity.getId().toString());
 
         // If goal doesn't exist
         if (goal == null) {
@@ -216,6 +216,7 @@ public class ProcessAssigned implements Rule {
         }
 
         goal = new Goal();
+        goal.setGoalId(activity.getId().toString());
         goal.setDescription(activityDescription);
         goal.setName(activityName);
         goal.setType(goalType);
