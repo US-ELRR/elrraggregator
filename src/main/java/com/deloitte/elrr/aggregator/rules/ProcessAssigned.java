@@ -86,10 +86,10 @@ public class ProcessAssigned implements Rule {
       NullPointerException, RuntimeServiceException,
       URISyntaxException {
 
-    log.info("Process competency.");
+    log.info("Process assigned.");
 
     // Get start date
-    // Convert from ZonedDateTime to LocalDate
+    // Convert from ZonedDateTime to LocalDateTime
     LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
 
     // Get Activity
@@ -124,7 +124,7 @@ public class ProcessAssigned implements Rule {
       final LocalDateTime startDate, final Person assignedPerson)
       throws AggregatorException, URISyntaxException {
 
-    List<LearningResource> learningRes = new ArrayList<LearningResource>();
+    List<LearningResource> learnResources = new ArrayList<LearningResource>();
     List<Credential> credentials = new ArrayList<Credential>();
     List<Competency> competencies = new ArrayList<Competency>();
     Goal goal = null;
@@ -140,16 +140,16 @@ public class ProcessAssigned implements Rule {
           DateTimeFormatter.ISO_DATE_TIME);
     }
 
-    // Process LearningResource
-    learningRes = learningResourceUtil.processLearningResource(
+    // Process LearningResources
+    learnResources = learningResourceUtil.processLearningResources(
         context);
 
-    // Process Credential
-    credentials = (List<Credential>) processCredential.processCredential(
+    // Process Credentials
+    credentials = (List<Credential>) processCredential.processCredentials(
         context, startDate);
 
     // Process Competencies
-    competencies = (List<Competency>) processCompetency.processCompetency(
+    competencies = (List<Competency>) processCompetency.processCompetencies(
         context, startDate);
 
     // Get goal
@@ -159,14 +159,14 @@ public class ProcessAssigned implements Rule {
     // If goal doesn't exist
     if (goal == null) {
 
-      goal = createGoal(activity, startDate, endDate, learningRes,
+      goal = createGoal(activity, startDate, endDate, learnResources,
           credentials, competencies, assignedPerson);
 
       // If goal already exists
     } else {
 
       log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-      goal = updateGoal(goal, activity, endDate);
+      goal = updateGoal(goal, activity, startDate, endDate);
 
     }
 
@@ -235,12 +235,13 @@ public class ProcessAssigned implements Rule {
   /**
    * @param goal
    * @param activity
+   * @param startDate
    * @param endDate
    * @return goal
    * @throws AggregatorException
    */
   public Goal updateGoal(Goal goal, Activity activity,
-      final LocalDateTime endDate) {
+      final LocalDateTime startDate, final LocalDateTime endDate) {
 
     log.info("Updating goal.");
 
@@ -267,6 +268,7 @@ public class ProcessAssigned implements Rule {
     goal.setDescription(activityDescription);
     goal.setName(activityName);
     goal.setType(goalType);
+    goal.setStartDate(startDate);
     goal.setExpirationDate(endDate);
     goalService.update(goal);
     log.info(GOAL_MESSAGE + " " + activity.getId() + " updated.");

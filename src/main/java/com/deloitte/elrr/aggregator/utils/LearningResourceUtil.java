@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.deloitte.elrr.aggregator.rules.ContextActivitiesTypeConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
@@ -20,136 +21,119 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LearningResourceUtil {
 
-    @Autowired
-    private LearningResourceSvc learningResourceService;
+  @Autowired
+  private LearningResourceSvc learningResourceService;
 
-    @Autowired
-    private LangMapUtil langMapUtil;
+  @Autowired
+  private LangMapUtil langMapUtil;
 
-    /**
-     * @param activity
-     * @return learningResource
-     * @throws AggregatorException
-     */
-    public LearningResource processLearningResource(final Activity activity) {
+  /**
+   * @param activity
+   * @return learningResource
+   * @throws AggregatorException
+   */
+  public LearningResource processLearningResource(final Activity activity)
+      throws AggregatorException {
 
-        log.info("Process learning resource.");
+    log.info("Process learning resource.");
 
-        // Get learningResource
-        LearningResource learningResource = learningResourceService.findByIri(
-                activity.getId().toString());
+    // Get learningResource
+    LearningResource learningResource = learningResourceService.findByIri(
+        activity.getId().toString());
 
-        // If LearningResource already exists
-        if (learningResource != null) {
+    // If LearningResource already exists
+    if (learningResource != null) {
 
-            log.info("Learning Resource " + learningResource.getTitle()
-                    + " exists.");
+      log.info("Learning Resource " + learningResource.getTitle()
+          + " exists.");
 
-        } else {
+    } else {
 
-            try {
+      learningResource = createLearningResource(activity);
 
-                learningResource = createLearningResource(activity);
-
-            } catch (AggregatorException e) {
-                throw e;
-            }
-        }
-
-        return learningResource;
     }
 
-    /**
-     * @param context
-     * @return learningResources
-     * @throws URISyntaxException
-     * @throws AggregatorException
-     */
-    public List<LearningResource> processLearningResource(final Context context)
-            throws URISyntaxException {
+    return learningResource;
+  }
 
-        log.info("Process learning resources.");
+  /**
+   * @param context
+   * @return learningResources
+   * @throws URISyntaxException
+   * @throws AggregatorException
+   */
+  public List<LearningResource> processLearningResources(final Context context)
+      throws URISyntaxException, AggregatorException {
 
-        List<LearningResource> learningResources = new ArrayList<
-                LearningResource>();
+    log.info("Process learning resources.");
 
-        // Get learningResources
-        List<Activity> activities = context.getContextActivities().getOther();
+    List<LearningResource> learnResources = new ArrayList<LearningResource>();
 
-        for (Activity activity : activities) {
+    // Get learningResources
+    List<Activity> activities = context.getContextActivities().getOther();
 
-            // Get type
-            URI type = activity.getDefinition().getType();
+    for (Activity activity : activities) {
 
-            URI otherCredentialURI = new URI(
-                    "https://w3id.org/xapi/cred/activities/credential");
+      // Get type
+      URI type = activity.getDefinition().getType();
 
-            URI otherCompetencyURI = new URI(
-                    "https://w3id.org/xapi/comp/activities/competency");
+      // Not a LearningResource if Credential or Competency
+      if (type.equals(ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)
+          || type.equals(
+              ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
+        return learnResources;
+      }
 
-            // If Credential or Competency
-            if (type.equals(otherCredentialURI) || type.equals(
-                    otherCompetencyURI)) {
-                return learningResources;
-            }
+      LearningResource learningResource = learningResourceService
+          .findByIri(activity.getId().toString());
 
-            LearningResource learningResource = learningResourceService
-                    .findByIri(activity.getId().toString());
+      // If LearningResource already exists
+      if (learningResource != null) {
 
-            // If LearningResource already exists
-            if (learningResource != null) {
+        log.info("Learning Resource " + learningResource.getTitle()
+            + " exists.");
 
-                log.info("Learning Resource " + learningResource.getTitle()
-                        + " exists.");
+      } else {
 
-            } else {
+        learningResource = createLearningResource(activity);
+        learnResources.add(learningResource);
 
-                try {
+      }
 
-                    learningResource = createLearningResource(activity);
-                    learningResources.add(learningResource);
-
-                } catch (AggregatorException e) {
-                    throw e;
-                }
-            }
-
-        }
-
-        return learningResources;
     }
 
-    /**
-     * @param activity
-     * @return learningResource
-     * @throws AggregatorException
-     */
-    private LearningResource createLearningResource(final Activity activity) {
+    return learnResources;
 
-        log.info("Creating new learning resource.");
+  }
 
-        LearningResource learningResource = null;
+  /**
+   * @param activity
+   * @return learningResource
+   * @throws AggregatorException
+   */
+  private LearningResource createLearningResource(final Activity activity)
+      throws AggregatorException {
 
-        try {
+    log.info("Creating new learning resource.");
 
-            String activityName = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getName());
-            String activityDescription = langMapUtil.getLangMapValue(activity
-                    .getDefinition().getDescription());
+    LearningResource learningResource = null;
 
-            learningResource = new LearningResource();
-            learningResource.setIri(activity.getId().toString());
-            learningResource.setDescription(activityDescription);
-            learningResource.setTitle(activityName);
-            learningResourceService.save(learningResource);
+    String activityName = langMapUtil.getLangMapValue(activity
+        .getDefinition().getName());
+    String activityDescription = langMapUtil.getLangMapValue(activity
+        .getDefinition().getDescription());
 
-            log.info("Learning Resource " + learningResource.getTitle()
-                    + " created.");
+    learningResource = new LearningResource();
+    learningResource.setIri(activity.getId().toString());
+    learningResource.setDescription(activityDescription);
+    learningResource.setTitle(activityName);
+    learningResourceService.save(learningResource);
 
-        } catch (AggregatorException e) {
-            throw e;
-        }
+    log.info("Learning Resource " + learningResource.getTitle()
+        + " created.");
 
-        return learningResource;
-    }
+    return learningResource;
+
+  }
+
 }
