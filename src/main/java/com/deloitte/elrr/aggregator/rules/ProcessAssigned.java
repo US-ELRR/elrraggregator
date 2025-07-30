@@ -2,6 +2,7 @@ package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +99,7 @@ public class ProcessAssigned implements Rule {
     AbstractActor assignedActor = (AbstractActor) extensionsUtil
         .getExtensions(statement.getContext(), "Actor");
 
-    // Get assigned person
+    // Process assigned person
     Person assignedPerson = processPerson.processPerson(assignedActor);
 
     // Process Goal
@@ -106,6 +107,7 @@ public class ProcessAssigned implements Rule {
         assignedPerson);
 
     return person;
+
   }
 
   /**
@@ -126,6 +128,17 @@ public class ProcessAssigned implements Rule {
     List<Credential> credentials = new ArrayList<Credential>();
     List<Competency> competencies = new ArrayList<Competency>();
     Goal goal = null;
+    LocalDateTime endDate = null;
+
+    // Get activity expires
+    String strLocalDateTime = (String) activity.getDefinition().getExtensions()
+        .get(
+            ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
+
+    if (strLocalDateTime != null) {
+      endDate = LocalDateTime.parse(strLocalDateTime,
+          DateTimeFormatter.ISO_DATE_TIME);
+    }
 
     // Process LearningResource
     learningRes = learningResourceUtil.processLearningResource(
@@ -133,11 +146,11 @@ public class ProcessAssigned implements Rule {
 
     // Process Credential
     credentials = (List<Credential>) processCredential.processCredential(
-        context, startDate, null);
+        context, startDate);
 
     // Process Competencies
     competencies = (List<Competency>) processCompetency.processCompetency(
-        context, startDate, null);
+        context, startDate);
 
     // Get goal
     goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
@@ -146,22 +159,25 @@ public class ProcessAssigned implements Rule {
     // If goal doesn't exist
     if (goal == null) {
 
-      goal = createGoal(activity, startDate, learningRes,
+      goal = createGoal(activity, startDate, endDate, learningRes,
           credentials, competencies, assignedPerson);
 
+      // If goal already exists
     } else {
 
       log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-      // goal = updateGoal(goal, activity);
+      goal = updateGoal(goal, activity, endDate);
 
     }
 
     return goal;
+
   }
 
   /**
    * @param activity
    * @param startDate
+   * @param endDate
    * @param learningResources
    * @param credentials
    * @param competencies
@@ -170,10 +186,9 @@ public class ProcessAssigned implements Rule {
    * @throws AggregatorException
    */
   public Goal createGoal(final Activity activity,
-      final LocalDateTime startDate,
+      final LocalDateTime startDate, final LocalDateTime endDate,
       final List<LearningResource> learningResources,
-      final List<Credential> credentials,
-      final List<Competency> competencies,
+      final List<Credential> credentials, final List<Competency> competencies,
       final Person assignedPerson) {
 
     log.info("Creating new goal.");
@@ -195,19 +210,7 @@ public class ProcessAssigned implements Rule {
       String type = (String) activity.getDefinition().getExtensions().get(
           ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-      if (type.toString().equalsIgnoreCase("ASSIGNED")) {
-
-        goalType = GoalType.ASSIGNED;
-
-      } else if (type.toString().equalsIgnoreCase("SELF")) {
-
-        goalType = GoalType.SELF;
-
-      } else {
-
-        goalType = GoalType.ASSIGNED;
-
-      }
+      goalType = getGoalType(type);
 
     }
 
@@ -217,6 +220,7 @@ public class ProcessAssigned implements Rule {
     goal.setName(activityName);
     goal.setType(goalType);
     goal.setStartDate(startDate);
+    goal.setExpirationDate(endDate);
     goal.setLearningResources(new HashSet<>(learningResources));
     goal.setCredentials(new HashSet<>(credentials));
     goal.setCompetencies(new HashSet<>(competencies));
@@ -225,6 +229,72 @@ public class ProcessAssigned implements Rule {
     log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
 
     return goal;
+
+  }
+
+  /**
+   * @param goal
+   * @param activity
+   * @param endDate
+   * @return goal
+   * @throws AggregatorException
+   */
+  public Goal updateGoal(Goal goal, Activity activity,
+      final LocalDateTime endDate) {
+
+    log.info("Updating goal.");
+
+    GoalType goalType = null;
+    String activityName = "";
+    String activityDescription = "";
+
+    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+        .getName());
+    activityDescription = langMapUtil.getLangMapValue(activity
+        .getDefinition().getDescription());
+
+    // Get goalType
+    if (activity != null && activity.getDefinition()
+        .getExtensions() != null) {
+
+      String type = (String) activity.getDefinition().getExtensions().get(
+          ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+
+      goalType = getGoalType(type);
+
+    }
+
+    goal.setDescription(activityDescription);
+    goal.setName(activityName);
+    goal.setType(goalType);
+    goal.setExpirationDate(endDate);
+    goalService.update(goal);
+    log.info(GOAL_MESSAGE + " " + activity.getId() + " updated.");
+
+    return goal;
+
+  }
+
+  /**
+   * @param type
+   * @return GoalType
+   */
+  private GoalType getGoalType(String type) {
+
+    if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+
+      return GoalType.ASSIGNED;
+
+    } else if (type.toString().equalsIgnoreCase("SELF")) {
+
+      return GoalType.SELF;
+
+    } else {
+
+      return GoalType.ASSIGNED;
+
+    }
+
   }
 
 }

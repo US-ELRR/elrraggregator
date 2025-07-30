@@ -140,13 +140,12 @@ public class ProcessCredential implements Rule {
   /**
    * @param context
    * @param startDate
-   * @param endDate
    * @return credential
    * @throws AggregatorException
    * @throws URISyntaxException
    */
   public List<Credential> processCredential(final Context context,
-      final LocalDateTime startDate, final LocalDateTime endDate)
+      final LocalDateTime startDate)
       throws AggregatorException, URISyntaxException {
 
     log.info("Process credentials.");
@@ -158,7 +157,7 @@ public class ProcessCredential implements Rule {
 
     for (Activity activity : activities) {
 
-      // If Competency
+      // If Credential
       if (activity.getDefinition().getType().equals(
           ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)) {
 
@@ -174,7 +173,7 @@ public class ProcessCredential implements Rule {
           // If Credential doesn't exist
         } else {
 
-          credential = createCredential(activity, startDate, endDate);
+          credential = createCredential(activity, startDate, null);
           credentials.add(credential);
 
         }
