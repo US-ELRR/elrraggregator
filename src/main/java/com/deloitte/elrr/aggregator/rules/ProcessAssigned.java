@@ -215,7 +215,7 @@ public class ProcessAssigned implements Rule {
       String type = (String) activity.getDefinition().getExtensions().get(
           ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-      goalType = extensionsUtil.getGoalType(type);
+      goalType = getGoalType(type);
 
     }
 
@@ -267,7 +267,7 @@ public class ProcessAssigned implements Rule {
       String type = (String) activity.getDefinition().getExtensions().get(
           ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-      goalType = extensionsUtil.getGoalType(type);
+      goalType = getGoalType(type);
 
     }
 
@@ -280,6 +280,22 @@ public class ProcessAssigned implements Rule {
     log.info(GOAL_MESSAGE + " " + activity.getId() + " updated.");
 
     return goal;
+
+  }
+
+  /**
+   * @param type
+   * @return GoalType
+   */
+  private GoalType getGoalType(String type) {
+
+    if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+      return GoalType.ASSIGNED;
+    } else if (type.toString().equalsIgnoreCase("SELF")) {
+      return GoalType.SELF;
+    } else {
+      return GoalType.ASSIGNED;
+    }
 
   }
 
