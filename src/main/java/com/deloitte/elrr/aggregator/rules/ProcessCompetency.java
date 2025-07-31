@@ -146,7 +146,7 @@ public class ProcessCompetency implements Rule {
    * @throws AggregatorException
    * @throws URISyntaxException
    */
-  public List<Competency> processCompetencies(final Context context,
+  public List<Competency> processAssignedCompetencies(final Context context,
       final LocalDateTime startDate)
       throws AggregatorException, URISyntaxException {
 

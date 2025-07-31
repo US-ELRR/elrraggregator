@@ -2,7 +2,6 @@ package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +99,7 @@ public class ProcessAssigned implements Rule {
         .getExtensions(statement.getContext(), "Actor");
 
     // Process assigned person
-    Person assignedPerson = processPerson.processPerson(assignedActor);
+    Person assignedPerson = processPerson.processAssignedPerson(assignedActor);
 
     // Process Goal
     processGoal(statement.getContext(), activity, startDate,
@@ -128,45 +127,48 @@ public class ProcessAssigned implements Rule {
     List<Credential> credentials = new ArrayList<Credential>();
     List<Competency> competencies = new ArrayList<Competency>();
     Goal goal = null;
+    LocalDateTime achievedByDate = null;
     LocalDateTime endDate = null;
 
-    // Get activity expires
-    String strLocalDateTime = (String) activity.getDefinition().getExtensions()
-        .get(
-            ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
+    // Get achieved by date
+    achievedByDate = extensionsUtil.getExtensionsDate(activity,
+        ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_ACHIEVED_BY);
 
-    if (strLocalDateTime != null) {
-      endDate = LocalDateTime.parse(strLocalDateTime,
-          DateTimeFormatter.ISO_DATE_TIME);
-    }
+    // Get activity expires
+    endDate = extensionsUtil.getExtensionsDate(activity,
+        ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
 
     // Process LearningResources
-    learnResources = learningResourceUtil.processLearningResources(
+    learnResources = learningResourceUtil.processAssignedLearningResources(
         context);
 
     // Process Credentials
-    credentials = (List<Credential>) processCredential.processCredentials(
-        context, startDate);
+    credentials = (List<Credential>) processCredential
+        .processAssignedCredentials(
+            context, startDate);
 
     // Process Competencies
-    competencies = (List<Competency>) processCompetency.processCompetencies(
-        context, startDate);
+    competencies = (List<Competency>) processCompetency
+        .processAssignedCompetencies(
+            context, startDate);
 
     // Get goal
-    goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
-        activity.getId().toString());
+    if (assignedPerson != null) {
+      goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
+          activity.getId().toString());
+    }
 
     // If goal doesn't exist
     if (goal == null) {
 
-      goal = createGoal(activity, startDate, endDate, learnResources,
-          credentials, competencies, assignedPerson);
+      goal = createGoal(activity, startDate, achievedByDate, endDate,
+          learnResources, credentials, competencies, assignedPerson);
 
       // If goal already exists
     } else {
 
       log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
-      goal = updateGoal(goal, activity, startDate, endDate);
+      goal = updateGoal(goal, activity, endDate, achievedByDate);
 
     }
 
@@ -177,6 +179,7 @@ public class ProcessAssigned implements Rule {
   /**
    * @param activity
    * @param startDate
+   * @param achievedByDate
    * @param endDate
    * @param learningResources
    * @param credentials
@@ -185,8 +188,10 @@ public class ProcessAssigned implements Rule {
    * @return goal
    * @throws AggregatorException
    */
+  @SuppressWarnings("checkstyle:ParameterNumber")
   public Goal createGoal(final Activity activity,
-      final LocalDateTime startDate, final LocalDateTime endDate,
+      final LocalDateTime startDate, final LocalDateTime achievedByDate,
+      final LocalDateTime endDate,
       final List<LearningResource> learningResources,
       final List<Credential> credentials, final List<Competency> competencies,
       final Person assignedPerson) {
@@ -210,7 +215,7 @@ public class ProcessAssigned implements Rule {
       String type = (String) activity.getDefinition().getExtensions().get(
           ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-      goalType = getGoalType(type);
+      goalType = extensionsUtil.getGoalType(type);
 
     }
 
@@ -220,6 +225,7 @@ public class ProcessAssigned implements Rule {
     goal.setName(activityName);
     goal.setType(goalType);
     goal.setStartDate(startDate);
+    goal.setAchievedByDate(achievedByDate);
     goal.setExpirationDate(endDate);
     goal.setLearningResources(new HashSet<>(learningResources));
     goal.setCredentials(new HashSet<>(credentials));
@@ -235,13 +241,13 @@ public class ProcessAssigned implements Rule {
   /**
    * @param goal
    * @param activity
-   * @param startDate
+   * @param achievedByDate
    * @param endDate
    * @return goal
    * @throws AggregatorException
    */
   public Goal updateGoal(Goal goal, Activity activity,
-      final LocalDateTime startDate, final LocalDateTime endDate) {
+      final LocalDateTime achievedByDate, final LocalDateTime endDate) {
 
     log.info("Updating goal.");
 
@@ -261,41 +267,19 @@ public class ProcessAssigned implements Rule {
       String type = (String) activity.getDefinition().getExtensions().get(
           ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
-      goalType = getGoalType(type);
+      goalType = extensionsUtil.getGoalType(type);
 
     }
 
     goal.setDescription(activityDescription);
     goal.setName(activityName);
     goal.setType(goalType);
-    goal.setStartDate(startDate);
+    goal.setAchievedByDate(achievedByDate);
     goal.setExpirationDate(endDate);
     goalService.update(goal);
     log.info(GOAL_MESSAGE + " " + activity.getId() + " updated.");
 
     return goal;
-
-  }
-
-  /**
-   * @param type
-   * @return GoalType
-   */
-  private GoalType getGoalType(String type) {
-
-    if (type.toString().equalsIgnoreCase("ASSIGNED")) {
-
-      return GoalType.ASSIGNED;
-
-    } else if (type.toString().equalsIgnoreCase("SELF")) {
-
-      return GoalType.SELF;
-
-    } else {
-
-      return GoalType.ASSIGNED;
-
-    }
 
   }
 

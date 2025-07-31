@@ -62,7 +62,8 @@ public class LearningResourceUtil {
    * @throws URISyntaxException
    * @throws AggregatorException
    */
-  public List<LearningResource> processLearningResources(final Context context)
+  public List<LearningResource> processAssignedLearningResources(
+      final Context context)
       throws URISyntaxException, AggregatorException {
 
     log.info("Process learning resources.");

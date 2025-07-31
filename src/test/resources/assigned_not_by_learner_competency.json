@@ -1,0 +1,66 @@
+{
+    "id": "7a8073a4-2d0c-48da-986d-b84473730ec8",
+    "actor": {
+        "name": "Nelson Mandella",
+        "account": {
+            "name": "77777",
+            "homePage": "https://school.org/teachers2"
+        }
+    },
+    "verb": {
+        "id": "https://w3id.org/xapi/tla/verbs/assigned",
+        "display": {
+            "en-us": "Assigned"
+        }
+    },
+    "object": {
+        "id": "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f7777",
+        "definition": {
+            "name": {
+                "en-us": "Study O'Learner Professional Development Goal 2"
+            },
+            "type": "https://w3id.org/xapi/activities/goal",
+            "extensions": {
+                "http://xapi.edlm/goals/activity-extensions/goal-type": "ASSIGNED",
+                "http://xapi.edlm/goals/activity-extensions/expires": "2025-12-05T15:30:00Z",
+                "http://xapi.edlm/goals/activity-extensions/achieved-by": "2025-11-06T15:30:00Z"
+            }
+        }
+    },
+    "context": {
+        "extensions": {
+            "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/to": {
+                "name": "Student Mando",
+                "account": {
+                    "name": "77777",
+                    "homePage": "https://school.org/students2"
+                }
+            }
+        },
+        "contextActivities": {
+            "other": [
+                {
+                    "objectType": "Activity",
+                    "id": "http://school.org/courses/course22",
+                    "definition": {
+                        "type": "http://adlnet.gov/expapi/activities/course",
+                        "name": {
+                            "en-us": "Course 22"
+                        }
+                    }
+                },
+                {
+                    "objectType": "Activity",
+                    "id": "http://school.org/competencies/competencyA",
+                    "definition": {
+                        "type": "https://w3id.org/xapi/comp/activities/competency",
+                        "name": {
+                            "en-us": "Competency B"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "timestamp": "2025-05-25T12:34:56Z"
+}

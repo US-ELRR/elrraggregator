@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.rules.ExtensionsConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+import com.deloitte.elrr.entity.types.GoalType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.AbstractActor;
+import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Context;
 import com.yetanalytics.xapi.util.Mapper;
 
@@ -80,6 +83,45 @@ public class ExtensionsUtil {
     }
 
     return null;
+  }
+
+  /**
+   * @param activity
+   * @param extensionsConstant
+   * @return LocatDateTime
+   * @throws IllegalArgumentException
+   * @throws DateTimeParseException
+   */
+  public LocalDateTime getExtensionsDate(Activity activity,
+      String extensionsConstant)
+      throws IllegalArgumentException, DateTimeParseException {
+
+    String strDate = (String) activity.getDefinition().getExtensions()
+        .get(extensionsConstant);
+
+    if (strDate != null) {
+      return LocalDateTime.parse(strDate,
+          DateTimeFormatter.ISO_DATE_TIME);
+    }
+
+    return null;
+
+  }
+
+  /**
+   * @param type
+   * @return GoalType
+   */
+  public GoalType getGoalType(String type) {
+
+    if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+      return GoalType.ASSIGNED;
+    } else if (type.toString().equalsIgnoreCase("SELF")) {
+      return GoalType.SELF;
+    } else {
+      return GoalType.ASSIGNED;
+    }
+
   }
 
 }

@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,7 @@ import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
-import com.deloitte.elrr.entity.Credential;
-import com.deloitte.elrr.entity.Email;
-import com.deloitte.elrr.entity.Identity;
+import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
@@ -44,124 +42,149 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessAssignedTest {
 
-    @Mock
-    private LangMapUtil langMapUtil;
+  @Mock
+  private LangMapUtil langMapUtil;
 
-    @Mock
-    private PersonSvc personService;
+  @Mock
+  private PersonSvc personService;
 
-    @Mock
-    private CredentialSvc credentialService;
+  @Mock
+  private CredentialSvc credentialService;
 
-    @Mock
-    private ProcessPerson processPerson;
+  @Mock
+  private ProcessPerson processPerson;
 
-    @Mock
-    private LearningResourceUtil learningResourceUtil;
+  @Mock
+  private LearningResourceUtil learningResourceUtil;
 
-    @Mock
-    private ProcessCredential processCredential;
+  @Mock
+  private ProcessCredential processCredential;
 
-    @Mock
-    private ProcessCompetency processCompetency;
+  @Mock
+  private ProcessCompetency processCompetency;
 
-    @Mock
-    private PersonalCredentialSvc personalCredentialService;
+  @Mock
+  private PersonalCredentialSvc personalCredentialService;
 
-    @Mock
-    private ExtensionsUtil extensionsUtil;
+  @Mock
+  private ExtensionsUtil extensionsUtil;
 
-    @Mock
-    private GoalSvc goalService;
+  @Mock
+  private GoalSvc goalService;
 
-    @InjectMocks
-    private ProcessAssigned processAssigned;
+  @Mock
+  private Person personMock;
 
-    // @Test
-    void
-            test() {
+  @InjectMocks
+  private ProcessAssigned processAssigned;
 
-        try {
+  @Test
+  void testAssignedCompetency() {
 
-            File testFile = TestFileUtil.getJsonTestFile(
-                    "assigned_not_by_learner.json");
+    try {
 
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
+      File testFile = TestFileUtil.getJsonTestFile(
+          "assigned_not_by_learner_competency.json");
 
-            // Get Activity
-            Activity activity = (Activity) stmt.getObject();
+      Statement stmt = Mapper.getMapper().readValue(testFile,
+          Statement.class);
+      assertNotNull(stmt);
 
-            Mockito.doReturn("Test Credential A").doReturn(
-                    "Object representing Credential A level").when(langMapUtil)
-                    .getLangMapValue(any());
+      LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
 
-            Email email = new Email();
-            email.setId(UUID.randomUUID());
-            email.setEmailAddressType("primary");
-            email.setEmailAddress("mailto:testcredential@gmail.com");
+      // Get Activity
+      Activity activity = (Activity) stmt.getObject();
 
-            Person person = new Person();
-            person.setId(UUID.randomUUID());
-            person.setName("Test Credential");
-            person.setEmailAddresses(new HashSet<Email>());
-            person.getEmailAddresses().add(email);
-            Mockito.doReturn(person).when(personService).save(person);
+      Mockito.doReturn("Competency B").when(langMapUtil)
+          .getLangMapValue(any());
 
-            UUID identityUUID = UUID.randomUUID();
-            Identity identity = new Identity();
-            identity.setId(identityUUID);
-            identity.setMbox("mailto:testcredential@gmail.com");
+      Person assignedPerson = new Person();
+      assignedPerson.setId(UUID.randomUUID());
+      assignedPerson.setName("Student Mando");
 
-            Credential credential = new Credential();
-            credential.setId(UUID.randomUUID());
-            credential.setIdentifier(
-                    "http://example.edlm/credentials/credential-a");
-            credential.setFrameworkTitle("Test Credential A");
-            credential.setFrameworkDescription(
-                    "Object representing Test Credential A level");
-            Mockito.doReturn(credential).when(credentialService).save(any());
+      Goal goal = new Goal();
+      goal.setId(UUID.randomUUID());
+      goal.setName("Goal 1");
+      goal.setPerson(assignedPerson);
 
-            boolean fireRule = processAssigned.fireRule(stmt);
-            assertTrue(fireRule);
+      boolean fireRule = processAssigned.fireRule(stmt);
+      assertTrue(fireRule);
 
-            Mockito.doReturn(null).when(goalService).findByPersonIdAndGoalId(
-                    any(), any());
+      Person personResult = processAssigned.processRule(assignedPerson, stmt);
+      assertNotNull(personResult);
 
-            Mockito.doReturn(person).when(goalService).save(
-                    any());
+      goal = processAssigned.updateGoal(goal, activity, null, null);
+      assertNotNull(goal);
 
-            Person personResult = processAssigned.processRule(person, stmt);
-
-        } catch (AggregatorException | IOException | ClassCastException
-                | NullPointerException | RuntimeServiceException
-                | URISyntaxException e) {
-            e.printStackTrace();
-            fail("Should not have thrown any exception");
-        }
+    } catch (AggregatorException | IOException | ClassCastException
+        | NullPointerException | RuntimeServiceException
+        | URISyntaxException e) {
+      fail("Should not have thrown any exception");
     }
+  }
 
-    @Test
-    void
-            testFireRule() {
+  @Test
+  void testAssignedCredential() {
 
-        File testFile;
+    try {
 
-        try {
+      File testFile = TestFileUtil.getJsonTestFile(
+          "assigned_not_by_learner_credential.json");
 
-            testFile = TestFileUtil.getJsonTestFile("agent.json");
+      Statement stmt = Mapper.getMapper().readValue(testFile,
+          Statement.class);
+      assertNotNull(stmt);
 
-            Statement stmt = Mapper.getMapper().readValue(testFile,
-                    Statement.class);
-            assertNotNull(stmt);
+      // Get Activity
+      Activity activity = (Activity) stmt.getObject();
 
-            boolean fireRule = processAssigned.fireRule(stmt);
-            assertFalse(fireRule);
+      Mockito.doReturn("Credential A").when(langMapUtil)
+          .getLangMapValue(any());
 
-        } catch (IOException e) {
-            fail("Should not have thrown any exception");
-        }
+      Person assignedPerson = new Person();
+      assignedPerson.setId(UUID.randomUUID());
+      assignedPerson.setName("Study O'Learner");
+
+      Goal goal = new Goal();
+      goal.setId(UUID.randomUUID());
+      goal.setName("Goal 1");
+      goal.setPerson(assignedPerson);
+
+      boolean fireRule = processAssigned.fireRule(stmt);
+      assertTrue(fireRule);
+
+      Person personResult = processAssigned.processRule(assignedPerson, stmt);
+      assertNotNull(personResult);
+
+      goal = processAssigned.updateGoal(goal, activity, null, null);
+      assertNotNull(goal);
+
+    } catch (AggregatorException | IOException | ClassCastException
+        | NullPointerException | RuntimeServiceException
+        | URISyntaxException e) {
+      fail("Should not have thrown any exception");
     }
+  }
+
+  @Test
+  void testFireRule() {
+
+    File testFile;
+
+    try {
+
+      testFile = TestFileUtil.getJsonTestFile("agent.json");
+
+      Statement stmt = Mapper.getMapper().readValue(testFile,
+          Statement.class);
+      assertNotNull(stmt);
+
+      boolean fireRule = processAssigned.fireRule(stmt);
+      assertFalse(fireRule);
+
+    } catch (IOException e) {
+      fail("Should not have thrown any exception");
+    }
+  }
 
 }

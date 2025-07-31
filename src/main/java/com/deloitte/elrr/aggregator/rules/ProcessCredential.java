@@ -144,7 +144,7 @@ public class ProcessCredential implements Rule {
    * @throws AggregatorException
    * @throws URISyntaxException
    */
-  public List<Credential> processCredentials(final Context context,
+  public List<Credential> processAssignedCredentials(final Context context,
       final LocalDateTime startDate)
       throws AggregatorException, URISyntaxException {
 
