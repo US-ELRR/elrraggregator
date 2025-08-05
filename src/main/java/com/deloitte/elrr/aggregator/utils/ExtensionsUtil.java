@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.deloitte.elrr.aggregator.rules.ExtensionsConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
+import com.deloitte.elrr.entity.types.GoalType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.AbstractActor;
 import com.yetanalytics.xapi.model.Activity;
@@ -75,6 +76,10 @@ public class ExtensionsUtil {
 
         }
 
+      } else {
+
+        return null;
+
       }
 
     } catch (IOException e) {
@@ -104,6 +109,22 @@ public class ExtensionsUtil {
     }
 
     return null;
+
+  }
+
+  /**
+   * @param type
+   * @return GoalType
+   */
+  public GoalType getGoalType(String type) {
+
+    if (type.toString().equalsIgnoreCase("ASSIGNED")) {
+      return GoalType.ASSIGNED;
+    } else if (type.toString().equalsIgnoreCase("SELF-ASSIGNED")) {
+      return GoalType.SELF;
+    } else {
+      return GoalType.ASSIGNED;
+    }
 
   }
 

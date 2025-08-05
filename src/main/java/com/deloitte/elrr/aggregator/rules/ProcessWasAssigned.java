@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class ProcessAssigned implements Rule {
+public class ProcessWasAssigned implements Rule {
 
   @Autowired
   private ProcessPerson processPerson;
@@ -70,7 +70,7 @@ public class ProcessAssigned implements Rule {
 
     // Is Verb Id = assigned
     return (statement.getVerb().getId().toString().equalsIgnoreCase(
-        VerbIdConstants.ASSIGNED_VERB_ID.toString()));
+        VerbIdConstants.WAS_ASSIGNED_VERB_ID.toString()));
   }
 
   /**
@@ -85,7 +85,7 @@ public class ProcessAssigned implements Rule {
       NullPointerException, RuntimeServiceException,
       URISyntaxException {
 
-    log.info("Process assigned.");
+    log.info("Process was assigned.");
 
     // Get start date
     // Convert from ZonedDateTime to LocalDateTime
@@ -94,16 +94,21 @@ public class ProcessAssigned implements Rule {
     // Get Activity
     Activity activity = (Activity) statement.getObject();
 
-    // Get assigned actor
-    AbstractActor assignedActor = (AbstractActor) extensionsUtil
+    // Get assigning actor
+    AbstractActor assigningActor = (AbstractActor) extensionsUtil
         .getExtensions(statement.getContext(), "Actor");
 
-    // Process assigned person
-    Person assignedPerson = processPerson.processAssignedPerson(assignedActor);
+    // If assigning actor present
+    if (assigningActor != null) {
+
+      // Process assigning person
+      processPerson.processAssignedPerson(assigningActor);
+
+    }
 
     // Process Goal
     processGoal(statement.getContext(), activity, startDate,
-        assignedPerson);
+        person);
 
     return person;
 
