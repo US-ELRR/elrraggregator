@@ -102,7 +102,7 @@ public class ProcessAssigned implements Rule {
     Person assignedPerson = processPerson.processAssignedPerson(assignedActor);
 
     // Process Goal
-    processGoal(statement.getContext(), activity, person, startDate,
+    processGoal(statement.getContext(), activity, startDate,
         assignedPerson);
 
     return person;
@@ -112,7 +112,6 @@ public class ProcessAssigned implements Rule {
   /**
    * @param context
    * @param activity
-   * @param person
    * @param startDate
    * @param assignedPerson
    * @return goal
@@ -121,7 +120,7 @@ public class ProcessAssigned implements Rule {
    */
   @Transactional
   public Goal processGoal(final Context context, final Activity activity,
-      final Person person, final LocalDateTime startDate,
+      final LocalDateTime startDate,
       final Person assignedPerson)
       throws AggregatorException, URISyntaxException {
 
@@ -147,12 +146,12 @@ public class ProcessAssigned implements Rule {
     // Process Credentials
     credentials = (List<Credential>) processCredential
         .processAssignedCredentials(
-            context, person, startDate, endDate);
+            context, assignedPerson, startDate, endDate);
 
     // Process Competencies
     competencies = (List<Competency>) processCompetency
         .processAssignedCompetencies(
-            context, person, startDate, endDate);
+            context, assignedPerson, startDate, endDate);
 
     // Get goal
     if (assignedPerson != null) {
