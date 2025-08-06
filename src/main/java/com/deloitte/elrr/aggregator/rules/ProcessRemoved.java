@@ -70,8 +70,9 @@ public class ProcessRemoved implements Rule {
     // If assigning actor present
     if (assigningActor != null) {
 
-      // Process assigning person
-      person = processPerson.processAssignedPerson(assigningActor);
+      // Get assigning person
+      person = processPerson.getPerson(assigningActor,
+          assigningActor.getAccount());
 
     }
 
@@ -80,9 +81,11 @@ public class ProcessRemoved implements Rule {
         activity.getId().toString());
 
     // Delete goal
-    if (goal != null) {
+    if (person != null
+        && goal != null) {
       long rowsDeleted = goalService
-          .deleteByGoalId(activity.getId().toString());
+          .deleteByPersonIdAndGoalId(person.getId(),
+              activity.getId().toString());
       log.info(rowsDeleted + " goals deleted.");
     }
 
