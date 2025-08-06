@@ -58,6 +58,9 @@ class ELRRMessageListenerTest {
   private Rule processWasAssigned;
 
   @Mock
+  private Rule processRemoved;
+
+  @Mock
   private KafkaTemplate<?, String> kafkaTemplate;
 
   @InjectMocks

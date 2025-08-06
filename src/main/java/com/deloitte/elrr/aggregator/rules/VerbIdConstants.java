@@ -34,6 +34,9 @@ public final class VerbIdConstants {
   public static final URI WAS_ASSIGNED_VERB_ID = URI.create(
       "https://w3id.org/xapi/tla/verbs/was-assigned");
 
+  public static final URI REMOVED_VERB_ID = URI.create(
+      "http://activitystrea.ms/removed");
+
   private VerbIdConstants() {
     throw new UnsupportedOperationException(
         "This is a utility class and cannot be instantiated");

@@ -122,6 +122,8 @@ public class ExtensionsUtil {
       return GoalType.ASSIGNED;
     } else if (type.toString().equalsIgnoreCase("SELF-ASSIGNED")) {
       return GoalType.SELF;
+    } else if (type.toString().equalsIgnoreCase("RECOMMENDED")) {
+      return GoalType.RECOMMENDED;
     } else {
       return GoalType.ASSIGNED;
     }

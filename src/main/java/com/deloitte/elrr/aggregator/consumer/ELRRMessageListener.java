@@ -66,6 +66,9 @@ public class ELRRMessageListener {
   private Rule processWasAssigned;
 
   @Autowired
+  private Rule processRemoved;
+
+  @Autowired
   private KafkaTemplate<?, String> kafkaTemplate;
 
   @Value("${kafka.dead.letter.topic}")
@@ -138,7 +141,7 @@ public class ELRRMessageListener {
           processCompleted, processCredential, processFailed,
           processInitialized, processPassed, processSatisfied,
           processRegistered, processScheduled, processAssigned,
-          processWasAssigned);
+          processWasAssigned, processRemoved);
 
       for (Rule rule : classList) {
 
