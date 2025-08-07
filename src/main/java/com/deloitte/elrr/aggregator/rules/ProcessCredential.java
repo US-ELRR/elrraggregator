@@ -67,11 +67,10 @@ public class ProcessCredential implements Rule {
       objType = obj.getDefinition().getType().toString();
     }
 
-    // Is Verb Id = achieved and object type = competency
+    // Is Verb Id = achieved and object type = credential
     return (statement.getVerb().getId().toString().equalsIgnoreCase(
         VerbIdConstants.ACHIEVED_VERB_ID.toString())
-        && objType
-            .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
+        && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
   }
 
@@ -127,11 +126,15 @@ public class ProcessCredential implements Rule {
     if (credential == null) {
 
       credential = createCredential(activity, startDate, endDate);
+      log.info(
+          CREDENTIAL_MESSAGE + " " + credential.getIdentifier() + " created.");
 
     } else {
 
-      log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " exists.");
       credential = updateCredential(credential, activity, endDate);
+      log.info(
+          CREDENTIAL_MESSAGE + " " + credential.getIdentifier() + " updated.");
+
     }
 
     return credential;
@@ -170,14 +173,17 @@ public class ProcessCredential implements Rule {
         // If Credential already exists
         if (credential != null) {
 
-          log.info(CREDENTIAL_MESSAGE + " " + activity.getId()
-              + " exists.");
+          log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+              + " already exists.");
 
           // If Credential doesn't exist
         } else {
 
           credential = createCredential(activity, startDate, null);
           credentials.add(credential);
+
+          log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+              + " created.");
 
           // Process PersonalCredential
           processPersonalCredential(person, credential, expires);
@@ -202,8 +208,6 @@ public class ProcessCredential implements Rule {
       final LocalDateTime startDate,
       final LocalDateTime endDate) {
 
-    log.info("Creating new credential.");
-
     Credential credential = null;
     String activityName = "";
     String activityDescription = "";
@@ -220,7 +224,6 @@ public class ProcessCredential implements Rule {
     credential.setValidStartDate(startDate);
     credential.setValidEndDate(endDate);
     credentialService.save(credential);
-    log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " created.");
 
     return credential;
   }
@@ -235,8 +238,6 @@ public class ProcessCredential implements Rule {
   public Credential updateCredential(Credential credential,
       final Activity activity, final LocalDateTime endDate) {
 
-    log.info("Updating credential.");
-
     String activityName = "";
     String activityDescription = "";
 
@@ -249,7 +250,6 @@ public class ProcessCredential implements Rule {
     credential.setFrameworkDescription(activityDescription);
     credential.setValidEndDate(endDate);
     credentialService.update(credential);
-    log.info(CREDENTIAL_MESSAGE + " " + activity.getId() + " updated.");
 
     return credential;
   }
@@ -285,10 +285,19 @@ public class ProcessCredential implements Rule {
         person.getCredentials().add(personalCredential);
         personService.save(person);
 
+        log.info("Personal Credential for " + person.getName() + " - "
+            + personalCredential.getCredential().getFrameworkTitle()
+            + " created.");
+
       } else {
 
         personalCredential = updatePersonalCredential(
             personalCredential, person, expires);
+
+        log.info("Personal Credential for " + person.getName() + " - "
+            + personalCredential.getCredential().getFrameworkTitle()
+            + " updated.");
+
       }
 
     } catch (DateTimeParseException e) {
@@ -308,7 +317,6 @@ public class ProcessCredential implements Rule {
   private PersonalCredential createPersonalCredential(final Person person,
       final Credential credential, final LocalDateTime expires) {
 
-    log.info("Creating new personal credential record.");
     PersonalCredential personalCredential = new PersonalCredential();
 
     personalCredential.setPerson(person);
@@ -320,10 +328,6 @@ public class ProcessCredential implements Rule {
     }
 
     personalCredentialService.save(personalCredential);
-
-    log.info("Personal Credential for " + person.getName() + " - "
-        + personalCredential.getCredential().getFrameworkTitle()
-        + " created.");
 
     return personalCredential;
   }
@@ -342,10 +346,6 @@ public class ProcessCredential implements Rule {
 
       personalCredential.setExpires(expires);
       personalCredentialService.update(personalCredential);
-
-      log.info("Personal Credential for " + person.getName() + " - "
-          + personalCredential.getCredential().getFrameworkTitle()
-          + " updated.");
 
     }
 

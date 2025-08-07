@@ -142,8 +142,6 @@ public class ProcessPerson {
    */
   public Person createPerson(AbstractActor actor, Account account) {
 
-    log.info("Creating new person.");
-
     Email email = null;
 
     // If email
@@ -198,8 +196,6 @@ public class ProcessPerson {
       openId = actor.getOpenid().toString();
     }
 
-    log.info("Creating new identity.");
-
     Identity identity = new Identity();
     identity.setMboxSha1Sum(mboxSha1sum);
     identity.setMbox(mBox);
@@ -223,7 +219,6 @@ public class ProcessPerson {
    * @return email
    */
   public Email createEmail(String emailAddress) {
-    log.info("Creating new email.");
     Email email = new Email();
     email.setEmailAddress(emailAddress);
     email.setEmailAddressType("primary");

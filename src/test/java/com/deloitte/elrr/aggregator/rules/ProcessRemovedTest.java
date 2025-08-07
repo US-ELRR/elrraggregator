@@ -24,6 +24,7 @@ import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.entity.types.GoalType;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.CredentialSvc;
 import com.deloitte.elrr.jpa.svc.GoalSvc;
@@ -94,6 +95,9 @@ class ProcessRemovedTest {
       goal.setId(UUID.randomUUID());
       goal.setName("was assigned goal");
       goal.setPerson(assignedPerson);
+      goal.setGoalId(
+          "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f0578");
+      goal.setType(GoalType.SELF);
 
       boolean fireRule = processRemoved.fireRule(stmt);
       assertTrue(fireRule);

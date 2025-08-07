@@ -12,7 +12,6 @@ import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.Person;
 import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.deloitte.elrr.jpa.svc.GoalSvc;
-import com.yetanalytics.xapi.model.AbstractActor;
 import com.yetanalytics.xapi.model.Activity;
 import com.yetanalytics.xapi.model.Statement;
 
@@ -41,9 +40,18 @@ public class ProcessRemoved implements Rule {
       return false;
     }
 
-    // Is Verb Id = removed
+    String objType = null;
+
+    Activity obj = (Activity) statement.getObject();
+
+    if (obj.getDefinition().getType() != null) {
+      objType = obj.getDefinition().getType().toString();
+    }
+
+    // Is Verb Id = removed and object type = goal
     return (statement.getVerb().getId().toString().equalsIgnoreCase(
-        VerbIdConstants.REMOVED_VERB_ID.toString()));
+        VerbIdConstants.REMOVED_VERB_ID.toString())
+        && ObjectTypeConstants.GOAL.equalsIgnoreCase(objType));
   }
 
   /**
@@ -63,28 +71,14 @@ public class ProcessRemoved implements Rule {
     // Get Activity
     Activity activity = (Activity) statement.getObject();
 
-    // Get assigning actor
-    AbstractActor assigningActor = (AbstractActor) extensionsUtil
-        .getExtensions(statement.getContext(), "Actor");
-
-    // If assigning actor present
-    if (assigningActor != null) {
-
-      // Get assigning person
-      person = processPerson.getPerson(assigningActor,
-          assigningActor.getAccount());
-
-    }
-
     // Get goal
-    Goal goal = goalService.findByPersonIdAndGoalId(person.getId(),
+    Goal goal = goalService.findByGoalId(
         activity.getId().toString());
 
     // Delete goal
-    if (person != null
-        && goal != null) {
+    if (goal != null) {
       long rowsDeleted = goalService
-          .deleteByPersonIdAndGoalId(person.getId(),
+          .deleteByGoalId(
               activity.getId().toString());
       log.info(rowsDeleted + " goals deleted.");
     }

@@ -21,303 +21,298 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LearningRecordUtil {
 
-    @Autowired
-    private LearningRecordSvc learningRecordService;
+  @Autowired
+  private LearningRecordSvc learningRecordService;
 
-    private static final String LEARNING_RECORD_FOR = "Learning Record for ";
+  private static final String LEARNING_RECORD_FOR = "Learning Record for ";
 
-    /**
-     * @param person
-     * @param verb
-     * @param result
-     * @param learningResource
-     * @return learningRccord
-     * @throws RuntimeServiceException
-     */
-    public LearningRecord processLearningRecord(final Person person,
-            final Verb verb, final Result result,
-            final LearningResource learningResource)
-            throws RuntimeServiceException {
+  /**
+   * @param person
+   * @param verb
+   * @param result
+   * @param learningResource
+   * @return learningRccord
+   * @throws RuntimeServiceException
+   */
+  public LearningRecord processLearningRecord(final Person person,
+      final Verb verb, final Result result,
+      final LearningResource learningResource)
+      throws RuntimeServiceException {
 
-        LearningRecord learningRecord = null;
+    LearningRecord learningRecord = null;
 
-        log.info("Process learning record.");
+    log.info("Process learning record.");
 
-        // Get LearningRecord
-        learningRecord = learningRecordService
-                .findByPersonIdAndLearningResourceId(person.getId(),
-                        learningResource.getId());
+    // Get LearningRecord
+    learningRecord = learningRecordService
+        .findByPersonIdAndLearningResourceId(person.getId(),
+            learningResource.getId());
 
-        // If LearningRecord doesn't exist
-        if (learningRecord == null) {
+    // If LearningRecord doesn't exist
+    if (learningRecord == null) {
 
-            learningRecord = createLearningRecord(person, learningResource,
-                    verb, result);
+      learningRecord = createLearningRecord(person, learningResource,
+          verb, result);
 
-            // If learningRecord already exists
-        } else {
+      // If learningRecord already exists
+    } else {
 
-            learningRecord = updateLearningRecord(person, learningRecord, verb,
-                    result);
-        }
-
-        return learningRecord;
+      learningRecord = updateLearningRecord(person, learningRecord, verb,
+          result);
     }
 
-    /**
-     * @param person
-     * @param verb
-     * @param result
-     * @param learningResource
-     * @param enrollmentDate
-     * @return learningRccord
-     * @throws RuntimeServiceException
-     */
-    @SuppressWarnings("checkstyle:linelength")
-    public LearningRecord processLearningRecord(final Person person,
-            final Verb verb, final Result result,
-            final LearningResource learningResource,
-            final LocalDateTime enrollmentDate) throws RuntimeServiceException {
+    return learningRecord;
+  }
 
-        LearningRecord learningRecord = null;
+  /**
+   * @param person
+   * @param verb
+   * @param result
+   * @param learningResource
+   * @param enrollmentDate
+   * @return learningRccord
+   * @throws RuntimeServiceException
+   */
+  @SuppressWarnings("checkstyle:linelength")
+  public LearningRecord processLearningRecord(final Person person,
+      final Verb verb, final Result result,
+      final LearningResource learningResource,
+      final LocalDateTime enrollmentDate) throws RuntimeServiceException {
 
-        log.info("Process learning record.");
+    LearningRecord learningRecord = null;
 
-        // Get LearningRecord
-        learningRecord = learningRecordService
-                .findByPersonIdAndLearningResourceId(person.getId(),
-                        learningResource.getId());
+    log.info("Process learning record.");
 
-        // If LearningRecord doesn't exist
-        if (learningRecord == null) {
+    // Get LearningRecord
+    learningRecord = learningRecordService
+        .findByPersonIdAndLearningResourceId(person.getId(),
+            learningResource.getId());
 
-            learningRecord = createLearningRecord(person, learningResource,
-                    verb, result, enrollmentDate);
+    // If LearningRecord doesn't exist
+    if (learningRecord == null) {
 
-            // If learningRecord already exists
-        } else {
+      learningRecord = createLearningRecord(person, learningResource,
+          verb, result, enrollmentDate);
 
-            // If existing LearningRecord is COMPLETED
-            if (learningRecord.getRecordStatus().equals(
-                    LearningStatus.COMPLETED)) {
+      // If learningRecord already exists
+    } else {
 
-                // If new registered enrollmentDate <= existing timestamp
-                if (enrollmentDate.isEqual(learningRecord.getInsertedDate())
-                        || enrollmentDate.isBefore(learningRecord
-                                .getInsertedDate())) {
-                    log.warn(
-                            "Error trying to re-register a completed activity. Learning Record for "
-                                    + person.getName() + " - " + learningRecord
-                                            .getLearningResource().getTitle()
-                                    + ".  Enrollment date " + enrollmentDate
-                                    + " before " + learningRecord
-                                            .getInsertedDate());
-                    return learningRecord;
-                }
+      // If existing LearningRecord is COMPLETED
+      if (learningRecord.getRecordStatus().equals(
+          LearningStatus.COMPLETED)) {
 
-            }
-
-            learningRecord = updateLearningRecord(person, learningRecord, verb,
-                    result, enrollmentDate);
+        // If new registered enrollmentDate <= existing timestamp
+        if (enrollmentDate.isEqual(learningRecord.getInsertedDate())
+            || enrollmentDate.isBefore(learningRecord
+                .getInsertedDate())) {
+          log.warn(
+              "Error trying to re-register a completed activity. Learning Record for "
+                  + person.getName() + " - " + learningRecord
+                      .getLearningResource().getTitle()
+                  + ".  Enrollment date " + enrollmentDate
+                  + " before " + learningRecord
+                      .getInsertedDate());
+          return learningRecord;
         }
 
-        return learningRecord;
+      }
+
+      learningRecord = updateLearningRecord(person, learningRecord, verb,
+          result, enrollmentDate);
     }
 
-    /**
-     * @param person
-     * @param learningResource
-     * @param verb
-     * @param result
-     * @return learningRecord
-     */
-    private LearningRecord createLearningRecord(final Person person,
-            final LearningResource learningResource, final Verb verb,
-            final Result result) {
+    return learningRecord;
+  }
 
-        log.info("Creating new learning record.");
-        LearningRecord learningRecord = new LearningRecord();
+  /**
+   * @param person
+   * @param learningResource
+   * @param verb
+   * @param result
+   * @return learningRecord
+   */
+  private LearningRecord createLearningRecord(final Person person,
+      final LearningResource learningResource, final Verb verb,
+      final Result result) {
 
-        LearningStatus learningStatus = getStatus(verb, result);
+    LearningRecord learningRecord = new LearningRecord();
 
-        learningRecord.setLearningResource(learningResource);
-        learningRecord.setPerson(person);
-        learningRecord.setRecordStatus(learningStatus);
+    LearningStatus learningStatus = getStatus(verb, result);
 
-        if (result != null && result.getScore() != null && result.getScore()
-                .getScaled() != null) {
-            learningRecord.setAcademicGrade(result.getScore().getScaled()
-                    .toString());
-        }
+    learningRecord.setLearningResource(learningResource);
+    learningRecord.setPerson(person);
+    learningRecord.setRecordStatus(learningStatus);
 
-        learningRecordService.save(learningRecord);
-
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
-                + learningResource.getTitle() + " created.");
-
-        return learningRecord;
+    if (result != null && result.getScore() != null && result.getScore()
+        .getScaled() != null) {
+      learningRecord.setAcademicGrade(result.getScore().getScaled()
+          .toString());
     }
 
-    /**
-     * @param person
-     * @param learningResource
-     * @param verb
-     * @param result
-     * @param enrollmentDate
-     * @return learningRecord
-     */
-    private LearningRecord createLearningRecord(final Person person,
-            final LearningResource learningResource, final Verb verb,
-            final Result result, LocalDateTime enrollmentDate) {
+    learningRecordService.save(learningRecord);
 
-        log.info("Creating new learning record.");
-        LearningRecord learningRecord = new LearningRecord();
+    log.info(LEARNING_RECORD_FOR + person.getName() + " - "
+        + learningResource.getTitle() + " created.");
 
-        LearningStatus learningStatus = getStatus(verb, result);
+    return learningRecord;
+  }
 
-        learningRecord.setEnrollmentDate(enrollmentDate);
-        learningRecord.setLearningResource(learningResource);
-        learningRecord.setPerson(person);
-        learningRecord.setRecordStatus(learningStatus);
+  /**
+   * @param person
+   * @param learningResource
+   * @param verb
+   * @param result
+   * @param enrollmentDate
+   * @return learningRecord
+   */
+  private LearningRecord createLearningRecord(final Person person,
+      final LearningResource learningResource, final Verb verb,
+      final Result result, LocalDateTime enrollmentDate) {
 
-        if (result != null && result.getScore() != null && result.getScore()
-                .getScaled() != null) {
-            learningRecord.setAcademicGrade(result.getScore().getScaled()
-                    .toString());
-        }
+    LearningRecord learningRecord = new LearningRecord();
 
-        learningRecordService.save(learningRecord);
+    LearningStatus learningStatus = getStatus(verb, result);
 
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
-                + learningResource.getTitle() + " created.");
+    learningRecord.setEnrollmentDate(enrollmentDate);
+    learningRecord.setLearningResource(learningResource);
+    learningRecord.setPerson(person);
+    learningRecord.setRecordStatus(learningStatus);
 
-        return learningRecord;
+    if (result != null && result.getScore() != null && result.getScore()
+        .getScaled() != null) {
+      learningRecord.setAcademicGrade(result.getScore().getScaled()
+          .toString());
     }
 
-    /**
-     * @param person
-     * @param learningRecord
-     * @param verb
-     * @param result
-     * @return learningRecord
-     * @throws RuntimeServiceException
-     */
-    public LearningRecord updateLearningRecord(Person person,
-            LearningRecord learningRecord, final Verb verb, final Result result)
-            throws RuntimeServiceException {
+    learningRecordService.save(learningRecord);
 
-        log.info("Update learning record.");
+    log.info(LEARNING_RECORD_FOR + person.getName() + " - "
+        + learningResource.getTitle() + " created.");
 
-        LearningStatus learningStatus = getStatus(verb, result);
+    return learningRecord;
+  }
 
-        learningRecord.setRecordStatus(learningStatus);
+  /**
+   * @param person
+   * @param learningRecord
+   * @param verb
+   * @param result
+   * @return learningRecord
+   * @throws RuntimeServiceException
+   */
+  public LearningRecord updateLearningRecord(Person person,
+      LearningRecord learningRecord, final Verb verb, final Result result)
+      throws RuntimeServiceException {
 
-        if (result != null && result.getScore() != null && result.getScore()
-                .getScaled() != null) {
-            learningRecord.setAcademicGrade(result.getScore().getScaled()
-                    .toString());
-        }
+    LearningStatus learningStatus = getStatus(verb, result);
 
-        learningRecordService.update(learningRecord);
+    learningRecord.setRecordStatus(learningStatus);
 
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - " + learningRecord
-                .getLearningResource().getTitle() + " updated.");
+    if (result != null && result.getScore() != null && result.getScore()
+        .getScaled() != null) {
+      learningRecord.setAcademicGrade(result.getScore().getScaled()
+          .toString());
+    }
 
-        return learningRecord;
+    learningRecordService.update(learningRecord);
+
+    log.info(LEARNING_RECORD_FOR + person.getName() + " - " + learningRecord
+        .getLearningResource().getTitle() + " updated.");
+
+    return learningRecord;
+
+  }
+
+  /**
+   * @param person
+   * @param learningRecord
+   * @param verb
+   * @param result
+   * @param enrollmentDate
+   * @return learningRecord
+   * @throws RuntimeServiceException
+   */
+  public LearningRecord updateLearningRecord(Person person,
+      LearningRecord learningRecord, final Verb verb, final Result result,
+      final LocalDateTime enrollmentDate) throws RuntimeServiceException {
+
+    LearningStatus learningStatus = getStatus(verb, result);
+
+    learningRecord.setRecordStatus(learningStatus);
+    learningRecord.setEnrollmentDate(enrollmentDate);
+
+    if (result != null && result.getScore() != null && result.getScore()
+        .getScaled() != null) {
+      learningRecord.setAcademicGrade(result.getScore().getScaled()
+          .toString());
+    }
+
+    learningRecordService.update(learningRecord);
+
+    log.info("Learning Record for " + person.getName() + " - "
+        + learningRecord.getLearningResource().getTitle()
+        + " updated.");
+
+    return learningRecord;
+  }
+
+  /**
+   * @param verb
+   * @param result
+   * @return learningStatus
+   */
+  private LearningStatus getStatus(final Verb verb, final Result result) {
+
+    log.info("Verb = " + verb.getId());
+
+    if (verb.getId().toString().equalsIgnoreCase(
+        VerbIdConstants.PASSED_VERB_ID.toString())) {
+
+      return LearningStatus.PASSED;
+
+    } else if (verb.getId().toString().equalsIgnoreCase(
+        VerbIdConstants.FAILED_VERB_ID.toString())) {
+
+      return LearningStatus.FAILED;
+
+    } else if (verb.getId().toString().equalsIgnoreCase(
+        VerbIdConstants.INITIALIZED_VERB_ID.toString())) {
+
+      return LearningStatus.ATTEMPTED;
+
+    } else if (verb.getId().toString().equalsIgnoreCase(
+        VerbIdConstants.REGISTERED_VERB_ID.toString())
+        || verb.getId()
+            .toString().equalsIgnoreCase(
+                VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
+
+      return LearningStatus.REGISTERED;
 
     }
 
-    /**
-     * @param person
-     * @param learningRecord
-     * @param verb
-     * @param result
-     * @param enrollmentDate
-     * @return learningRecord
-     * @throws RuntimeServiceException
-     */
-    public LearningRecord updateLearningRecord(Person person,
-            LearningRecord learningRecord, final Verb verb, final Result result,
-            final LocalDateTime enrollmentDate) throws RuntimeServiceException {
-
-        log.info("Update learning record.");
-
-        LearningStatus learningStatus = getStatus(verb, result);
-
-        learningRecord.setRecordStatus(learningStatus);
-        learningRecord.setEnrollmentDate(enrollmentDate);
-
-        if (result != null && result.getScore() != null && result.getScore()
-                .getScaled() != null) {
-            learningRecord.setAcademicGrade(result.getScore().getScaled()
-                    .toString());
-        }
-
-        learningRecordService.update(learningRecord);
-
-        log.info("Learning Record for " + person.getName() + " - "
-                + learningRecord.getLearningResource().getTitle()
-                + " updated.");
-
-        return learningRecord;
+    if (result == null) {
+      return LearningStatus.ATTEMPTED;
     }
 
-    /**
-     * @param verb
-     * @param result
-     * @return learningStatus
-     */
-    private LearningStatus getStatus(final Verb verb, final Result result) {
+    Boolean success = result.getSuccess();
+    Boolean completed = result.getCompletion();
 
-        log.info("Verb = " + verb.getId());
+    if (completed && success == null) {
 
-        if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.PASSED_VERB_ID.toString())) {
+      return LearningStatus.COMPLETED;
 
-            return LearningStatus.PASSED;
+    } else if (completed && success) {
 
-        } else if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.FAILED_VERB_ID.toString())) {
+      return LearningStatus.PASSED;
 
-            return LearningStatus.FAILED;
+    } else if (completed && !success) {
 
-        } else if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.INITIALIZED_VERB_ID.toString())) {
+      return LearningStatus.FAILED;
 
-            return LearningStatus.ATTEMPTED;
+    } else {
 
-        } else if (verb.getId().toString().equalsIgnoreCase(
-                VerbIdConstants.REGISTERED_VERB_ID.toString()) || verb.getId()
-                        .toString().equalsIgnoreCase(
-                                VerbIdConstants.SCHEDULED_VERB_ID.toString())) {
-
-            return LearningStatus.REGISTERED;
-
-        }
-
-        if (result == null) {
-            return LearningStatus.ATTEMPTED;
-        }
-
-        Boolean success = result.getSuccess();
-        Boolean completed = result.getCompletion();
-
-        if (completed && success == null) {
-
-            return LearningStatus.COMPLETED;
-
-        } else if (completed && success) {
-
-            return LearningStatus.PASSED;
-
-        } else if (completed && !success) {
-
-            return LearningStatus.FAILED;
-
-        } else {
-
-            return LearningStatus.ATTEMPTED;
-        }
-
+      return LearningStatus.ATTEMPTED;
     }
+
+  }
 }

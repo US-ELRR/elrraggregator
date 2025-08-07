@@ -115,8 +115,6 @@ public class LearningResourceUtil {
   private LearningResource createLearningResource(final Activity activity)
       throws AggregatorException {
 
-    log.info("Creating new learning resource.");
-
     LearningResource learningResource = null;
 
     String activityName = langMapUtil.getLangMapValue(activity

@@ -160,22 +160,20 @@ public class ProcessWasAssigned implements Rule {
             context, person, startDate, endDate);
 
     // Get goal
-    if (assignedPerson != null) {
-      goal = goalService.findByPersonIdAndGoalId(assignedPerson.getId(),
-          activity.getId().toString());
-    }
+    goal = goalService.findByGoalId(activity.getId().toString());
 
     // If goal doesn't exist
     if (goal == null) {
 
       goal = createGoal(activity, startDate, achievedByDate, endDate,
           learnResources, credentials, competencies, assignedPerson);
+      log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
       // If goal already exists
     } else {
 
-      log.info(GOAL_MESSAGE + " " + activity.getId() + " exists.");
       goal = updateGoal(goal, activity, endDate, achievedByDate);
+      log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
 
     }
 
@@ -202,8 +200,6 @@ public class ProcessWasAssigned implements Rule {
       final List<LearningResource> learningResources,
       final List<Credential> credentials, final List<Competency> competencies,
       final Person assignedPerson) {
-
-    log.info("Creating new goal.");
 
     GoalType goalType = null;
     Goal goal = null;
@@ -239,7 +235,6 @@ public class ProcessWasAssigned implements Rule {
     goal.setCompetencies(new HashSet<>(competencies));
     goal.setPerson(assignedPerson);
     goalService.save(goal);
-    log.info(GOAL_MESSAGE + " " + activity.getId() + " created.");
 
     return goal;
 
@@ -255,8 +250,6 @@ public class ProcessWasAssigned implements Rule {
    */
   public Goal updateGoal(Goal goal, Activity activity,
       final LocalDateTime achievedByDate, final LocalDateTime endDate) {
-
-    log.info("Updating goal.");
 
     GoalType goalType = null;
     String activityName = "";
@@ -284,7 +277,6 @@ public class ProcessWasAssigned implements Rule {
     goal.setAchievedByDate(achievedByDate);
     goal.setExpirationDate(endDate);
     goalService.update(goal);
-    log.info(GOAL_MESSAGE + " " + activity.getId() + " updated.");
 
     return goal;
 

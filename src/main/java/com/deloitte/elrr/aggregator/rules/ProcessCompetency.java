@@ -128,11 +128,14 @@ public class ProcessCompetency implements Rule {
     if (competency == null) {
 
       competency = createCompetency(activity, startDate, endDate);
+      log.info(
+          COMPETENCY_MESSAGE + " " + competency.getIdentifier() + " created.");
 
     } else {
 
-      log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " exists.");
       competency = updateCompetency(competency, activity, endDate);
+      log.info(
+          COMPETENCY_MESSAGE + " " + competency.getIdentifier() + " updated.");
 
     }
 
@@ -172,14 +175,16 @@ public class ProcessCompetency implements Rule {
         // If Competency already exists
         if (competency != null) {
 
-          log.info(COMPETENCY_MESSAGE + " " + activity.getId()
-              + " exists.");
+          log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+              + " already exists.");
 
           // If Competency doesn't exist
         } else {
 
           competency = createCompetency(activity, startDate, null);
           competencies.add(competency);
+          log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+              + " created.");
 
           // Process PersonalCompetency
           processPersonalCompetency(person, competency, expires);
@@ -203,8 +208,6 @@ public class ProcessCompetency implements Rule {
   private Competency createCompetency(final Activity activity,
       final LocalDateTime startDate, final LocalDateTime endDate) {
 
-    log.info("Creating new competency.");
-
     Competency competency = null;
     String activityName = "";
     String activityDescription = "";
@@ -221,7 +224,6 @@ public class ProcessCompetency implements Rule {
     competency.setValidStartDate(startDate);
     competency.setValidEndDate(endDate);
     competencyService.save(competency);
-    log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " created.");
 
     return competency;
   }
@@ -236,8 +238,6 @@ public class ProcessCompetency implements Rule {
   public Competency updateCompetency(Competency competency,
       final Activity activity, final LocalDateTime endDate) {
 
-    log.info("Updating competency.");
-
     String activityName = "";
     String activityDescription = "";
 
@@ -250,7 +250,6 @@ public class ProcessCompetency implements Rule {
     competency.setFrameworkDescription(activityDescription);
     competency.setValidEndDate(endDate);
     competencyService.update(competency);
-    log.info(COMPETENCY_MESSAGE + " " + activity.getId() + " updated.");
 
     return competency;
   }
@@ -286,13 +285,23 @@ public class ProcessCompetency implements Rule {
         person.getCompetencies().add(personalCompetency);
         personService.save(person);
 
+        log.info("Personal Competency for " + person.getName() + " - "
+            + personalCompetency.getCompetency().getIdentifier()
+            + " created.");
+
       } else {
 
         personalCompetency = updatePersonalCompetency(
             personalCompetency, person, expires);
+
+        log.info("Personal Competency for " + person.getName() + " - "
+            + personalCompetency.getCompetency().getIdentifier()
+            + " updated.");
+
       }
 
     } catch (DateTimeParseException e) {
+
       log.error("Error invalid expires date.", e);
       throw new AggregatorException("Error invalid expires date.", e);
 
@@ -310,7 +319,6 @@ public class ProcessCompetency implements Rule {
   private PersonalCompetency createPersonalCompetency(final Person person,
       final Competency competency, final LocalDateTime expires) {
 
-    log.info("Creating new personal competency record.");
     PersonalCompetency personalCompetency = new PersonalCompetency();
 
     personalCompetency.setPerson(person);
@@ -322,10 +330,6 @@ public class ProcessCompetency implements Rule {
     }
 
     personalCompetencyService.save(personalCompetency);
-
-    log.info("Personal Competency for " + person.getName() + " - "
-        + personalCompetency.getCompetency().getFrameworkTitle()
-        + " created.");
 
     return personalCompetency;
   }
@@ -344,10 +348,6 @@ public class ProcessCompetency implements Rule {
 
       personalCompetency.setExpires(expires);
       personalCompetencyService.update(personalCompetency);
-
-      log.info("Personal Competency for " + person.getName() + " - "
-          + personalCompetency.getCompetency().getFrameworkTitle()
-          + " updated.");
 
     }
 
