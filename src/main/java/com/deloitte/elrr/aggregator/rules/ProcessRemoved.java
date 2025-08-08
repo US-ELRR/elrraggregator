@@ -5,8 +5,6 @@ import java.net.URISyntaxException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
-import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.Goal;
 import com.deloitte.elrr.entity.Person;
@@ -22,12 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessRemoved implements Rule {
 
   @Autowired
-  private ProcessPerson processPerson;
-  @Autowired
   private GoalSvc goalService;
-
-  @Autowired
-  private ExtensionsUtil extensionsUtil;
 
   /**
    * @param statement

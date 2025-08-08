@@ -16,89 +16,89 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LangMapUtil {
 
-    @Value("${lang.codes}")
-    private ArrayList<String> prefLangCodes = new ArrayList<String>();
+  @Value("${lang.codes}")
+  private ArrayList<String> prefLangCodes = new ArrayList<String>();
 
-    /**
-     * Constructor.
-     */
-    public LangMapUtil() {
-        this.prefLangCodes.add("en-us");
+  /**
+   * Constructor.
+   */
+  public LangMapUtil() {
+    this.prefLangCodes.add("en-us");
+  }
+
+  /**
+   * Given a set of LangTags, find the first one that matches one of the
+   * prefLangCodes.
+   *
+   * @param tags
+   * @return matching LangTag
+   */
+  public LangTag getMatchingKey(Set<LangTag> tags) {
+    for (LangTag tag : new ArrayList<LangTag>(tags)) {
+      if (prefLangCodes.contains(tag.toString().toLowerCase())) {
+        return tag;
+      }
     }
+    return null;
+  }
 
-    /**
-     * Given a set of LangTags, find the first one that matches one of the
-     * prefLangCodes.
-     *
-     * @param tags
-     * @return matching LangTag
-     */
-    public LangTag getMatchingKey(Set<LangTag> tags) {
-        for (LangTag tag : new ArrayList<LangTag>(tags)) {
-            if (prefLangCodes.contains(tag.toString().toLowerCase())) {
-                return tag;
-            }
-        }
+  /**
+   * Given a set of LangTags and a string prefix, return the first one that
+   * matches the prefix.
+   *
+   * @param tags
+   * @param prefix
+   * @return Matching LangTag
+   */
+  public LangTag getCodeWithPrefix(Set<LangTag> tags, String prefix) {
+    for (LangTag tag : new ArrayList<LangTag>(tags)) {
+      if (tag.toString().startsWith(prefix)) {
+        return tag;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param langMap
+   * @return langCode
+   * @throws AggregatorException
+   */
+  public String getLangMapValue(LangMap langMap) throws AggregatorException {
+
+    try {
+
+      if (langMap == null) {
         return null;
-    }
+      }
 
-    /**
-     * Given a set of LangTags and a string prefix, return the first one that
-     * matches the prefix.
-     *
-     * @param tags
-     * @param prefix
-     * @return Matching LangTag
-     */
-    public LangTag getCodeWithPrefix(Set<LangTag> tags, String prefix) {
-        for (LangTag tag : new ArrayList<LangTag>(tags)) {
-            if (tag.toString().startsWith(prefix)) {
-                return tag;
-            }
+      Set<LangTag> langCodes = langMap.getKeys();
+
+      // Iterate and compare to lang.codes in .properties
+      LangTag langCode = getMatchingKey(langMap.getKeys());
+
+      // If langCode not found
+      if (langCode == null) {
+
+        LangTag enUS = new LangTag("en-us");
+
+        // Check for en-us
+        if (langCodes.contains(enUS)) {
+          langCode = enUS;
+        } else {
+          langCode = getCodeWithPrefix(langMap.getKeys(), "en");
         }
-        return null;
+      }
+
+      // Get 1st element
+      if (langCode == null) {
+        langCode = langCodes.stream().findFirst().orElse(null);
+      }
+
+      return langMap.get(langCode);
+
+    } catch (ClassCastException | NullPointerException e) {
+      throw new AggregatorException("Error getting language codes", e);
     }
-
-    /**
-     * @param langMap
-     * @return langCode
-     * @throws AggregatorException
-     */
-    public String getLangMapValue(LangMap langMap) {
-
-        try {
-
-            if (langMap == null) {
-                return null;
-            }
-
-            Set<LangTag> langCodes = langMap.getKeys();
-
-            // Iterate and compare to lang.codes in .properties
-            LangTag langCode = getMatchingKey(langMap.getKeys());
-
-            // If langCode not found
-            if (langCode == null) {
-
-                LangTag enUS = new LangTag("en-us");
-
-                // Check for en-us
-                if (langCodes.contains(enUS)) {
-                    langCode = enUS;
-                } else {
-                    langCode = getCodeWithPrefix(langMap.getKeys(), "en");
-                }
-            }
-
-            // Get 1st element
-            if (langCode == null) {
-                langCode = langCodes.stream().findFirst().orElse(null);
-            }
-
-            return langMap.get(langCode);
-
-        } catch (ClassCastException | NullPointerException e) {
-            throw new AggregatorException("Error getting language codes", e);
-        }
-    }
+  }
 }

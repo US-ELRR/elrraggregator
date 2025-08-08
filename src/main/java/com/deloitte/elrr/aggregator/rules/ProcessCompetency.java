@@ -81,7 +81,8 @@ public class ProcessCompetency implements Rule {
    */
   @Override
   @Transactional
-  public Person processRule(final Person person, final Statement statement) {
+  public Person processRule(final Person person, final Statement statement)
+      throws AggregatorException {
 
     log.info("Process competency.");
 
@@ -112,10 +113,8 @@ public class ProcessCompetency implements Rule {
    * @return competency
    * @throws AggregatorException
    */
-  private Competency processCompetency(
-      final Activity activity,
-      final LocalDateTime startDate,
-      final LocalDateTime endDate)
+  private Competency processCompetency(final Activity activity,
+      final LocalDateTime startDate, final LocalDateTime endDate)
       throws AggregatorException {
 
     Competency competency = null;
@@ -206,7 +205,8 @@ public class ProcessCompetency implements Rule {
    * @throws AggregatorException
    */
   private Competency createCompetency(final Activity activity,
-      final LocalDateTime startDate, final LocalDateTime endDate) {
+      final LocalDateTime startDate, final LocalDateTime endDate)
+      throws AggregatorException {
 
     Competency competency = null;
     String activityName = "";
@@ -236,7 +236,8 @@ public class ProcessCompetency implements Rule {
    * @throws AggregatorException
    */
   public Competency updateCompetency(Competency competency,
-      final Activity activity, final LocalDateTime endDate) {
+      final Activity activity, final LocalDateTime endDate)
+      throws AggregatorException {
 
     String activityName = "";
     String activityDescription = "";

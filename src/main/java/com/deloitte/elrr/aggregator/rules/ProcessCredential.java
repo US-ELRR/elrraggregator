@@ -81,7 +81,8 @@ public class ProcessCredential implements Rule {
    */
   @Override
   @Transactional
-  public Person processRule(final Person person, final Statement statement) {
+  public Person processRule(final Person person, final Statement statement)
+      throws AggregatorException {
 
     log.info("Process credential.");
 
@@ -206,7 +207,7 @@ public class ProcessCredential implements Rule {
    */
   private Credential createCredential(final Activity activity,
       final LocalDateTime startDate,
-      final LocalDateTime endDate) {
+      final LocalDateTime endDate) throws AggregatorException {
 
     Credential credential = null;
     String activityName = "";
@@ -236,7 +237,8 @@ public class ProcessCredential implements Rule {
    * @throws AggregatorException
    */
   public Credential updateCredential(Credential credential,
-      final Activity activity, final LocalDateTime endDate) {
+      final Activity activity, final LocalDateTime endDate)
+      throws AggregatorException {
 
     String activityName = "";
     String activityDescription = "";

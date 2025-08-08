@@ -172,8 +172,16 @@ public class ProcessWasAssigned implements Rule {
       // If goal already exists
     } else {
 
-      goal = updateGoal(goal, activity, endDate, achievedByDate);
-      log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
+      // If goal id already exists for another person
+      if (assignedPerson != goal.getPerson()) {
+        log.info(
+            "Duplicate goal id: Assigned person " + assignedPerson.getName()
+                + " has same goal id " + goal.getGoalId() + " as "
+                + goal.getPerson().getName());
+      } else {
+        goal = updateGoal(goal, activity, endDate, achievedByDate);
+        log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
+      }
 
     }
 
@@ -199,7 +207,7 @@ public class ProcessWasAssigned implements Rule {
       final LocalDateTime endDate,
       final List<LearningResource> learningResources,
       final List<Credential> credentials, final List<Competency> competencies,
-      final Person assignedPerson) {
+      final Person assignedPerson) throws AggregatorException {
 
     GoalType goalType = null;
     Goal goal = null;
@@ -249,7 +257,8 @@ public class ProcessWasAssigned implements Rule {
    * @throws AggregatorException
    */
   public Goal updateGoal(Goal goal, Activity activity,
-      final LocalDateTime achievedByDate, final LocalDateTime endDate) {
+      final LocalDateTime achievedByDate, final LocalDateTime endDate)
+      throws AggregatorException {
 
     GoalType goalType = null;
     String activityName = "";

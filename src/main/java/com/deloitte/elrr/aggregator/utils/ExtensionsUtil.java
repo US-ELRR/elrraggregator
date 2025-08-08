@@ -31,7 +31,8 @@ public class ExtensionsUtil {
    * @return extensionsMap or LocalDateTime
    * @throws AggregatorException
    */
-  public Object getExtensions(Context context, String returnObject) {
+  public Object getExtensions(Context context, String returnObject)
+      throws AggregatorException {
 
     Map<URI, Object> extensionsMap = new HashMap<>();
 

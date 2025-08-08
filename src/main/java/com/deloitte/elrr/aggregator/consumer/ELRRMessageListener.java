@@ -84,7 +84,8 @@ public class ELRRMessageListener {
    */
   @Transactional
   @KafkaListener(topics = "${kafka.topic}")
-  public void listen(final String message) throws ClassCastException,
+  public void listen(final String message)
+      throws AggregatorException, ClassCastException,
       NullPointerException, RuntimeServiceException, URISyntaxException {
 
     log.info("\n\n Received Messasge in group - group-id== \n" + message);
@@ -116,7 +117,8 @@ public class ELRRMessageListener {
    * @throws AggregatorException
    */
   @Transactional
-  public void processMessage(final String payload) throws ClassCastException,
+  public void processMessage(final String payload)
+      throws AggregatorException, ClassCastException,
       NullPointerException, RuntimeServiceException, URISyntaxException {
 
     log.info(" \n\n ===============Process Kafka message===============");
