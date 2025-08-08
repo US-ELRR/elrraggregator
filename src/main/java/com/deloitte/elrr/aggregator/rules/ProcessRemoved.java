@@ -19,8 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessRemoved implements Rule {
 
-  @Autowired
-  private GoalSvc goalService;
+    @Autowired
+    private GoalSvc goalService;
 
   /**
    * @param statement
@@ -78,6 +78,6 @@ public class ProcessRemoved implements Rule {
 
     return person;
 
-  }
+}
 
 }

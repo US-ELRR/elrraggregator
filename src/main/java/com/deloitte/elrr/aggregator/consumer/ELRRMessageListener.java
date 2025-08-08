@@ -29,140 +29,148 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ELRRMessageListener {
 
-  @Autowired
-  private Rule processCompleted;
+    @Autowired
+    private Rule processCompleted;
 
-  @Autowired
-  private Rule processCompetency;
+    @Autowired
+    private Rule processCompetency;
 
-  @Autowired
-  private Rule processCredential;
+    @Autowired
+    private Rule processCredential;
 
-  @Autowired
-  private ProcessPerson processPerson;
+    @Autowired
+    private ProcessPerson processPerson;
 
-  @Autowired
-  private Rule processPassed;
+    @Autowired
+    private Rule processPassed;
 
-  @Autowired
-  private Rule processFailed;
+    @Autowired
+    private Rule processFailed;
 
-  @Autowired
-  private Rule processInitialized;
+    @Autowired
+    private Rule processInitialized;
 
-  @Autowired
-  private Rule processSatisfied;
+    @Autowired
+    private Rule processSatisfied;
 
-  @Autowired
-  private Rule processRegistered;
+    @Autowired
+    private Rule processRegistered;
 
-  @Autowired
-  private Rule processScheduled;
+    @Autowired
+    private Rule processScheduled;
 
-  @Autowired
-  private Rule processAssigned;
+    @Autowired
+    private Rule processAssigned;
 
-  @Autowired
-  private Rule processWasAssigned;
+    @Autowired
+    private Rule processWasAssigned;
 
-  @Autowired
-  private Rule processRemoved;
+    @Autowired
+    private Rule processRemoved;
 
-  @Autowired
-  private KafkaTemplate<?, String> kafkaTemplate;
+    @Autowired
+    private KafkaTemplate<?, String> kafkaTemplate;
 
-  @Value("${kafka.dead.letter.topic}")
-  private String deadLetterTopic;
+    @Value("${kafka.dead.letter.topic}")
+    private String deadLetterTopic;
 
-  /**
-   * @param message
-   * @throws URISyntaxException
-   * @throws RuntimeServiceException
-   * @throws NullPointerException
-   * @throws ClassCastException
-   * @throws AggregatorException
-   */
-  @Transactional
-  @KafkaListener(topics = "${kafka.topic}")
-  public void listen(final String message)
-      throws AggregatorException, ClassCastException,
-      NullPointerException, RuntimeServiceException, URISyntaxException {
+    /**
+     * @param message
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
+     * @throws AggregatorException
+     */
+    @Transactional
+    @KafkaListener(topics = "${kafka.topic}")
+    public
+            void
+            listen(
+                    final String message)
+                    throws AggregatorException, ClassCastException,
+                    NullPointerException, RuntimeServiceException,
+                    URISyntaxException {
 
-    log.info("\n\n Received Messasge in group - group-id== \n" + message);
+        log.info("\n\n Received Messasge in group - group-id== \n" + message);
 
-    try {
+        try {
 
-      // If valid message process otherwise send to dead letter queue
-      if (InputSanitizer.isValidInput(message)) {
-        processMessage(message);
-      } else {
-        log.error("Invalid message did not pass whitelist check - "
-            + message);
-        kafkaTemplate.send(deadLetterTopic, message);
-      }
+            // If valid message process otherwise send to dead letter queue
+            if (InputSanitizer.isValidInput(message)) {
+                processMessage(message);
+            } else {
+                log.error("Invalid message did not pass whitelist check - "
+                        + message);
+                kafkaTemplate.send(deadLetterTopic, message);
+            }
 
-    } catch (AggregatorException e) {
-      // Send to dead letter queue
-      kafkaTemplate.send(deadLetterTopic, message);
-      throw e;
+        } catch (AggregatorException e) {
+            // Send to dead letter queue
+            kafkaTemplate.send(deadLetterTopic, message);
+            throw e;
+        }
     }
-  }
 
-  /**
-   * @param payload
-   * @throws URISyntaxException
-   * @throws RuntimeServiceException
-   * @throws NullPointerException
-   * @throws ClassCastException
-   * @throws AggregatorException
-   */
-  @Transactional
-  public void processMessage(final String payload)
-      throws AggregatorException, ClassCastException,
-      NullPointerException, RuntimeServiceException, URISyntaxException {
+    /**
+     * @param payload
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
+     * @throws AggregatorException
+     */
+    @Transactional
+    public
+            void
+            processMessage(
+                    final String payload)
+                    throws AggregatorException, ClassCastException,
+                    NullPointerException, RuntimeServiceException,
+                    URISyntaxException {
 
-    log.info(" \n\n ===============Process Kafka message===============");
+        log.info(" \n\n ===============Process Kafka message===============");
 
-    Statement statement = null;
-    Person person = null;
-    MessageVO messageVo = null;
+        Statement statement = null;
+        Person person = null;
+        MessageVO messageVo = null;
 
-    try {
+        try {
 
-      ObjectMapper mapper = Mapper.getMapper();
+            ObjectMapper mapper = Mapper.getMapper();
 
-      // Get Statement
-      messageVo = mapper.readValue(payload, MessageVO.class);
-      statement = messageVo.getStatement();
+            // Get Statement
+            messageVo = mapper.readValue(payload, MessageVO.class);
+            statement = messageVo.getStatement();
 
-      // Process Person
-      person = processPerson.processPerson(statement);
+            // Process Person
+            person = processPerson.processPerson(statement);
 
-      // *** ADD NEW RULES HERE ***
-      List<Rule> classList = Arrays.asList(processCompetency,
-          processCompleted, processCredential, processFailed,
-          processInitialized, processPassed, processSatisfied,
-          processRegistered, processScheduled, processAssigned,
-          processWasAssigned, processRemoved);
+            // *** ADD NEW RULES HERE ***
+            List<Rule> classList = Arrays.asList(processCompetency,
+                    processCompleted, processCredential, processFailed,
+                    processInitialized, processPassed, processSatisfied,
+                    processRegistered, processScheduled, processAssigned,
+                    processWasAssigned, processRemoved);
 
-      for (Rule rule : classList) {
+            for (Rule rule : classList) {
 
-        if (rule.fireRule(statement)) {
+                if (rule.fireRule(statement)) {
 
-          // Process Rule
-          rule.processRule(person, statement);
+                    // Process Rule
+                    rule.processRule(person, statement);
+
+                }
+            }
+
+        } catch (AggregatorException | PersonNotFoundException
+                | JsonProcessingException e) {
+
+            log.error("Error processing Kafka message", e);
+            throw new AggregatorException("Error processing Kafka message.", e);
 
         }
-      }
-
-    } catch (AggregatorException | PersonNotFoundException
-        | JsonProcessingException e) {
-
-      log.error("Error processing Kafka message", e);
-      throw new AggregatorException("Error processing Kafka message.", e);
 
     }
-
-  }
 
 }
