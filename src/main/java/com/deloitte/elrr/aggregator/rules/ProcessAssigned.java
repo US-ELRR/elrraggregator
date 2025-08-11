@@ -61,10 +61,8 @@ public class ProcessAssigned implements Rule {
      * @param statement
      * @return boolean
      */
-    public
-            boolean
-            fireRule(
-                    Statement statement) {
+    public boolean fireRule(
+            Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -83,14 +81,12 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public
-            Person
-            processRule(
-                    Person person,
-                    Statement statement)
-                    throws AggregatorException, ClassCastException,
-                    NullPointerException, RuntimeServiceException,
-                    URISyntaxException {
+    public Person processRule(
+            Person person,
+            Statement statement)
+            throws AggregatorException, ClassCastException,
+            NullPointerException, RuntimeServiceException,
+            URISyntaxException {
 
         log.info("Process assigned.");
 
@@ -127,14 +123,13 @@ public class ProcessAssigned implements Rule {
      * @throws URISyntaxException
      */
     @Transactional
-    public
-            Goal
-            processGoal(
-                    final Context context,
-                    final Activity activity,
-                    final LocalDateTime startDate,
-                    final Person assignedPerson)
-                    throws AggregatorException, URISyntaxException {
+    @SuppressWarnings("checkstyle:linelength")
+    public Goal processGoal(
+            final Context context,
+            final Activity activity,
+            final LocalDateTime startDate,
+            final Person assignedPerson)
+            throws AggregatorException, URISyntaxException {
 
         List<LearningResource> learnResources = new ArrayList<LearningResource>();
         List<Credential> credentials = new ArrayList<Credential>();
@@ -210,17 +205,15 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public
-            Goal
-            createGoal(
-                    final Activity activity,
-                    final LocalDateTime startDate,
-                    final LocalDateTime achievedByDate,
-                    final LocalDateTime endDate,
-                    final List<LearningResource> learningResources,
-                    final List<Credential> credentials,
-                    final List<Competency> competencies,
-                    final Person assignedPerson) throws AggregatorException {
+    public Goal createGoal(
+            final Activity activity,
+            final LocalDateTime startDate,
+            final LocalDateTime achievedByDate,
+            final LocalDateTime endDate,
+            final List<LearningResource> learningResources,
+            final List<Credential> credentials,
+            final List<Competency> competencies,
+            final Person assignedPerson) throws AggregatorException {
 
         GoalType goalType = null;
         Goal goal = null;
@@ -269,14 +262,12 @@ public class ProcessAssigned implements Rule {
      * @return goal
      * @throws AggregatorException
      */
-    public
-            Goal
-            updateGoal(
-                    Goal goal,
-                    Activity activity,
-                    final LocalDateTime achievedByDate,
-                    final LocalDateTime endDate)
-                    throws AggregatorException {
+    public Goal updateGoal(
+            Goal goal,
+            Activity activity,
+            final LocalDateTime achievedByDate,
+            final LocalDateTime endDate)
+            throws AggregatorException {
 
         GoalType goalType = null;
         String activityName = "";
