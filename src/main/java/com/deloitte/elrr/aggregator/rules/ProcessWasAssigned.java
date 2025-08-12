@@ -69,8 +69,8 @@ public class ProcessWasAssigned implements Rule {
     }
 
     // Is Verb Id = assigned
-    return (statement.getVerb().getId().toString().equalsIgnoreCase(
-        VerbIdConstants.WAS_ASSIGNED_VERB_ID.toString()));
+    return (statement.getVerb().getId().toString()
+        .equalsIgnoreCase(VerbIdConstants.WAS_ASSIGNED_VERB_ID.toString()));
   }
 
   /**
@@ -81,9 +81,8 @@ public class ProcessWasAssigned implements Rule {
    * @throws URISyntaxException
    */
   public Person processRule(Person person, Statement statement)
-      throws AggregatorException, ClassCastException,
-      NullPointerException, RuntimeServiceException,
-      URISyntaxException {
+      throws AggregatorException, ClassCastException, NullPointerException,
+      RuntimeServiceException, URISyntaxException {
 
     log.info("Process was assigned.");
 
@@ -107,8 +106,7 @@ public class ProcessWasAssigned implements Rule {
     }
 
     // Process Goal
-    processGoal(statement.getContext(), activity, person, startDate,
-        person);
+    processGoal(statement.getContext(), activity, person, startDate, person);
 
     return person;
 
@@ -146,18 +144,16 @@ public class ProcessWasAssigned implements Rule {
         ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
 
     // Process LearningResources
-    learnResources = learningResourceUtil.processAssignedLearningResources(
-        context);
+    learnResources = learningResourceUtil
+        .processAssignedLearningResources(context);
 
     // Process Credentials
     credentials = (List<Credential>) processCredential
-        .processAssignedCredentials(
-            context, person, startDate, endDate);
+        .processAssignedCredentials(context, person, startDate, endDate);
 
     // Process Competencies
     competencies = (List<Competency>) processCompetency
-        .processAssignedCompetencies(
-            context, person, startDate, endDate);
+        .processAssignedCompetencies(context, person, startDate, endDate);
 
     // Get goal
     goal = goalService.findByGoalId(activity.getId().toString());
@@ -174,10 +170,9 @@ public class ProcessWasAssigned implements Rule {
 
       // If goal id already exists for another person
       if (assignedPerson != goal.getPerson()) {
-        log.info(
-            "Duplicate goal id: Assigned person " + assignedPerson.getName()
-                + " has same goal id " + goal.getGoalId() + " as "
-                + goal.getPerson().getName());
+        log.info("Duplicate goal id: Assigned person "
+            + assignedPerson.getName() + " has same goal id " + goal.getGoalId()
+            + " as " + goal.getPerson().getName());
       } else {
         goal = updateGoal(goal, activity, endDate, achievedByDate);
         log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
@@ -202,9 +197,8 @@ public class ProcessWasAssigned implements Rule {
    * @throws AggregatorException
    */
   @SuppressWarnings("checkstyle:ParameterNumber")
-  public Goal createGoal(final Activity activity,
-      final LocalDateTime startDate, final LocalDateTime achievedByDate,
-      final LocalDateTime endDate,
+  public Goal createGoal(final Activity activity, final LocalDateTime startDate,
+      final LocalDateTime achievedByDate, final LocalDateTime endDate,
       final List<LearningResource> learningResources,
       final List<Credential> credentials, final List<Competency> competencies,
       final Person assignedPerson) throws AggregatorException {
@@ -214,17 +208,16 @@ public class ProcessWasAssigned implements Rule {
     String activityName = "";
     String activityDescription = "";
 
-    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-        .getName());
-    activityDescription = langMapUtil.getLangMapValue(activity
-        .getDefinition().getDescription());
+    activityName = langMapUtil
+        .getLangMapValue(activity.getDefinition().getName());
+    activityDescription = langMapUtil
+        .getLangMapValue(activity.getDefinition().getDescription());
 
     // Get goalType
-    if (activity != null && activity.getDefinition()
-        .getExtensions() != null) {
+    if (activity != null && activity.getDefinition().getExtensions() != null) {
 
-      String type = (String) activity.getDefinition().getExtensions().get(
-          ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+      String type = (String) activity.getDefinition().getExtensions()
+          .get(ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
       goalType = extensionsUtil.getGoalType(type);
 
@@ -264,17 +257,16 @@ public class ProcessWasAssigned implements Rule {
     String activityName = "";
     String activityDescription = "";
 
-    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-        .getName());
-    activityDescription = langMapUtil.getLangMapValue(activity
-        .getDefinition().getDescription());
+    activityName = langMapUtil
+        .getLangMapValue(activity.getDefinition().getName());
+    activityDescription = langMapUtil
+        .getLangMapValue(activity.getDefinition().getDescription());
 
     // Get goalType
-    if (activity != null && activity.getDefinition()
-        .getExtensions() != null) {
+    if (activity != null && activity.getDefinition().getExtensions() != null) {
 
-      String type = (String) activity.getDefinition().getExtensions().get(
-          ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+      String type = (String) activity.getDefinition().getExtensions()
+          .get(ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
 
       goalType = extensionsUtil.getGoalType(type);
 

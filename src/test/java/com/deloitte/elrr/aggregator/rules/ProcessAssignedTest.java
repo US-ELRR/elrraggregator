@@ -83,11 +83,10 @@ class ProcessAssignedTest {
 
     try {
 
-      File testFile = TestFileUtil.getJsonTestFile(
-          "assigned_not_by_learner_competency.json");
+      File testFile = TestFileUtil
+          .getJsonTestFile("assigned_not_by_learner_competency.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
       LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
@@ -95,8 +94,7 @@ class ProcessAssignedTest {
       // Get Activity
       Activity activity = (Activity) stmt.getObject();
 
-      Mockito.doReturn("Competency B").when(langMapUtil)
-          .getLangMapValue(any());
+      Mockito.doReturn("Competency B").when(langMapUtil).getLangMapValue(any());
 
       Person assignedPerson = new Person();
       assignedPerson.setId(UUID.randomUUID());
@@ -128,18 +126,16 @@ class ProcessAssignedTest {
 
     try {
 
-      File testFile = TestFileUtil.getJsonTestFile(
-          "assigned_not_by_learner_credential.json");
+      File testFile = TestFileUtil
+          .getJsonTestFile("assigned_not_by_learner_credential.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
       // Get Activity
       Activity activity = (Activity) stmt.getObject();
 
-      Mockito.doReturn("Credential A").when(langMapUtil)
-          .getLangMapValue(any());
+      Mockito.doReturn("Credential A").when(langMapUtil).getLangMapValue(any());
 
       Person assignedPerson = new Person();
       assignedPerson.setId(UUID.randomUUID());
@@ -175,8 +171,7 @@ class ProcessAssignedTest {
 
       testFile = TestFileUtil.getJsonTestFile("agent.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
       boolean fireRule = processAssigned.fireRule(stmt);

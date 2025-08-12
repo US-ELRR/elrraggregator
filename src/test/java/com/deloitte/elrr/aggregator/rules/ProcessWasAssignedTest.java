@@ -83,11 +83,10 @@ class ProcessWasAssignedTest {
 
     try {
 
-      File testFile = TestFileUtil.getJsonTestFile(
-          "was_assigned_by_learner_credential.json");
+      File testFile = TestFileUtil
+          .getJsonTestFile("was_assigned_by_learner_credential.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
       LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
@@ -129,20 +128,15 @@ class ProcessWasAssignedTest {
 
     try {
 
-      File testFile = TestFileUtil.getJsonTestFile(
-          "was_assigned_by_learner_credential.json");
+      File testFile = TestFileUtil
+          .getJsonTestFile("was_assigned_by_learner_credential.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
-      LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
-
-      // Get Activity
       Activity activity = (Activity) stmt.getObject();
 
-      Mockito.doReturn("Credentail A").when(langMapUtil)
-          .getLangMapValue(any());
+      Mockito.doReturn("Credentail A").when(langMapUtil).getLangMapValue(any());
 
       Person assignedPerson = new Person();
       assignedPerson.setId(UUID.randomUUID());
@@ -179,8 +173,7 @@ class ProcessWasAssignedTest {
 
       testFile = TestFileUtil.getJsonTestFile("agent.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
+      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
       assertNotNull(stmt);
 
       boolean fireRule = processWasAssigned.fireRule(stmt);
