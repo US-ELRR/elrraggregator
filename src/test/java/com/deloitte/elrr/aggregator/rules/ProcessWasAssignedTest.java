@@ -42,146 +42,150 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessWasAssignedTest {
 
-  @Mock
-  private LangMapUtil langMapUtil;
+    @Mock
+    private LangMapUtil langMapUtil;
 
-  @Mock
-  private PersonSvc personService;
+    @Mock
+    private PersonSvc personService;
 
-  @Mock
-  private CredentialSvc credentialService;
+    @Mock
+    private CredentialSvc credentialService;
 
-  @Mock
-  private ProcessPerson processPerson;
+    @Mock
+    private ProcessPerson processPerson;
 
-  @Mock
-  private LearningResourceUtil learningResourceUtil;
+    @Mock
+    private LearningResourceUtil learningResourceUtil;
 
-  @Mock
-  private ProcessCredential processCredential;
+    @Mock
+    private ProcessCredential processCredential;
 
-  @Mock
-  private ProcessCompetency processCompetency;
+    @Mock
+    private ProcessCompetency processCompetency;
 
-  @Mock
-  private PersonalCredentialSvc personalCredentialService;
+    @Mock
+    private PersonalCredentialSvc personalCredentialService;
 
-  @Mock
-  private ExtensionsUtil extensionsUtil;
+    @Mock
+    private ExtensionsUtil extensionsUtil;
 
-  @Mock
-  private GoalSvc goalService;
+    @Mock
+    private GoalSvc goalService;
 
-  @Mock
-  private Person personMock;
+    @Mock
+    private Person personMock;
 
-  @InjectMocks
-  private ProcessWasAssigned processWasAssigned;
+    @InjectMocks
+    private ProcessWasAssigned processWasAssigned;
 
-  @Test
-  void testAssignedCompetency() {
+    @Test
+    void testAssignedCompetency() {
 
-    try {
+        try {
 
-      File testFile = TestFileUtil
-          .getJsonTestFile("was_assigned_by_learner_credential.json");
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "was_assigned_by_learner_credential.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
+            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
 
-      // Get Activity
-      Activity activity = (Activity) stmt.getObject();
+            // Get Activity
+            Activity activity = (Activity) stmt.getObject();
 
-      Mockito.doReturn("Competency AA").when(langMapUtil)
-          .getLangMapValue(any());
+            Mockito.doReturn("Competency AA").when(langMapUtil).getLangMapValue(
+                    any());
 
-      Person assignedPerson = new Person();
-      assignedPerson.setId(UUID.randomUUID());
-      assignedPerson.setName("Bill Curry");
+            Person assignedPerson = new Person();
+            assignedPerson.setId(UUID.randomUUID());
+            assignedPerson.setName("Bill Curry");
 
-      Goal goal = new Goal();
-      goal.setId(UUID.randomUUID());
-      goal.setName("Bill Curry Professional Development Goal 1");
-      goal.setPerson(assignedPerson);
+            Goal goal = new Goal();
+            goal.setId(UUID.randomUUID());
+            goal.setName("Bill Curry Professional Development Goal 1");
+            goal.setPerson(assignedPerson);
 
-      boolean fireRule = processWasAssigned.fireRule(stmt);
-      assertTrue(fireRule);
+            boolean fireRule = processWasAssigned.fireRule(stmt);
+            assertTrue(fireRule);
 
-      Person personResult = processWasAssigned.processRule(assignedPerson,
-          stmt);
-      assertNotNull(personResult);
+            Person personResult = processWasAssigned.processRule(assignedPerson,
+                    stmt);
+            assertNotNull(personResult);
 
-      goal = processWasAssigned.updateGoal(goal, activity, null, null);
-      assertNotNull(goal);
+            goal = processWasAssigned.updateGoal(goal, activity, null, null);
+            assertNotNull(goal);
 
-    } catch (AggregatorException | IOException | ClassCastException
-        | NullPointerException | RuntimeServiceException
-        | URISyntaxException e) {
-      fail("Should not have thrown any exception");
+        } catch (AggregatorException | IOException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
+            fail("Should not have thrown any exception");
+        }
     }
-  }
 
-  @Test
-  void testWasAssignedCredential() {
+    @Test
+    void testWasAssignedCredential() {
 
-    try {
+        try {
 
-      File testFile = TestFileUtil
-          .getJsonTestFile("was_assigned_by_learner_credential.json");
+            File testFile = TestFileUtil.getJsonTestFile(
+                    "was_assigned_by_learner_credential.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      Activity activity = (Activity) stmt.getObject();
+            Activity activity = (Activity) stmt.getObject();
 
-      Mockito.doReturn("Credentail A").when(langMapUtil).getLangMapValue(any());
+            Mockito.doReturn("Credentail A").when(langMapUtil).getLangMapValue(
+                    any());
 
-      Person assignedPerson = new Person();
-      assignedPerson.setId(UUID.randomUUID());
-      assignedPerson.setName("Study O'Learner");
+            Person assignedPerson = new Person();
+            assignedPerson.setId(UUID.randomUUID());
+            assignedPerson.setName("Study O'Learner");
 
-      Goal goal = new Goal();
-      goal.setId(UUID.randomUUID());
-      goal.setName("Study O'Learner Professional Development Goal 1");
-      goal.setPerson(assignedPerson);
+            Goal goal = new Goal();
+            goal.setId(UUID.randomUUID());
+            goal.setName("Study O'Learner Professional Development Goal 1");
+            goal.setPerson(assignedPerson);
 
-      boolean fireRule = processWasAssigned.fireRule(stmt);
-      assertTrue(fireRule);
+            boolean fireRule = processWasAssigned.fireRule(stmt);
+            assertTrue(fireRule);
 
-      Person personResult = processWasAssigned.processRule(assignedPerson,
-          stmt);
-      assertNotNull(personResult);
+            Person personResult = processWasAssigned.processRule(assignedPerson,
+                    stmt);
+            assertNotNull(personResult);
 
-      goal = processWasAssigned.updateGoal(goal, activity, null, null);
-      assertNotNull(goal);
+            goal = processWasAssigned.updateGoal(goal, activity, null, null);
+            assertNotNull(goal);
 
-    } catch (AggregatorException | IOException | ClassCastException
-        | NullPointerException | RuntimeServiceException
-        | URISyntaxException e) {
-      fail("Should not have thrown any exception");
+        } catch (AggregatorException | IOException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
+            fail("Should not have thrown any exception");
+        }
     }
-  }
 
-  @Test
-  void testFireRule() {
+    @Test
+    void testFireRule() {
 
-    File testFile;
+        File testFile;
 
-    try {
+        try {
 
-      testFile = TestFileUtil.getJsonTestFile("agent.json");
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile, Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      boolean fireRule = processWasAssigned.fireRule(stmt);
-      assertFalse(fireRule);
+            boolean fireRule = processWasAssigned.fireRule(stmt);
+            assertFalse(fireRule);
 
-    } catch (IOException e) {
-      fail("Should not have thrown any exception");
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
     }
-  }
 
 }

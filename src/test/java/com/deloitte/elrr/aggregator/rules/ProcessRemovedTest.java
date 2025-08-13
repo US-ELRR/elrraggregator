@@ -39,99 +39,98 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class ProcessRemovedTest {
 
-  @Mock
-  private LangMapUtil langMapUtil;
+    @Mock
+    private LangMapUtil langMapUtil;
 
-  @Mock
-  private PersonSvc personService;
+    @Mock
+    private PersonSvc personService;
 
-  @Mock
-  private CredentialSvc credentialService;
+    @Mock
+    private CredentialSvc credentialService;
 
-  @Mock
-  private ProcessPerson processPerson;
+    @Mock
+    private ProcessPerson processPerson;
 
-  @Mock
-  private LearningResourceUtil learningResourceUtil;
+    @Mock
+    private LearningResourceUtil learningResourceUtil;
 
-  @Mock
-  private ProcessCredential processCredential;
+    @Mock
+    private ProcessCredential processCredential;
 
-  @Mock
-  private ProcessCompetency processCompetency;
+    @Mock
+    private ProcessCompetency processCompetency;
 
-  @Mock
-  private PersonalCredentialSvc personalCredentialService;
+    @Mock
+    private PersonalCredentialSvc personalCredentialService;
 
-  @Mock
-  private ExtensionsUtil extensionsUtil;
+    @Mock
+    private ExtensionsUtil extensionsUtil;
 
-  @Mock
-  private GoalSvc goalService;
+    @Mock
+    private GoalSvc goalService;
 
-  @Mock
-  private Person personMock;
+    @Mock
+    private Person personMock;
 
-  @InjectMocks
-  private ProcessRemoved processRemoved;
+    @InjectMocks
+    private ProcessRemoved processRemoved;
 
-  @Test
-  void testRemoved() {
+    @Test
+    void testRemoved() {
 
-    try {
+        try {
 
-      File testFile = TestFileUtil.getJsonTestFile(
-          "removed.json");
+            File testFile = TestFileUtil.getJsonTestFile("removed.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      Person assignedPerson = new Person();
-      assignedPerson.setId(UUID.randomUUID());
-      assignedPerson.setName("Dawn Greer");
+            Person assignedPerson = new Person();
+            assignedPerson.setId(UUID.randomUUID());
+            assignedPerson.setName("Dawn Greer");
 
-      Goal goal = new Goal();
-      goal.setId(UUID.randomUUID());
-      goal.setName("was assigned goal");
-      goal.setPerson(assignedPerson);
-      goal.setGoalId(
-          "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f0578");
-      goal.setType(GoalType.SELF);
+            Goal goal = new Goal();
+            goal.setId(UUID.randomUUID());
+            goal.setName("was assigned goal");
+            goal.setPerson(assignedPerson);
+            goal.setGoalId(
+                    "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f0578");
+            goal.setType(GoalType.SELF);
 
-      boolean fireRule = processRemoved.fireRule(stmt);
-      assertTrue(fireRule);
+            boolean fireRule = processRemoved.fireRule(stmt);
+            assertTrue(fireRule);
 
-      Person personResult = processRemoved.processRule(assignedPerson,
-          stmt);
-      assertNotNull(personResult);
+            Person personResult = processRemoved.processRule(assignedPerson,
+                    stmt);
+            assertNotNull(personResult);
 
-    } catch (AggregatorException | IOException | ClassCastException
-        | NullPointerException | RuntimeServiceException
-        | URISyntaxException e) {
-      fail("Should not have thrown any exception");
+        } catch (AggregatorException | IOException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
+            fail("Should not have thrown any exception");
+        }
     }
-  }
 
-  @Test
-  void testFireRule() {
+    @Test
+    void testFireRule() {
 
-    File testFile;
+        File testFile;
 
-    try {
+        try {
 
-      testFile = TestFileUtil.getJsonTestFile("agent.json");
+            testFile = TestFileUtil.getJsonTestFile("agent.json");
 
-      Statement stmt = Mapper.getMapper().readValue(testFile,
-          Statement.class);
-      assertNotNull(stmt);
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
 
-      boolean fireRule = processRemoved.fireRule(stmt);
-      assertFalse(fireRule);
+            boolean fireRule = processRemoved.fireRule(stmt);
+            assertFalse(fireRule);
 
-    } catch (IOException e) {
-      fail("Should not have thrown any exception");
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
     }
-  }
 
 }

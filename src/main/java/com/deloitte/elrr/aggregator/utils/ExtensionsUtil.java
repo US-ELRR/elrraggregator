@@ -31,9 +31,7 @@ public class ExtensionsUtil {
      * @return extensionsMap or LocalDateTime
      * @throws AggregatorException
      */
-    public Object getExtensions(
-            Context context,
-            String returnObject)
+    public Object getExtensions(Context context, String returnObject)
             throws AggregatorException {
 
         Map<URI, Object> extensionsMap = new HashMap<>();
@@ -99,13 +97,12 @@ public class ExtensionsUtil {
      * @throws IllegalArgumentException
      * @throws DateTimeParseException
      */
-    public LocalDateTime getExtensionsDate(
-            Activity activity,
-            String extensionsConstant)
-            throws IllegalArgumentException, DateTimeParseException {
+    public LocalDateTime getExtensionsDate(Activity activity,
+            String extensionsConstant) throws IllegalArgumentException,
+            DateTimeParseException {
 
-        String strDate = (String) activity.getDefinition().getExtensions()
-                .get(extensionsConstant);
+        String strDate = (String) activity.getDefinition().getExtensions().get(
+                extensionsConstant);
 
         if (strDate != null) {
             return LocalDateTime.parse(strDate,
@@ -120,8 +117,7 @@ public class ExtensionsUtil {
      * @param type
      * @return GoalType
      */
-    public GoalType getGoalType(
-            String type) {
+    public GoalType getGoalType(String type) {
 
         if (type.toString().equalsIgnoreCase("ASSIGNED")) {
             return GoalType.ASSIGNED;

@@ -52,10 +52,7 @@ public class ProcessCredential implements Rule {
      * @return boolean
      */
     @Override
-    public
-            boolean
-            fireRule(
-                    final Statement statement) {
+    public boolean fireRule(final Statement statement) {
 
         // If not an activity
         if (!(statement.getObject() instanceof Activity)) {
@@ -72,8 +69,8 @@ public class ProcessCredential implements Rule {
 
         // Is Verb Id = achieved and object type = credential
         return (statement.getVerb().getId().toString().equalsIgnoreCase(
-                VerbIdConstants.ACHIEVED_VERB_ID.toString())
-                && objType.equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
+                VerbIdConstants.ACHIEVED_VERB_ID.toString()) && objType
+                        .equalsIgnoreCase(ObjectTypeConstants.CREDENTIAL));
 
     }
 
@@ -84,12 +81,8 @@ public class ProcessCredential implements Rule {
      */
     @Override
     @Transactional
-    public
-            Person
-            processRule(
-                    final Person person,
-                    final Statement statement)
-                    throws AggregatorException {
+    public Person processRule(final Person person, final Statement statement)
+            throws AggregatorException {
 
         log.info("Process credential.");
 
@@ -120,13 +113,9 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private
-            Credential
-            processCredential(
-                    final Activity activity,
-                    final LocalDateTime startDate,
-                    final LocalDateTime endDate)
-                    throws AggregatorException {
+    private Credential processCredential(final Activity activity,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException {
 
         Credential credential = null;
 
@@ -138,16 +127,14 @@ public class ProcessCredential implements Rule {
         if (credential == null) {
 
             credential = createCredential(activity, startDate, endDate);
-            log.info(
-                    CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
-                            + " created.");
+            log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+                    + " created.");
 
         } else {
 
             credential = updateCredential(credential, activity, endDate);
-            log.info(
-                    CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
-                            + " updated.");
+            log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+                    + " updated.");
 
         }
 
@@ -163,14 +150,10 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public
-            List<Credential>
-            processAssignedCredentials(
-                    final Context context,
-                    final Person person,
-                    final LocalDateTime startDate,
-                    final LocalDateTime expires)
-                    throws AggregatorException, URISyntaxException {
+    public List<Credential> processAssignedCredentials(final Context context,
+            final Person person, final LocalDateTime startDate,
+            final LocalDateTime expires) throws AggregatorException,
+            URISyntaxException {
 
         log.info("Process credentials.");
 
@@ -191,9 +174,8 @@ public class ProcessCredential implements Rule {
                 // If Credential already exists
                 if (credential != null) {
 
-                    log.info(CREDENTIAL_MESSAGE + " "
-                            + credential.getIdentifier()
-                            + " already exists.");
+                    log.info(CREDENTIAL_MESSAGE + " " + credential
+                            .getIdentifier() + " already exists.");
 
                     // If Credential doesn't exist
                 } else {
@@ -201,9 +183,8 @@ public class ProcessCredential implements Rule {
                     credential = createCredential(activity, startDate, null);
                     credentials.add(credential);
 
-                    log.info(CREDENTIAL_MESSAGE + " "
-                            + credential.getIdentifier()
-                            + " created.");
+                    log.info(CREDENTIAL_MESSAGE + " " + credential
+                            .getIdentifier() + " created.");
 
                     // Process PersonalCredential
                     processPersonalCredential(person, credential, expires);
@@ -224,12 +205,9 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    private
-            Credential
-            createCredential(
-                    final Activity activity,
-                    final LocalDateTime startDate,
-                    final LocalDateTime endDate) throws AggregatorException {
+    private Credential createCredential(final Activity activity,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException {
 
         Credential credential = null;
         String activityName = "";
@@ -258,13 +236,9 @@ public class ProcessCredential implements Rule {
      * @return credential
      * @throws AggregatorException
      */
-    public
-            Credential
-            updateCredential(
-                    Credential credential,
-                    final Activity activity,
-                    final LocalDateTime endDate)
-                    throws AggregatorException {
+    public Credential updateCredential(Credential credential,
+            final Activity activity, final LocalDateTime endDate)
+            throws AggregatorException {
 
         String activityName = "";
         String activityDescription = "";
@@ -288,12 +262,8 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return PersonalCredential
      */
-    private
-            PersonalCredential
-            processPersonalCredential(
-                    Person person,
-                    final Credential credential,
-                    final LocalDateTime expires) {
+    private PersonalCredential processPersonalCredential(Person person,
+            final Credential credential, final LocalDateTime expires) {
 
         PersonalCredential personalCredential = null;
 
@@ -346,12 +316,8 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return personalCredential
      */
-    private
-            PersonalCredential
-            createPersonalCredential(
-                    final Person person,
-                    final Credential credential,
-                    final LocalDateTime expires) {
+    private PersonalCredential createPersonalCredential(final Person person,
+            final Credential credential, final LocalDateTime expires) {
 
         PersonalCredential personalCredential = new PersonalCredential();
 
@@ -374,12 +340,9 @@ public class ProcessCredential implements Rule {
      * @param expires
      * @return PersonalCredential
      */
-    public
-            PersonalCredential
-            updatePersonalCredential(
-                    PersonalCredential personalCredential,
-                    final Person person,
-                    final LocalDateTime expires) {
+    public PersonalCredential updatePersonalCredential(
+            PersonalCredential personalCredential, final Person person,
+            final LocalDateTime expires) {
 
         if (expires != null) {
 

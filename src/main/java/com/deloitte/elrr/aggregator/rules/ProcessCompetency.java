@@ -30,328 +30,328 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProcessCompetency implements Rule {
 
-  @Autowired
-  private CompetencySvc competencyService;
+    @Autowired
+    private CompetencySvc competencyService;
 
-  @Autowired
-  private PersonalCompetencySvc personalCompetencyService;
+    @Autowired
+    private PersonalCompetencySvc personalCompetencyService;
 
-  @Autowired
-  private LangMapUtil langMapUtil;
+    @Autowired
+    private LangMapUtil langMapUtil;
 
-  @Autowired
-  private ExtensionsUtil extensionsUtil;
+    @Autowired
+    private ExtensionsUtil extensionsUtil;
 
-  @Autowired
-  private PersonSvc personService;
+    @Autowired
+    private PersonSvc personService;
 
-  private static final String COMPETENCY_MESSAGE = "Competency";
+    private static final String COMPETENCY_MESSAGE = "Competency";
 
-  /**
-   * @param statement
-   * @return boolean
-   */
-  @Override
-  public boolean fireRule(final Statement statement) {
+    /**
+     * @param statement
+     * @return boolean
+     */
+    @Override
+    public boolean fireRule(final Statement statement) {
 
-    // If not an activity
-    if (!(statement.getObject() instanceof Activity)) {
-      return false;
+        // If not an activity
+        if (!(statement.getObject() instanceof Activity)) {
+            return false;
+        }
+
+        String objType = null;
+
+        Activity obj = (Activity) statement.getObject();
+
+        if (obj.getDefinition().getType() != null) {
+            objType = obj.getDefinition().getType().toString();
+        }
+
+        // Is Verb Id = achieved and object type != credential
+        return (statement.getVerb().getId().toString().equalsIgnoreCase(
+                VerbIdConstants.ACHIEVED_VERB_ID.toString())
+                && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
     }
 
-    String objType = null;
+    /**
+     * @param person
+     * @param statement
+     * @return person
+     * @throws AggregatorException
+     */
+    @Override
+    @Transactional
+    public Person processRule(final Person person, final Statement statement)
+            throws AggregatorException {
 
-    Activity obj = (Activity) statement.getObject();
+        log.info("Process competency.");
 
-    if (obj.getDefinition().getType() != null) {
-      objType = obj.getDefinition().getType().toString();
+        // Get start date
+        // Convert from ZonedDateTime to LocalDate
+        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+
+        // Get Activity
+        Activity activity = (Activity) statement.getObject();
+
+        // Get expires
+        LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
+                statement.getContext(), "LocalDateTime");
+
+        // Process Competency
+        Competency competency = processCompetency(activity, startDate, expires);
+
+        // Process PersonalCompetency
+        processPersonalCompetency(person, competency, expires);
+
+        return person;
     }
 
-    // Is Verb Id = achieved and object type != credential
-    return (statement.getVerb().getId().toString().equalsIgnoreCase(
-        VerbIdConstants.ACHIEVED_VERB_ID.toString())
-        && !ObjectTypeConstants.CREDENTIAL.equalsIgnoreCase(objType));
-  }
+    /**
+     * @param activity
+     * @param startDate
+     * @param endDate
+     * @return competency
+     * @throws AggregatorException
+     */
+    private Competency processCompetency(final Activity activity,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException {
 
-  /**
-   * @param person
-   * @param statement
-   * @return person
-   * @throws AggregatorException
-   */
-  @Override
-  @Transactional
-  public Person processRule(final Person person, final Statement statement)
-      throws AggregatorException {
+        Competency competency = null;
 
-    log.info("Process competency.");
+        // Get competency
+        competency = competencyService.findByIdentifier(activity.getId()
+                .toString());
 
-    // Get start date
-    // Convert from ZonedDateTime to LocalDate
-    LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+        // If competency doesn't exist
+        if (competency == null) {
 
-    // Get Activity
-    Activity activity = (Activity) statement.getObject();
+            competency = createCompetency(activity, startDate, endDate);
+            log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+                    + " created.");
 
-    // Get expires
-    LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
-        statement.getContext(), "LocalDateTime");
-
-    // Process Competency
-    Competency competency = processCompetency(activity, startDate, expires);
-
-    // Process PersonalCompetency
-    processPersonalCompetency(person, competency, expires);
-
-    return person;
-  }
-
-  /**
-   * @param activity
-   * @param startDate
-   * @param endDate
-   * @return competency
-   * @throws AggregatorException
-   */
-  private Competency processCompetency(final Activity activity,
-      final LocalDateTime startDate, final LocalDateTime endDate)
-      throws AggregatorException {
-
-    Competency competency = null;
-
-    // Get competency
-    competency = competencyService.findByIdentifier(activity.getId()
-        .toString());
-
-    // If competency doesn't exist
-    if (competency == null) {
-
-      competency = createCompetency(activity, startDate, endDate);
-      log.info(
-          COMPETENCY_MESSAGE + " " + competency.getIdentifier() + " created.");
-
-    } else {
-
-      competency = updateCompetency(competency, activity, endDate);
-      log.info(
-          COMPETENCY_MESSAGE + " " + competency.getIdentifier() + " updated.");
-
-    }
-
-    return competency;
-  }
-
-  /**
-   * @param context
-   * @param person
-   * @param startDate
-   * @param expires
-   * @return competencies
-   * @throws AggregatorException
-   * @throws URISyntaxException
-   */
-  public List<Competency> processAssignedCompetencies(final Context context,
-      final Person person, final LocalDateTime startDate,
-      final LocalDateTime expires)
-      throws AggregatorException, URISyntaxException {
-
-    log.info("Process competencies.");
-
-    List<Competency> competencies = new ArrayList<Competency>();
-
-    // Get Activities
-    List<Activity> activities = context.getContextActivities().getOther();
-
-    for (Activity activity : activities) {
-
-      // If Competency
-      if (activity.getDefinition().getType().equals(
-          ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
-
-        Competency competency = competencyService.findByIdentifier(
-            activity.getId().toString());
-
-        // If Competency already exists
-        if (competency != null) {
-
-          log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
-              + " already exists.");
-
-          // If Competency doesn't exist
         } else {
 
-          competency = createCompetency(activity, startDate, null);
-          competencies.add(competency);
-          log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
-              + " created.");
-
-          // Process PersonalCompetency
-          processPersonalCompetency(person, competency, expires);
+            competency = updateCompetency(competency, activity, endDate);
+            log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+                    + " updated.");
 
         }
 
-      }
-
+        return competency;
     }
 
-    return competencies;
-  }
+    /**
+     * @param context
+     * @param person
+     * @param startDate
+     * @param expires
+     * @return competencies
+     * @throws AggregatorException
+     * @throws URISyntaxException
+     */
+    public List<Competency> processAssignedCompetencies(final Context context,
+            final Person person, final LocalDateTime startDate,
+            final LocalDateTime expires) throws AggregatorException,
+            URISyntaxException {
 
-  /**
-   * @param activity
-   * @param startDate
-   * @param endDate
-   * @return competency
-   * @throws AggregatorException
-   */
-  private Competency createCompetency(final Activity activity,
-      final LocalDateTime startDate, final LocalDateTime endDate)
-      throws AggregatorException {
+        log.info("Process competencies.");
 
-    Competency competency = null;
-    String activityName = "";
-    String activityDescription = "";
+        List<Competency> competencies = new ArrayList<Competency>();
 
-    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-        .getName());
-    activityDescription = langMapUtil.getLangMapValue(activity
-        .getDefinition().getDescription());
+        // Get Activities
+        List<Activity> activities = context.getContextActivities().getOther();
 
-    competency = new Competency();
-    competency.setIdentifier(activity.getId().toString());
-    competency.setFrameworkTitle(activityName);
-    competency.setFrameworkDescription(activityDescription);
-    competency.setValidStartDate(startDate);
-    competency.setValidEndDate(endDate);
-    competencyService.save(competency);
+        for (Activity activity : activities) {
 
-    return competency;
-  }
+            // If Competency
+            if (activity.getDefinition().getType().equals(
+                    ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
 
-  /**
-   * @param competency
-   * @param activity
-   * @param endDate
-   * @return competency
-   * @throws AggregatorException
-   */
-  public Competency updateCompetency(Competency competency,
-      final Activity activity, final LocalDateTime endDate)
-      throws AggregatorException {
+                Competency competency = competencyService.findByIdentifier(
+                        activity.getId().toString());
 
-    String activityName = "";
-    String activityDescription = "";
+                // If Competency already exists
+                if (competency != null) {
 
-    activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-        .getName());
-    activityDescription = langMapUtil.getLangMapValue(activity
-        .getDefinition().getDescription());
+                    log.info(COMPETENCY_MESSAGE + " " + competency
+                            .getIdentifier() + " already exists.");
 
-    competency.setFrameworkTitle(activityName);
-    competency.setFrameworkDescription(activityDescription);
-    competency.setValidEndDate(endDate);
-    competencyService.update(competency);
+                    // If Competency doesn't exist
+                } else {
 
-    return competency;
-  }
+                    competency = createCompetency(activity, startDate, null);
+                    competencies.add(competency);
+                    log.info(COMPETENCY_MESSAGE + " " + competency
+                            .getIdentifier() + " created.");
 
-  /**
-   * @param person
-   * @param competency
-   * @param expires
-   * @return personalCompetency
-   */
-  private PersonalCompetency processPersonalCompetency(Person person,
-      final Competency competency, final LocalDateTime expires) {
+                    // Process PersonalCompetency
+                    processPersonalCompetency(person, competency, expires);
 
-    PersonalCompetency personalCompetency = null;
+                }
 
-    try {
+            }
 
-      // Get PersonalCompetency
-      personalCompetency = personalCompetencyService
-          .findByPersonIdAndCompetencyId(person.getId(), competency
-              .getId());
-
-      // If PersonalCompetancy doesn't exist
-      if (personalCompetency == null) {
-
-        personalCompetency = createPersonalCompetency(person,
-            competency, expires);
-
-        if (person.getCompetencies() == null) {
-          person.setCompetencies(new HashSet<PersonalCompetency>());
         }
 
-        person.getCompetencies().add(personalCompetency);
-        personService.save(person);
-
-        log.info("Personal Competency for " + person.getName() + " - "
-            + personalCompetency.getCompetency().getIdentifier()
-            + " created.");
-
-      } else {
-
-        personalCompetency = updatePersonalCompetency(
-            personalCompetency, person, expires);
-
-        log.info("Personal Competency for " + person.getName() + " - "
-            + personalCompetency.getCompetency().getIdentifier()
-            + " updated.");
-
-      }
-
-    } catch (DateTimeParseException e) {
-
-      log.error("Error invalid expires date.", e);
-      throw new AggregatorException("Error invalid expires date.", e);
-
+        return competencies;
     }
 
-    return personalCompetency;
-  }
+    /**
+     * @param activity
+     * @param startDate
+     * @param endDate
+     * @return competency
+     * @throws AggregatorException
+     */
+    private Competency createCompetency(final Activity activity,
+            final LocalDateTime startDate, final LocalDateTime endDate)
+            throws AggregatorException {
 
-  /**
-   * @param person
-   * @param competency
-   * @param expires
-   * @return personalCompetency
-   */
-  private PersonalCompetency createPersonalCompetency(final Person person,
-      final Competency competency, final LocalDateTime expires) {
+        Competency competency = null;
+        String activityName = "";
+        String activityDescription = "";
 
-    PersonalCompetency personalCompetency = new PersonalCompetency();
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-    personalCompetency.setPerson(person);
-    personalCompetency.setCompetency(competency);
-    personalCompetency.setHasRecord(true);
+        competency = new Competency();
+        competency.setIdentifier(activity.getId().toString());
+        competency.setFrameworkTitle(activityName);
+        competency.setFrameworkDescription(activityDescription);
+        competency.setValidStartDate(startDate);
+        competency.setValidEndDate(endDate);
+        competencyService.save(competency);
 
-    if (expires != null) {
-      personalCompetency.setExpires(expires);
+        return competency;
     }
 
-    personalCompetencyService.save(personalCompetency);
+    /**
+     * @param competency
+     * @param activity
+     * @param endDate
+     * @return competency
+     * @throws AggregatorException
+     */
+    public Competency updateCompetency(Competency competency,
+            final Activity activity, final LocalDateTime endDate)
+            throws AggregatorException {
 
-    return personalCompetency;
-  }
+        String activityName = "";
+        String activityDescription = "";
 
-  /**
-   * @param personalCompetency
-   * @param person
-   * @param expires
-   * @return personalCompetency
-   */
-  public PersonalCompetency updatePersonalCompetency(
-      PersonalCompetency personalCompetency,
-      final Person person, final LocalDateTime expires) {
+        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
+                .getName());
+        activityDescription = langMapUtil.getLangMapValue(activity
+                .getDefinition().getDescription());
 
-    if (expires != null) {
+        competency.setFrameworkTitle(activityName);
+        competency.setFrameworkDescription(activityDescription);
+        competency.setValidEndDate(endDate);
+        competencyService.update(competency);
 
-      personalCompetency.setExpires(expires);
-      personalCompetencyService.update(personalCompetency);
-
+        return competency;
     }
 
-    return personalCompetency;
-  }
+    /**
+     * @param person
+     * @param competency
+     * @param expires
+     * @return personalCompetency
+     */
+    private PersonalCompetency processPersonalCompetency(Person person,
+            final Competency competency, final LocalDateTime expires) {
+
+        PersonalCompetency personalCompetency = null;
+
+        try {
+
+            // Get PersonalCompetency
+            personalCompetency = personalCompetencyService
+                    .findByPersonIdAndCompetencyId(person.getId(), competency
+                            .getId());
+
+            // If PersonalCompetancy doesn't exist
+            if (personalCompetency == null) {
+
+                personalCompetency = createPersonalCompetency(person,
+                        competency, expires);
+
+                if (person.getCompetencies() == null) {
+                    person.setCompetencies(new HashSet<PersonalCompetency>());
+                }
+
+                person.getCompetencies().add(personalCompetency);
+                personService.save(person);
+
+                log.info("Personal Competency for " + person.getName() + " - "
+                        + personalCompetency.getCompetency().getIdentifier()
+                        + " created.");
+
+            } else {
+
+                personalCompetency = updatePersonalCompetency(
+                        personalCompetency, person, expires);
+
+                log.info("Personal Competency for " + person.getName() + " - "
+                        + personalCompetency.getCompetency().getIdentifier()
+                        + " updated.");
+
+            }
+
+        } catch (DateTimeParseException e) {
+
+            log.error("Error invalid expires date.", e);
+            throw new AggregatorException("Error invalid expires date.", e);
+
+        }
+
+        return personalCompetency;
+    }
+
+    /**
+     * @param person
+     * @param competency
+     * @param expires
+     * @return personalCompetency
+     */
+    private PersonalCompetency createPersonalCompetency(final Person person,
+            final Competency competency, final LocalDateTime expires) {
+
+        PersonalCompetency personalCompetency = new PersonalCompetency();
+
+        personalCompetency.setPerson(person);
+        personalCompetency.setCompetency(competency);
+        personalCompetency.setHasRecord(true);
+
+        if (expires != null) {
+            personalCompetency.setExpires(expires);
+        }
+
+        personalCompetencyService.save(personalCompetency);
+
+        return personalCompetency;
+    }
+
+    /**
+     * @param personalCompetency
+     * @param person
+     * @param expires
+     * @return personalCompetency
+     */
+    public PersonalCompetency updatePersonalCompetency(
+            PersonalCompetency personalCompetency, final Person person,
+            final LocalDateTime expires) {
+
+        if (expires != null) {
+
+            personalCompetency.setExpires(expires);
+            personalCompetencyService.update(personalCompetency);
+
+        }
+
+        return personalCompetency;
+    }
 }
