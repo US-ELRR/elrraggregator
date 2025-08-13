@@ -124,7 +124,7 @@ public class ProcessAssigned implements Rule {
             final LocalDateTime startDate, final Person assignedPerson)
             throws AggregatorException, URISyntaxException {
 
-        List<LearningResource> learnResources = new ArrayList<LearningResource>();
+        List<LearningResource> lrnRes = new ArrayList<LearningResource>();
         List<Credential> credentials = new ArrayList<Credential>();
         List<Competency> competencies = new ArrayList<Competency>();
         Goal goal = null;
@@ -140,8 +140,7 @@ public class ProcessAssigned implements Rule {
                 ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
 
         // Process LearningResources
-        learnResources = learningResourceUtil.processAssignedLearningResources(
-                context);
+        lrnRes = learningResourceUtil.processAssignedLearningResources(context);
 
         // Process Credentials
         credentials = (List<Credential>) processCredential
@@ -160,7 +159,7 @@ public class ProcessAssigned implements Rule {
         if (goal == null) {
 
             goal = createGoal(activity, startDate, achievedByDate, endDate,
-                    learnResources, credentials, competencies, assignedPerson);
+                    lrnRes, credentials, competencies, assignedPerson);
             log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists

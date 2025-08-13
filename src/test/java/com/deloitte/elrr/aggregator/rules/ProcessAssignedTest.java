@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -89,8 +88,6 @@ class ProcessAssignedTest {
             Statement stmt = Mapper.getMapper().readValue(testFile,
                     Statement.class);
             assertNotNull(stmt);
-
-            LocalDateTime startDate = stmt.getTimestamp().toLocalDateTime();
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();

@@ -166,7 +166,7 @@ public class ProcessCompetency implements Rule {
 
             // If Competency
             if (activity.getDefinition().getType().equals(
-                    ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
+                    ContextActivitiesTypeConstants.OTHER_COMP_URI)) {
 
                 Competency competency = competencyService.findByIdentifier(
                         activity.getId().toString());

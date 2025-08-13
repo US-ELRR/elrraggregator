@@ -166,7 +166,7 @@ public class ProcessCredential implements Rule {
 
             // If Credential
             if (activity.getDefinition().getType().equals(
-                    ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)) {
+                    ContextActivitiesTypeConstants.OTHER_CRED_URI)) {
 
                 Credential credential = credentialService.findByIdentifier(
                         activity.getId().toString());

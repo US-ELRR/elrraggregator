@@ -68,7 +68,7 @@ public class LearningResourceUtil {
 
         log.info("Process learning resources.");
 
-        List<LearningResource> learnResources = new ArrayList<LearningResource>();
+        List<LearningResource> lrnRes = new ArrayList<LearningResource>();
 
         // Get learningResources
         List<Activity> activities = context.getContextActivities().getOther();
@@ -79,10 +79,10 @@ public class LearningResourceUtil {
             URI type = activity.getDefinition().getType();
 
             // Not a LearningResource if Credential or Competency
-            if (type.equals(ContextActivitiesTypeConstants.OTHER_CREDENTIAL_URI)
+            if (type.equals(ContextActivitiesTypeConstants.OTHER_CRED_URI)
                     || type.equals(
-                            ContextActivitiesTypeConstants.OTHER_COMPETENCY_URI)) {
-                return learnResources;
+                            ContextActivitiesTypeConstants.OTHER_COMP_URI)) {
+                return lrnRes;
             }
 
             LearningResource learningResource = learningResourceService
@@ -97,13 +97,13 @@ public class LearningResourceUtil {
             } else {
 
                 learningResource = createLearningResource(activity);
-                learnResources.add(learningResource);
+                lrnRes.add(learningResource);
 
             }
 
         }
 
-        return learnResources;
+        return lrnRes;
 
     }
 
