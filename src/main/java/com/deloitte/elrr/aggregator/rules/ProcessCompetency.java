@@ -94,8 +94,9 @@ public class ProcessCompetency implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get expires
-        LocalDateTime expires = (LocalDateTime) extensionsUtil.getExtensions(
-                statement.getContext(), "LocalDateTime");
+        LocalDateTime expires = extensionsUtil.getExtensionValue(statement
+                .getContext(), ExtensionsConstants.EXT_EXPIRES,
+                LocalDateTime.class);
 
         // Process Competency
         Competency competency = processCompetency(activity, startDate, expires);

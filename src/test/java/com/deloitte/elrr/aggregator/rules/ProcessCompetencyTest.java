@@ -75,8 +75,9 @@ class ProcessCompetencyTest {
             assertNotNull(stmt);
 
             // Get expires
-            LocalDateTime expires = (LocalDateTime) extensionsUtil
-                    .getExtensions(stmt.getContext(), "LocalDateTime");
+            LocalDateTime expires = extensionsUtil.getExtensionValue(stmt
+                    .getContext(), ExtensionsConstants.EXT_EXPIRES,
+                    LocalDateTime.class);
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();

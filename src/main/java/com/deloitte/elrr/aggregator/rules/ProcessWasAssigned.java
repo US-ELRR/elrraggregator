@@ -94,8 +94,9 @@ public class ProcessWasAssigned implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get assigning actor
-        AbstractActor assigningActor = (AbstractActor) extensionsUtil
-                .getExtensions(statement.getContext(), "Actor");
+        AbstractActor assigningActor = extensionsUtil.getExtensionValue(
+                statement.getContext(), ExtensionsConstants.EXT_BY,
+                AbstractActor.class);
 
         // If assigning actor present
         if (assigningActor != null) {
@@ -142,7 +143,7 @@ public class ProcessWasAssigned implements Rule {
 
         // Get activity expires
         endDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_EXPIRES);
+                ExtensionsConstants.ACTIVITY_EXT_EXPIRES);
 
         // Process LearningResources
         lrnRes = learningResourceUtil.processAssignedLearningResources(context);

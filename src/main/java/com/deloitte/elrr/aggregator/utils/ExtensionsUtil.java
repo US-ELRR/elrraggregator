@@ -26,40 +26,40 @@ import lombok.extern.slf4j.Slf4j;
 public class ExtensionsUtil {
 
     /**
+     * @param <T>
      * @param context
+     * @param key
      * @param returnObject
-     * @return extensionsMap or LocalDateTime
+     * @return T
      * @throws AggregatorException
      */
-    public Object getExtensions(Context context, String returnObject)
-            throws AggregatorException {
+    public <T> T getExtensionValue(Context context, String key,
+            Class<T> returnObject) throws AggregatorException {
 
         Map<URI, Object> extensionsMap = new HashMap<>();
 
         try {
 
-            // Map
-            if (context != null && context.getExtensions() != null
-                    && returnObject.equalsIgnoreCase("Map")) {
+            if (context == null || context.getExtensions() == null) {
+                return null;
+            }
 
-                extensionsMap = context.getExtensions().getMap();
-                return extensionsMap;
-
-                // LocalDatewTime
-            } else if (context != null && context.getExtensions() != null
-                    && returnObject.equalsIgnoreCase("LocalDateTime")) {
+            // LocalDateTime
+            if (key.equalsIgnoreCase(ExtensionsConstants.EXT_EXPIRES) || (key
+                    .equalsIgnoreCase(
+                            ExtensionsConstants.ACTIVITY_EXT_EXPIRES))) {
 
                 String strLocalDateTime = (String) context.getExtensions().get(
-                        ExtensionsConstants.CONTEXT_EXTENSIONS_EXPIRES);
+                        key);
 
                 if (strLocalDateTime != null) {
-                    return LocalDateTime.parse(strLocalDateTime,
+                    return (T) LocalDateTime.parse(strLocalDateTime,
                             DateTimeFormatter.ISO_DATE_TIME);
                 }
 
                 // Actor
-            } else if (context != null && context.getExtensions() != null
-                    && returnObject.equalsIgnoreCase("Actor")) {
+            } else if (key.equalsIgnoreCase(ExtensionsConstants.EXT_BY) || (key
+                    .equalsIgnoreCase(ExtensionsConstants.EXT_TO))) {
 
                 ObjectMapper mapper = Mapper.getMapper();
 
@@ -72,7 +72,7 @@ public class ExtensionsUtil {
                     AbstractActor actor = mapper.readValue(json,
                             AbstractActor.class);
                     if (actor != null) {
-                        return actor;
+                        return (T) actor;
                     }
 
                 }
