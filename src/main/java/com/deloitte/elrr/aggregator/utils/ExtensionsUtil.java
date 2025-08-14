@@ -1,16 +1,12 @@
 package com.deloitte.elrr.aggregator.utils;
 
 import java.io.IOException;
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.rules.ExtensionsConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.types.GoalType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,18 +32,14 @@ public class ExtensionsUtil {
     public <T> T getExtensionValue(Context context, String key,
             Class<T> returnObject) throws AggregatorException {
 
-        Map<URI, Object> extensionsMap = new HashMap<>();
-
         try {
 
             if (context == null || context.getExtensions() == null) {
                 return null;
             }
 
-            // LocalDateTime
-            if (key.equalsIgnoreCase(ExtensionsConstants.EXT_EXPIRES) || (key
-                    .equalsIgnoreCase(
-                            ExtensionsConstants.ACTIVITY_EXT_EXPIRES))) {
+            // LocalDatewTime
+            if (LocalDateTime.class.isAssignableFrom(returnObject)) {
 
                 String strLocalDateTime = (String) context.getExtensions().get(
                         key);
@@ -58,28 +50,19 @@ public class ExtensionsUtil {
                 }
 
                 // Actor
-            } else if (key.equalsIgnoreCase(ExtensionsConstants.EXT_BY) || (key
-                    .equalsIgnoreCase(ExtensionsConstants.EXT_TO))) {
+            } else if (AbstractActor.class.isAssignableFrom(returnObject)) {
 
                 ObjectMapper mapper = Mapper.getMapper();
 
                 // Get extensions
-                extensionsMap = context.getExtensions().getMap();
+                String json = mapper.writeValueAsString(context.getExtensions()
+                        .get(key));
 
-                for (Map.Entry<URI, Object> entry : extensionsMap.entrySet()) {
-
-                    String json = mapper.writeValueAsString(entry.getValue());
-                    AbstractActor actor = mapper.readValue(json,
-                            AbstractActor.class);
-                    if (actor != null) {
-                        return (T) actor;
-                    }
-
-                }
+                return (T) mapper.readValue(json, AbstractActor.class);
 
             } else {
 
-                return null;
+                throw new UnsupportedOperationException();
 
             }
 
