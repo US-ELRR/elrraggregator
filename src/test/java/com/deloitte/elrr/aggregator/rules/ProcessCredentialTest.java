@@ -76,7 +76,8 @@ class ProcessCredentialTest {
 
             // Get expires
             LocalDateTime expires = extensionsUtil.getExtensionValue(stmt
-                    .getContext(), ExtensionsConstants.EXT_EXPIRES,
+                    .getContext(),
+                    ExtensionsConstants.CONTEXT_EXTENSION_EXPIRES,
                     LocalDateTime.class);
 
             // Get Activity

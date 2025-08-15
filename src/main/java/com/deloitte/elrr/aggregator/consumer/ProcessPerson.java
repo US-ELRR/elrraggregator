@@ -76,7 +76,6 @@ public class ProcessPerson {
     public Person processAssignedPerson(AbstractActor actor) {
 
         Person person = null;
-        Account account = null;
 
         log.info("Process person.");
 

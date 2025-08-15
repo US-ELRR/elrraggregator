@@ -86,6 +86,8 @@ public class ProcessWasAssigned implements Rule {
 
         log.info("Process was assigned.");
 
+        GoalType goalType = null;
+
         // Get start date
         // Convert from ZonedDateTime to LocalDateTime
         LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
@@ -95,20 +97,19 @@ public class ProcessWasAssigned implements Rule {
 
         // Get assigning actor
         AbstractActor assigningActor = extensionsUtil.getExtensionValue(
-                statement.getContext(), ExtensionsConstants.EXT_BY,
-                AbstractActor.class);
+                statement.getContext(),
+                ExtensionsConstants.CONTEXT_EXTENSION_BY, AbstractActor.class);
 
         // If assigning actor present
         if (assigningActor != null) {
-
-            // Process assigning person
-            processPerson.processAssignedPerson(assigningActor);
-
+            goalType = GoalType.ASSIGNED;
+        } else {
+            goalType = GoalType.SELF;
         }
 
         // Process Goal
         processGoal(statement.getContext(), activity, person, startDate,
-                person);
+                goalType);
 
         return person;
 
@@ -119,7 +120,7 @@ public class ProcessWasAssigned implements Rule {
      * @param activity
      * @param person
      * @param startDate
-     * @param assignedPerson
+     * @param goalType
      * @return goal
      * @throws AggregatorException
      * @throws URISyntaxException
@@ -127,7 +128,7 @@ public class ProcessWasAssigned implements Rule {
     @Transactional
     public Goal processGoal(final Context context, final Activity activity,
             final Person person, final LocalDateTime startDate,
-            final Person assignedPerson) throws AggregatorException,
+            final GoalType goalType) throws AggregatorException,
             URISyntaxException {
 
         List<LearningResource> lrnRes = new ArrayList<LearningResource>();
@@ -139,11 +140,11 @@ public class ProcessWasAssigned implements Rule {
 
         // Get achieved by date
         achievedByDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_ACHIEVED_BY);
+                ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
 
         // Get activity expires
         endDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.ACTIVITY_EXT_EXPIRES);
+                ExtensionsConstants.ACTIVITY_EXTENSION_EXPIRES);
 
         // Process LearningResources
         lrnRes = learningResourceUtil.processAssignedLearningResources(context);
@@ -165,21 +166,14 @@ public class ProcessWasAssigned implements Rule {
         if (goal == null) {
 
             goal = createGoal(activity, startDate, achievedByDate, endDate,
-                    lrnRes, credentials, competencies, assignedPerson);
+                    lrnRes, credentials, competencies, person, goalType);
             log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists
         } else {
 
-            // If goal id already exists for another person
-            if (assignedPerson != goal.getPerson()) {
-                log.info("Duplicate goal id: Assigned person " + assignedPerson
-                        .getName() + " has same goal id " + goal.getGoalId()
-                        + " as " + goal.getPerson().getName());
-            } else {
-                goal = updateGoal(goal, activity, endDate, achievedByDate);
-                log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
-            }
+            goal = updateGoal(goal, activity, endDate, achievedByDate);
+            log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
 
         }
 
@@ -195,7 +189,8 @@ public class ProcessWasAssigned implements Rule {
      * @param learningResources
      * @param credentials
      * @param competencies
-     * @param assignedPerson
+     * @param person
+     * @param goalType
      * @return goal
      * @throws AggregatorException
      */
@@ -205,10 +200,9 @@ public class ProcessWasAssigned implements Rule {
             final LocalDateTime endDate,
             final List<LearningResource> learningResources,
             final List<Credential> credentials,
-            final List<Competency> competencies, final Person assignedPerson)
-            throws AggregatorException {
+            final List<Competency> competencies, final Person person,
+            final GoalType goalType) throws AggregatorException {
 
-        GoalType goalType = null;
         Goal goal = null;
         String activityName = "";
         String activityDescription = "";
@@ -217,17 +211,6 @@ public class ProcessWasAssigned implements Rule {
                 .getName());
         activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
-
-        // Get goalType
-        if (activity != null && activity.getDefinition()
-                .getExtensions() != null) {
-
-            String type = (String) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
-
-            goalType = extensionsUtil.getGoalType(type);
-
-        }
 
         goal = new Goal();
         goal.setGoalId(activity.getId().toString());
@@ -240,7 +223,7 @@ public class ProcessWasAssigned implements Rule {
         goal.setLearningResources(new HashSet<>(learningResources));
         goal.setCredentials(new HashSet<>(credentials));
         goal.setCompetencies(new HashSet<>(competencies));
-        goal.setPerson(assignedPerson);
+        goal.setPerson(person);
         goalService.save(goal);
 
         return goal;
@@ -273,7 +256,7 @@ public class ProcessWasAssigned implements Rule {
                 .getExtensions() != null) {
 
             String type = (String) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+                    ExtensionsConstants.CONTEXT_EXTENSION_GOAL_TYPE);
 
             goalType = extensionsUtil.getGoalType(type);
 

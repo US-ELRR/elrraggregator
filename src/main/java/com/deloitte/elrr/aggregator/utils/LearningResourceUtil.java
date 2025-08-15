@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.deloitte.elrr.aggregator.rules.ContextActivitiesTypeConstants;
+import com.deloitte.elrr.aggregator.rules.ContextActivityTypeConstants;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.entity.LearningResource;
 import com.deloitte.elrr.jpa.svc.LearningResourceSvc;
@@ -79,9 +79,9 @@ public class LearningResourceUtil {
             URI type = activity.getDefinition().getType();
 
             // Not a LearningResource if Credential or Competency
-            if (type.equals(ContextActivitiesTypeConstants.OTHER_CRED_URI)
+            if (type.equals(ContextActivityTypeConstants.OTHER_CRED_URI)
                     || type.equals(
-                            ContextActivitiesTypeConstants.OTHER_COMP_URI)) {
+                            ContextActivityTypeConstants.OTHER_COMP_URI)) {
                 return lrnRes;
             }
 

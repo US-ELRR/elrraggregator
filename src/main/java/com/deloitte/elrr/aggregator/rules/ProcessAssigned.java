@@ -95,7 +95,8 @@ public class ProcessAssigned implements Rule {
 
         // Get assigned actor
         AbstractActor assignedActor = extensionsUtil.getExtensionValue(statement
-                .getContext(), ExtensionsConstants.EXT_TO, AbstractActor.class);
+                .getContext(), ExtensionsConstants.CONTEXT_EXTENSION_TO,
+                AbstractActor.class);
 
         // Process assigned person
         Person assignedPerson = processPerson.processAssignedPerson(
@@ -119,12 +120,11 @@ public class ProcessAssigned implements Rule {
      * @throws URISyntaxException
      */
     @Transactional
-    @SuppressWarnings("checkstyle:linelength")
     public Goal processGoal(final Context context, final Activity activity,
             final LocalDateTime startDate, final Person assignedPerson)
             throws AggregatorException, URISyntaxException {
 
-        List<LearningResource> lrnRes = new ArrayList<LearningResource>();
+        List<LearningResource> lnRes = new ArrayList<LearningResource>();
         List<Credential> credentials = new ArrayList<Credential>();
         List<Competency> competencies = new ArrayList<Competency>();
         Goal goal = null;
@@ -133,14 +133,14 @@ public class ProcessAssigned implements Rule {
 
         // Get achieved by date
         achievedByDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.CONTEXT_ACTIVITY_EXTENSIONS_ACHIEVED_BY);
+                ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
 
         // Get activity expires
         endDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.ACTIVITY_EXT_EXPIRES);
+                ExtensionsConstants.ACTIVITY_EXTENSION_EXPIRES);
 
         // Process LearningResources
-        lrnRes = learningResourceUtil.processAssignedLearningResources(context);
+        lnRes = learningResourceUtil.processAssignedLearningResources(context);
 
         // Process Credentials
         credentials = (List<Credential>) processCredential
@@ -159,7 +159,7 @@ public class ProcessAssigned implements Rule {
         if (goal == null) {
 
             goal = createGoal(activity, startDate, achievedByDate, endDate,
-                    lrnRes, credentials, competencies, assignedPerson);
+                    lnRes, credentials, competencies, assignedPerson);
             log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists
@@ -217,7 +217,7 @@ public class ProcessAssigned implements Rule {
                 .getExtensions() != null) {
 
             String type = (String) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+                    ExtensionsConstants.CONTEXT_EXTENSION_GOAL_TYPE);
 
             goalType = extensionsUtil.getGoalType(type);
 
@@ -267,7 +267,7 @@ public class ProcessAssigned implements Rule {
                 .getExtensions() != null) {
 
             String type = (String) activity.getDefinition().getExtensions().get(
-                    ExtensionsConstants.CONTEXT_EXTENSIONS_GOAL_TYPE);
+                    ExtensionsConstants.CONTEXT_EXTENSION_GOAL_TYPE);
 
             goalType = extensionsUtil.getGoalType(type);
 

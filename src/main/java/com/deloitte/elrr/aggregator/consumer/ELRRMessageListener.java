@@ -135,9 +135,6 @@ public class ELRRMessageListener {
             messageVo = mapper.readValue(payload, MessageVO.class);
             statement = messageVo.getStatement();
 
-            // Process Person
-            person = processPerson.processPerson(statement);
-
             // *** ADD NEW RULES HERE ***
             List<Rule> classList = Arrays.asList(processCompetency,
                     processCompleted, processCredential, processFailed,
@@ -148,6 +145,9 @@ public class ELRRMessageListener {
             for (Rule rule : classList) {
 
                 if (rule.fireRule(statement)) {
+
+                    // Process Person
+                    person = processPerson.processPerson(statement);
 
                     // Process Rule
                     rule.processRule(person, statement);

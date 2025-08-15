@@ -95,7 +95,7 @@ public class ProcessCredential implements Rule {
 
         // Get expires
         LocalDateTime expires = extensionsUtil.getExtensionValue(statement
-                .getContext(), ExtensionsConstants.EXT_EXPIRES,
+                .getContext(), ExtensionsConstants.CONTEXT_EXTENSION_EXPIRES,
                 LocalDateTime.class);
 
         // Process Credential
@@ -167,7 +167,7 @@ public class ProcessCredential implements Rule {
 
             // If Credential
             if (activity.getDefinition().getType().equals(
-                    ContextActivitiesTypeConstants.OTHER_CRED_URI)) {
+                    ContextActivityTypeConstants.OTHER_CRED_URI)) {
 
                 Credential credential = credentialService.findByIdentifier(
                         activity.getId().toString());
