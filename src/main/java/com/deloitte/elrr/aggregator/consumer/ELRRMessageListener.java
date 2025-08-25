@@ -156,7 +156,9 @@ public class ELRRMessageListener {
             }
 
         } catch (AggregatorException | PersonNotFoundException
-                | JsonProcessingException e) {
+                | JsonProcessingException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
 
             log.error("Error processing Kafka message", e);
             throw new AggregatorException("Error processing Kafka message.", e);
