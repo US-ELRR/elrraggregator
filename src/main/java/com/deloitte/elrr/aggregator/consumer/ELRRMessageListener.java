@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.aggregator.utils.Utils;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -71,8 +72,14 @@ public class ELRRMessageListener {
     @Autowired
     private KafkaTemplate<?, String> kafkaTemplate;
 
+    @Autowired
+    private Utils utils;
+
     @Value("${kafka.dead.letter.topic}")
     private String deadLetterTopic;
+
+    @Value("${pretty.json}")
+    private boolean makePretty;
 
     /**
      * @param message
@@ -88,7 +95,13 @@ public class ELRRMessageListener {
             ClassCastException, NullPointerException, RuntimeServiceException,
             URISyntaxException {
 
-        log.info("\n\n Received Messasge in group - group-id== \n" + message);
+        if (makePretty) {
+            log.info("\n\n Received Messasge in group - group-id== \n" + utils
+                    .prettyJson(message));
+        } else {
+            log.info("\n\n Received Messasge in group - group-id== \n"
+                    + message);
+        }
 
         try {
 

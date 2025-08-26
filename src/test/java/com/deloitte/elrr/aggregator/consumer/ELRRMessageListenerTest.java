@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.aggregator.utils.Utils;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +64,9 @@ class ELRRMessageListenerTest {
 
     @Mock
     private KafkaTemplate<?, String> kafkaTemplate;
+
+    @Spy
+    private Utils utils;
 
     @InjectMocks
     private ELRRMessageListener elrrMessageListener;
