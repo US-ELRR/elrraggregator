@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
-import com.deloitte.elrr.aggregator.utils.Utils;
+import com.deloitte.elrr.aggregator.utils.PrettyJson;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
@@ -72,9 +72,6 @@ public class ELRRMessageListener {
     @Autowired
     private KafkaTemplate<?, String> kafkaTemplate;
 
-    @Autowired
-    private Utils utils;
-
     @Value("${kafka.dead.letter.topic}")
     private String deadLetterTopic;
 
@@ -96,8 +93,8 @@ public class ELRRMessageListener {
             URISyntaxException {
 
         if (makePretty) {
-            log.info("\n\n Received Messasge in group - group-id== \n" + utils
-                    .prettyJson(message));
+            log.info("\n\n Received Messasge in group - group-id== \n"
+                    + PrettyJson.prettyJson(message));
         } else {
             log.info("\n\n Received Messasge in group - group-id== \n"
                     + message);
@@ -109,8 +106,15 @@ public class ELRRMessageListener {
             if (InputSanitizer.isValidInput(message)) {
                 processMessage(message);
             } else {
-                log.error("Invalid message did not pass whitelist check - "
-                        + message);
+
+                if (makePretty) {
+                    log.error("Invalid message did not pass whitelist check - "
+                            + PrettyJson.prettyJson(message));
+                } else {
+                    log.error("Invalid message did not pass whitelist check - "
+                            + message);
+                }
+
                 kafkaTemplate.send(deadLetterTopic, message);
             }
 

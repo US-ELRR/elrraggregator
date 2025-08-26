@@ -1,21 +1,19 @@
 package com.deloitte.elrr.aggregator.utils;
 
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Component
 @Slf4j
-public class Utils {
+@SuppressWarnings({"PMD", "checkstyle:hideutilityclassconstructor"})
+public final class PrettyJson {
 
     /**
      * @param json
      * @return prettyJson
      */
-    public String prettyJson(String json) {
+    public static String prettyJson(String json) {
 
         String prettyJson = null;
 
@@ -31,4 +29,5 @@ public class Utils {
         return prettyJson;
 
     }
+
 }

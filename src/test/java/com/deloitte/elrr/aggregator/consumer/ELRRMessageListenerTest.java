@@ -12,9 +12,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.deloitte.elrr.aggregator.rules.Rule;
-import com.deloitte.elrr.aggregator.utils.Utils;
+import com.deloitte.elrr.aggregator.utils.PrettyJson;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,7 @@ class ELRRMessageListenerTest {
     private KafkaTemplate<?, String> kafkaTemplate;
 
     @Spy
-    private Utils utils;
+    private PrettyJson prettyJson;
 
     @InjectMocks
     private ELRRMessageListener elrrMessageListener;
@@ -74,6 +75,8 @@ class ELRRMessageListenerTest {
     @Test
     @SuppressWarnings("checkstyle:linelength")
     void test() {
+
+        ReflectionTestUtils.setField(elrrMessageListener, "makePretty", true);
 
         try {
 
@@ -88,6 +91,8 @@ class ELRRMessageListenerTest {
     @Test
     @SuppressWarnings("checkstyle:linelength")
     void testInvalid() {
+
+        ReflectionTestUtils.setField(elrrMessageListener, "makePretty", true);
 
         try {
 
