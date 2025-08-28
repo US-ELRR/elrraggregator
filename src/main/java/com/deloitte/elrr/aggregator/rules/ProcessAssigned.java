@@ -127,16 +127,14 @@ public class ProcessAssigned implements Rule {
         List<LearningResource> lnRes = new ArrayList<LearningResource>();
         List<Credential> credentials = new ArrayList<Credential>();
         List<Competency> competencies = new ArrayList<Competency>();
-        Goal goal = null;
         LocalDateTime achievedByDate = null;
-        LocalDateTime endDate = null;
 
         // Get achieved by date
         achievedByDate = extensionsUtil.getExtensionsDate(activity,
                 ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
 
         // Get activity expires
-        endDate = extensionsUtil.getExtensionsDate(activity,
+        LocalDateTime endDate = extensionsUtil.getExtensionsDate(activity,
                 ExtensionsConstants.ACTIVITY_EXTENSION_EXPIRES);
 
         // Process LearningResources
@@ -144,16 +142,14 @@ public class ProcessAssigned implements Rule {
 
         // Process Credentials
         credentials = (List<Credential>) processCredential
-                .processAssignedCredentials(context, assignedPerson, startDate,
-                        endDate);
+                .processAssignedCredentials(context, startDate);
 
         // Process Competencies
         competencies = (List<Competency>) processCompetency
-                .processAssignedCompetencies(context, assignedPerson, startDate,
-                        endDate);
+                .processAssignedCompetencies(context, startDate);
 
         // Get goal
-        goal = goalService.findByGoalId(activity.getId().toString());
+        Goal goal = goalService.findByGoalId(activity.getId().toString());
 
         // If goal doesn't exist
         if (goal == null) {

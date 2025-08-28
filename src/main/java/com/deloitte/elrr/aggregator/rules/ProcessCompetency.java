@@ -144,19 +144,16 @@ public class ProcessCompetency implements Rule {
 
     /**
      * @param context
-     * @param person
      * @param startDate
-     * @param expires
      * @return competencies
      * @throws AggregatorException
      * @throws URISyntaxException
      */
     public List<Competency> processAssignedCompetencies(final Context context,
-            final Person person, final LocalDateTime startDate,
-            final LocalDateTime expires) throws AggregatorException,
+            final LocalDateTime startDate) throws AggregatorException,
             URISyntaxException {
 
-        log.info("Process competencies.");
+        log.info("Process assigned competencies.");
 
         List<Competency> competencies = new ArrayList<Competency>();
 
@@ -185,9 +182,6 @@ public class ProcessCompetency implements Rule {
                     competencies.add(competency);
                     log.info(COMPETENCY_MESSAGE + " " + competency
                             .getIdentifier() + " created.");
-
-                    // Process PersonalCompetency
-                    processPersonalCompetency(person, competency, expires);
 
                 }
 

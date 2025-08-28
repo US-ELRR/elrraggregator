@@ -75,9 +75,6 @@ public class ELRRMessageListener {
     @Value("${kafka.dead.letter.topic}")
     private String deadLetterTopic;
 
-    @Value("${pretty.json}")
-    private boolean makePretty;
-
     /**
      * @param message
      * @throws URISyntaxException
@@ -92,14 +89,8 @@ public class ELRRMessageListener {
             ClassCastException, NullPointerException, RuntimeServiceException,
             URISyntaxException {
 
-        if (makePretty) {
-            log.info("\n\n Received Messasge in group - group-id== \n"
-                    + PrettyJson.prettyJson(message));
-        } else {
-            log.info("\n\n Received Messasge in group - group-id== \n"
-                    + message);
-        }
-
+        log.debug("\n\n Received Message in group - group-id== \n" + PrettyJson
+                .prettyJson(message));
         try {
 
             // If valid message process otherwise send to dead letter queue
@@ -107,14 +98,8 @@ public class ELRRMessageListener {
                 processMessage(message);
             } else {
 
-                if (makePretty) {
-                    log.error("Invalid message did not pass whitelist check - "
-                            + PrettyJson.prettyJson(message));
-                } else {
-                    log.error("Invalid message did not pass whitelist check - "
-                            + message);
-                }
-
+                log.error("Invalid message did not pass whitelist check - "
+                        + PrettyJson.prettyJson(message));
                 kafkaTemplate.send(deadLetterTopic, message);
             }
 
@@ -138,7 +123,7 @@ public class ELRRMessageListener {
             ClassCastException, NullPointerException, RuntimeServiceException,
             URISyntaxException {
 
-        log.info(" \n\n ===============Process Kafka message===============");
+        log.debug(" \n\n ===============Process Kafka message===============");
 
         Statement statement = null;
         Person person = null;

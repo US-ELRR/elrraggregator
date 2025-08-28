@@ -151,13 +151,11 @@ public class ProcessWasAssigned implements Rule {
 
         // Process Credentials
         credentials = (List<Credential>) processCredential
-                .processAssignedCredentials(context, person, startDate,
-                        endDate);
+                .processAssignedCredentials(context, startDate);
 
         // Process Competencies
         competencies = (List<Competency>) processCompetency
-                .processAssignedCompetencies(context, person, startDate,
-                        endDate);
+                .processAssignedCompetencies(context, startDate);
 
         // Get goal
         goal = goalService.findByGoalId(activity.getId().toString());

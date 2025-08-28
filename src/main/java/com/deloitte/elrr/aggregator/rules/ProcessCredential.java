@@ -144,19 +144,16 @@ public class ProcessCredential implements Rule {
 
     /**
      * @param context
-     * @param person
      * @param startDate
-     * @param expires
      * @return credential
      * @throws AggregatorException
      * @throws URISyntaxException
      */
     public List<Credential> processAssignedCredentials(final Context context,
-            final Person person, final LocalDateTime startDate,
-            final LocalDateTime expires) throws AggregatorException,
+            final LocalDateTime startDate) throws AggregatorException,
             URISyntaxException {
 
-        log.info("Process credentials.");
+        log.info("Process assigned credentials.");
 
         List<Credential> credentials = new ArrayList<Credential>();
 
@@ -186,9 +183,6 @@ public class ProcessCredential implements Rule {
 
                     log.info(CREDENTIAL_MESSAGE + " " + credential
                             .getIdentifier() + " created.");
-
-                    // Process PersonalCredential
-                    processPersonalCredential(person, credential, expires);
 
                 }
 
