@@ -86,10 +86,6 @@ public class ProcessCredential implements Rule {
 
         log.info("Process credential.");
 
-        // Get start date
-        // Convert from ZonedDateTime to LocalDateTime
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
-
         // Get Activity
         Activity activity = (Activity) statement.getObject();
 
@@ -99,7 +95,7 @@ public class ProcessCredential implements Rule {
                 LocalDateTime.class);
 
         // Process Credential
-        Credential credential = processCredential(activity, startDate, expires);
+        Credential credential = processCredential(activity, expires);
 
         // Process PersonalCredential
         processPersonalCredential(person, credential, expires);
@@ -109,14 +105,12 @@ public class ProcessCredential implements Rule {
 
     /**
      * @param activity
-     * @param startDate
      * @param endDate
      * @return credential
      * @throws AggregatorException
      */
     private Credential processCredential(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+            final LocalDateTime endDate) throws AggregatorException {
 
         Credential credential = null;
 
@@ -127,7 +121,7 @@ public class ProcessCredential implements Rule {
         // If credential doesn't exist
         if (credential == null) {
 
-            credential = createCredential(activity, startDate, endDate);
+            credential = createCredential(activity, endDate);
             log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
                     + " created.");
 
@@ -144,14 +138,12 @@ public class ProcessCredential implements Rule {
 
     /**
      * @param context
-     * @param startDate
      * @return credential
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public List<Credential> processAssignedCredentials(final Context context,
-            final LocalDateTime startDate) throws AggregatorException,
-            URISyntaxException {
+    public List<Credential> processAssignedCredentials(final Context context)
+            throws AggregatorException, URISyntaxException {
 
         log.info("Process assigned credentials.");
 
@@ -178,7 +170,7 @@ public class ProcessCredential implements Rule {
                     // If Credential doesn't exist
                 } else {
 
-                    credential = createCredential(activity, startDate, null);
+                    credential = createCredential(activity, null);
                     credentials.add(credential);
 
                     log.info(CREDENTIAL_MESSAGE + " " + credential
@@ -195,14 +187,12 @@ public class ProcessCredential implements Rule {
 
     /**
      * @param activity
-     * @param startDate
      * @param endDate
      * @return credential
      * @throws AggregatorException
      */
     private Credential createCredential(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+            final LocalDateTime endDate) throws AggregatorException {
 
         Credential credential = null;
         String activityName = "";
@@ -217,7 +207,6 @@ public class ProcessCredential implements Rule {
         credential.setIdentifier(activity.getId().toString());
         credential.setFrameworkTitle(activityName);
         credential.setFrameworkDescription(activityDescription);
-        credential.setValidStartDate(startDate);
         credential.setValidEndDate(endDate);
         credentialService.save(credential);
 

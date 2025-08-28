@@ -86,10 +86,6 @@ public class ProcessCompetency implements Rule {
 
         log.info("Process competency.");
 
-        // Get start date
-        // Convert from ZonedDateTime to LocalDate
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
-
         // Get Activity
         Activity activity = (Activity) statement.getObject();
 
@@ -99,7 +95,7 @@ public class ProcessCompetency implements Rule {
                 LocalDateTime.class);
 
         // Process Competency
-        Competency competency = processCompetency(activity, startDate, expires);
+        Competency competency = processCompetency(activity, expires);
 
         // Process PersonalCompetency
         processPersonalCompetency(person, competency, expires);
@@ -109,14 +105,12 @@ public class ProcessCompetency implements Rule {
 
     /**
      * @param activity
-     * @param startDate
      * @param endDate
      * @return competency
      * @throws AggregatorException
      */
     private Competency processCompetency(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+            final LocalDateTime endDate) throws AggregatorException {
 
         Competency competency = null;
 
@@ -127,7 +121,7 @@ public class ProcessCompetency implements Rule {
         // If competency doesn't exist
         if (competency == null) {
 
-            competency = createCompetency(activity, startDate, endDate);
+            competency = createCompetency(activity, endDate);
             log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
                     + " created.");
 
@@ -144,14 +138,12 @@ public class ProcessCompetency implements Rule {
 
     /**
      * @param context
-     * @param startDate
      * @return competencies
      * @throws AggregatorException
      * @throws URISyntaxException
      */
-    public List<Competency> processAssignedCompetencies(final Context context,
-            final LocalDateTime startDate) throws AggregatorException,
-            URISyntaxException {
+    public List<Competency> processAssignedCompetencies(final Context context)
+            throws AggregatorException, URISyntaxException {
 
         log.info("Process assigned competencies.");
 
@@ -178,7 +170,7 @@ public class ProcessCompetency implements Rule {
                     // If Competency doesn't exist
                 } else {
 
-                    competency = createCompetency(activity, startDate, null);
+                    competency = createCompetency(activity, null);
                     competencies.add(competency);
                     log.info(COMPETENCY_MESSAGE + " " + competency
                             .getIdentifier() + " created.");
@@ -194,14 +186,12 @@ public class ProcessCompetency implements Rule {
 
     /**
      * @param activity
-     * @param startDate
      * @param endDate
      * @return competency
      * @throws AggregatorException
      */
     private Competency createCompetency(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime endDate)
-            throws AggregatorException {
+            final LocalDateTime endDate) throws AggregatorException {
 
         Competency competency = null;
         String activityName = "";
@@ -216,7 +206,6 @@ public class ProcessCompetency implements Rule {
         competency.setIdentifier(activity.getId().toString());
         competency.setFrameworkTitle(activityName);
         competency.setFrameworkDescription(activityDescription);
-        competency.setValidStartDate(startDate);
         competency.setValidEndDate(endDate);
         competencyService.save(competency);
 
