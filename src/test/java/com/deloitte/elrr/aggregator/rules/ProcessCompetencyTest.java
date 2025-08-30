@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
@@ -75,10 +75,10 @@ class ProcessCompetencyTest {
             assertNotNull(stmt);
 
             // Get expires
-            LocalDateTime expires = extensionsUtil.getExtensionValue(stmt
+            ZonedDateTime expires = extensionsUtil.getExtensionValue(stmt
                     .getContext(),
                     ExtensionsConstants.CONTEXT_EXTENSION_EXPIRES,
-                    LocalDateTime.class);
+                    ZonedDateTime.class);
 
             // Get Activity
             Activity activity = (Activity) stmt.getObject();
@@ -146,7 +146,7 @@ class ProcessCompetencyTest {
             assertNotNull(competencyResult);
 
             // Test update personal competency
-            expires = LocalDateTime.parse("2025-12-06T17:30:00Z",
+            expires = ZonedDateTime.parse("2025-12-06T17:30:00Z",
                     DateTimeFormatter.ISO_DATE_TIME);
 
             PersonalCompetency personalCompetencyResult2 = processCompetency

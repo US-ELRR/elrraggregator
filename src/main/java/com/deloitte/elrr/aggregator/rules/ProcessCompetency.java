@@ -1,7 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,9 +90,9 @@ public class ProcessCompetency implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get expires
-        LocalDateTime expires = extensionsUtil.getExtensionValue(statement
+        ZonedDateTime expires = extensionsUtil.getExtensionValue(statement
                 .getContext(), ExtensionsConstants.CONTEXT_EXTENSION_EXPIRES,
-                LocalDateTime.class);
+                ZonedDateTime.class);
 
         // Process Competency
         Competency competency = processCompetency(activity, expires);
@@ -110,7 +110,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     private Competency processCompetency(final Activity activity,
-            final LocalDateTime endDate) throws AggregatorException {
+            final ZonedDateTime endDate) throws AggregatorException {
 
         Competency competency = null;
 
@@ -191,7 +191,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     private Competency createCompetency(final Activity activity,
-            final LocalDateTime endDate) throws AggregatorException {
+            final ZonedDateTime endDate) throws AggregatorException {
 
         Competency competency = null;
         String activityName = "";
@@ -220,7 +220,7 @@ public class ProcessCompetency implements Rule {
      * @throws AggregatorException
      */
     public Competency updateCompetency(Competency competency,
-            final Activity activity, final LocalDateTime endDate)
+            final Activity activity, final ZonedDateTime endDate)
             throws AggregatorException {
 
         String activityName = "";
@@ -246,7 +246,7 @@ public class ProcessCompetency implements Rule {
      * @return personalCompetency
      */
     private PersonalCompetency processPersonalCompetency(Person person,
-            final Competency competency, final LocalDateTime expires) {
+            final Competency competency, final ZonedDateTime expires) {
 
         PersonalCompetency personalCompetency = null;
 
@@ -302,7 +302,7 @@ public class ProcessCompetency implements Rule {
      * @return personalCompetency
      */
     private PersonalCompetency createPersonalCompetency(final Person person,
-            final Competency competency, final LocalDateTime expires) {
+            final Competency competency, final ZonedDateTime expires) {
 
         PersonalCompetency personalCompetency = new PersonalCompetency();
 
@@ -327,7 +327,7 @@ public class ProcessCompetency implements Rule {
      */
     public PersonalCompetency updatePersonalCompetency(
             PersonalCompetency personalCompetency, final Person person,
-            final LocalDateTime expires) {
+            final ZonedDateTime expires) {
 
         if (expires != null) {
 

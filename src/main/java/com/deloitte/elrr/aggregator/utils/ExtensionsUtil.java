@@ -2,6 +2,7 @@ package com.deloitte.elrr.aggregator.utils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -38,14 +39,14 @@ public class ExtensionsUtil {
                 return null;
             }
 
-            // LocalDatewTime
-            if (LocalDateTime.class.isAssignableFrom(returnObject)) {
+            // ZonedDateTime
+            if (ZonedDateTime.class.isAssignableFrom(returnObject)) {
 
                 String strLocalDateTime = (String) context.getExtensions().get(
                         key);
 
                 if (strLocalDateTime != null) {
-                    return (T) LocalDateTime.parse(strLocalDateTime,
+                    return (T) ZonedDateTime.parse(strLocalDateTime,
                             DateTimeFormatter.ISO_DATE_TIME);
                 }
 

@@ -1,6 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -77,7 +77,7 @@ public class LearningRecordUtil {
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
             final LearningResource learningResource,
-            final LocalDateTime enrollmentDate) throws RuntimeServiceException {
+            final ZonedDateTime enrollmentDate) throws RuntimeServiceException {
 
         LearningRecord learningRecord = null;
 
@@ -167,7 +167,7 @@ public class LearningRecordUtil {
      */
     private LearningRecord createLearningRecord(final Person person,
             final LearningResource learningResource, final Verb verb,
-            final Result result, LocalDateTime enrollmentDate) {
+            final Result result, ZonedDateTime enrollmentDate) {
 
         LearningRecord learningRecord = new LearningRecord();
 
@@ -234,7 +234,7 @@ public class LearningRecordUtil {
      */
     public LearningRecord updateLearningRecord(Person person,
             LearningRecord learningRecord, final Verb verb, final Result result,
-            final LocalDateTime enrollmentDate) throws RuntimeServiceException {
+            final ZonedDateTime enrollmentDate) throws RuntimeServiceException {
 
         LearningStatus learningStatus = getStatus(verb, result);
 

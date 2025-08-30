@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -108,8 +108,7 @@ class LearningRecordUtilTest {
 
             Result result = stmt.getResult();
 
-            LocalDateTime enrollmentDate = stmt.getTimestamp()
-                    .toLocalDateTime();
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
 
             Person person = new Person();
             person.setId(UUID.randomUUID());
@@ -343,8 +342,7 @@ class LearningRecordUtilTest {
 
             Result result = stmt.getResult();
 
-            LocalDateTime enrollmentDate = stmt.getTimestamp()
-                    .toLocalDateTime();
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
 
             Person person = new Person();
             person.setId(UUID.randomUUID());
@@ -393,8 +391,7 @@ class LearningRecordUtilTest {
 
             Result result = stmt.getResult();
 
-            LocalDateTime enrollmentDate = stmt.getTimestamp()
-                    .toLocalDateTime();
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
 
             Person person = new Person();
             person.setId(UUID.randomUUID());

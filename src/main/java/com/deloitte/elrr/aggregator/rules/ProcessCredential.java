@@ -1,7 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,9 +90,9 @@ public class ProcessCredential implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get expires
-        LocalDateTime expires = extensionsUtil.getExtensionValue(statement
+        ZonedDateTime expires = extensionsUtil.getExtensionValue(statement
                 .getContext(), ExtensionsConstants.CONTEXT_EXTENSION_EXPIRES,
-                LocalDateTime.class);
+                ZonedDateTime.class);
 
         // Process Credential
         Credential credential = processCredential(activity, expires);
@@ -110,7 +110,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     private Credential processCredential(final Activity activity,
-            final LocalDateTime endDate) throws AggregatorException {
+            final ZonedDateTime endDate) throws AggregatorException {
 
         Credential credential = null;
 
@@ -192,7 +192,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     private Credential createCredential(final Activity activity,
-            final LocalDateTime endDate) throws AggregatorException {
+            final ZonedDateTime endDate) throws AggregatorException {
 
         Credential credential = null;
         String activityName = "";
@@ -221,7 +221,7 @@ public class ProcessCredential implements Rule {
      * @throws AggregatorException
      */
     public Credential updateCredential(Credential credential,
-            final Activity activity, final LocalDateTime endDate)
+            final Activity activity, final ZonedDateTime endDate)
             throws AggregatorException {
 
         String activityName = "";
@@ -247,7 +247,7 @@ public class ProcessCredential implements Rule {
      * @return PersonalCredential
      */
     private PersonalCredential processPersonalCredential(Person person,
-            final Credential credential, final LocalDateTime expires) {
+            final Credential credential, final ZonedDateTime expires) {
 
         PersonalCredential personalCredential = null;
 
@@ -301,7 +301,7 @@ public class ProcessCredential implements Rule {
      * @return personalCredential
      */
     private PersonalCredential createPersonalCredential(final Person person,
-            final Credential credential, final LocalDateTime expires) {
+            final Credential credential, final ZonedDateTime expires) {
 
         PersonalCredential personalCredential = new PersonalCredential();
 
@@ -326,7 +326,7 @@ public class ProcessCredential implements Rule {
      */
     public PersonalCredential updatePersonalCredential(
             PersonalCredential personalCredential, final Person person,
-            final LocalDateTime expires) {
+            final ZonedDateTime expires) {
 
         if (expires != null) {
 
