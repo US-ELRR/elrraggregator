@@ -1,8 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 
@@ -87,8 +86,7 @@ public class ProcessAssigned implements Rule {
         log.info("Process assigned.");
 
         // Get start date
-        // Convert from ZonedDateTime to LocalDateTime
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+        ZonedDateTime startDate = statement.getTimestamp();
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -121,31 +119,27 @@ public class ProcessAssigned implements Rule {
      */
     @Transactional
     public Goal processGoal(final Context context, final Activity activity,
-            final LocalDateTime startDate, final Person assignedPerson)
+            final ZonedDateTime startDate, final Person assignedPerson)
             throws AggregatorException, URISyntaxException {
 
-        List<LearningResource> lnRes = new ArrayList<LearningResource>();
-        List<Credential> credentials = new ArrayList<Credential>();
-        List<Competency> competencies = new ArrayList<Competency>();
-        LocalDateTime achievedByDate = null;
-
         // Get achieved by date
-        achievedByDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
+        ZonedDateTime achievedByDate = extensionsUtil.getExtensionsDate(
+                activity, ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
 
         // Get activity expires
-        LocalDateTime endDate = extensionsUtil.getExtensionsDate(activity,
+        ZonedDateTime endDate = extensionsUtil.getExtensionsDate(activity,
                 ExtensionsConstants.ACTIVITY_EXTENSION_EXPIRES);
 
         // Process LearningResources
-        lnRes = learningResourceUtil.processAssignedLearningResources(context);
+        List<LearningResource> learningResources = learningResourceUtil
+                .processAssignedLearningResources(context);
 
         // Process Credentials
-        credentials = (List<Credential>) processCredential
+        List<Credential> credentials = (List<Credential>) processCredential
                 .processAssignedCredentials(context);
 
         // Process Competencies
-        competencies = (List<Competency>) processCompetency
+        List<Competency> competencies = (List<Competency>) processCompetency
                 .processAssignedCompetencies(context);
 
         // Get goal
@@ -155,7 +149,8 @@ public class ProcessAssigned implements Rule {
         if (goal == null) {
 
             goal = createGoal(activity, startDate, achievedByDate, endDate,
-                    lnRes, credentials, competencies, assignedPerson);
+                    learningResources, credentials, competencies,
+                    assignedPerson);
             log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists
@@ -191,21 +186,19 @@ public class ProcessAssigned implements Rule {
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public Goal createGoal(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime achievedByDate,
-            final LocalDateTime endDate,
+            final ZonedDateTime startDate, final ZonedDateTime achievedByDate,
+            final ZonedDateTime endDate,
             final List<LearningResource> learningResources,
             final List<Credential> credentials,
             final List<Competency> competencies, final Person assignedPerson)
             throws AggregatorException {
 
         GoalType goalType = null;
-        Goal goal = null;
-        String activityName = "";
-        String activityDescription = "";
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
+
+        String activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
 
         // Get goalType
@@ -219,7 +212,7 @@ public class ProcessAssigned implements Rule {
 
         }
 
-        goal = new Goal();
+        Goal goal = new Goal();
         goal.setGoalId(activity.getId().toString());
         goal.setDescription(activityDescription);
         goal.setName(activityName);
@@ -246,16 +239,15 @@ public class ProcessAssigned implements Rule {
      * @throws AggregatorException
      */
     public Goal updateGoal(Goal goal, Activity activity,
-            final LocalDateTime achievedByDate, final LocalDateTime endDate)
+            final ZonedDateTime achievedByDate, final ZonedDateTime endDate)
             throws AggregatorException {
 
         GoalType goalType = null;
-        String activityName = "";
-        String activityDescription = "";
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
+
+        String activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
 
         // Get goalType

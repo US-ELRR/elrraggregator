@@ -1,7 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -77,11 +76,11 @@ public class ExtensionsUtil {
     /**
      * @param activity
      * @param extensionsConstant
-     * @return LocatDateTime
+     * @return ZonedDateTime
      * @throws IllegalArgumentException
      * @throws DateTimeParseException
      */
-    public LocalDateTime getExtensionsDate(Activity activity,
+    public ZonedDateTime getExtensionsDate(Activity activity,
             String extensionsConstant) throws IllegalArgumentException,
             DateTimeParseException {
 
@@ -89,7 +88,7 @@ public class ExtensionsUtil {
                 extensionsConstant);
 
         if (strDate != null) {
-            return LocalDateTime.parse(strDate,
+            return ZonedDateTime.parse(strDate,
                     DateTimeFormatter.ISO_DATE_TIME);
         }
 

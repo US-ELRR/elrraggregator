@@ -1,8 +1,7 @@
 package com.deloitte.elrr.aggregator.rules;
 
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.deloitte.elrr.aggregator.consumer.ProcessPerson;
 import com.deloitte.elrr.aggregator.utils.ExtensionsUtil;
 import com.deloitte.elrr.aggregator.utils.LangMapUtil;
 import com.deloitte.elrr.aggregator.utils.LearningResourceUtil;
@@ -33,9 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class ProcessWasAssigned implements Rule {
-
-    @Autowired
-    private ProcessPerson processPerson;
 
     @Autowired
     private LangMapUtil langMapUtil;
@@ -89,8 +84,7 @@ public class ProcessWasAssigned implements Rule {
         GoalType goalType = null;
 
         // Get start date
-        // Convert from ZonedDateTime to LocalDateTime
-        LocalDateTime startDate = statement.getTimestamp().toLocalDateTime();
+        ZonedDateTime startDate = statement.getTimestamp();
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -127,44 +121,39 @@ public class ProcessWasAssigned implements Rule {
      */
     @Transactional
     public Goal processGoal(final Context context, final Activity activity,
-            final Person person, final LocalDateTime startDate,
+            final Person person, final ZonedDateTime startDate,
             final GoalType goalType) throws AggregatorException,
             URISyntaxException {
 
-        List<LearningResource> lrnRes = new ArrayList<LearningResource>();
-        List<Credential> credentials = new ArrayList<Credential>();
-        List<Competency> competencies = new ArrayList<Competency>();
-        Goal goal = null;
-        LocalDateTime achievedByDate = null;
-        LocalDateTime endDate = null;
-
         // Get achieved by date
-        achievedByDate = extensionsUtil.getExtensionsDate(activity,
-                ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
+        ZonedDateTime achievedByDate = extensionsUtil.getExtensionsDate(
+                activity, ExtensionsConstants.ACTIVITY_EXTENSION_ACHIEVED_BY);
 
         // Get activity expires
-        endDate = extensionsUtil.getExtensionsDate(activity,
+        ZonedDateTime endDate = extensionsUtil.getExtensionsDate(activity,
                 ExtensionsConstants.ACTIVITY_EXTENSION_EXPIRES);
 
         // Process LearningResources
-        lrnRes = learningResourceUtil.processAssignedLearningResources(context);
+        List<LearningResource> learningResource = learningResourceUtil
+                .processAssignedLearningResources(context);
 
         // Process Credentials
-        credentials = (List<Credential>) processCredential
+        List<Credential> credentials = (List<Credential>) processCredential
                 .processAssignedCredentials(context);
 
         // Process Competencies
-        competencies = (List<Competency>) processCompetency
+        List<Competency> competencies = (List<Competency>) processCompetency
                 .processAssignedCompetencies(context);
 
         // Get goal
-        goal = goalService.findByGoalId(activity.getId().toString());
+        Goal goal = goalService.findByGoalId(activity.getId().toString());
 
         // If goal doesn't exist
         if (goal == null) {
 
             goal = createGoal(activity, startDate, achievedByDate, endDate,
-                    lrnRes, credentials, competencies, person, goalType);
+                    learningResource, credentials, competencies, person,
+                    goalType);
             log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists
@@ -194,23 +183,20 @@ public class ProcessWasAssigned implements Rule {
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public Goal createGoal(final Activity activity,
-            final LocalDateTime startDate, final LocalDateTime achievedByDate,
-            final LocalDateTime endDate,
+            final ZonedDateTime startDate, final ZonedDateTime achievedByDate,
+            final ZonedDateTime endDate,
             final List<LearningResource> learningResources,
             final List<Credential> credentials,
             final List<Competency> competencies, final Person person,
             final GoalType goalType) throws AggregatorException {
 
-        Goal goal = null;
-        String activityName = "";
-        String activityDescription = "";
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
+        String activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
 
-        goal = new Goal();
+        Goal goal = new Goal();
         goal.setGoalId(activity.getId().toString());
         goal.setDescription(activityDescription);
         goal.setName(activityName);
@@ -237,16 +223,15 @@ public class ProcessWasAssigned implements Rule {
      * @throws AggregatorException
      */
     public Goal updateGoal(Goal goal, Activity activity,
-            final LocalDateTime achievedByDate, final LocalDateTime endDate)
+            final ZonedDateTime achievedByDate, final ZonedDateTime endDate)
             throws AggregatorException {
 
         GoalType goalType = null;
-        String activityName = "";
-        String activityDescription = "";
 
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
+
+        String activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
 
         // Get goalType
