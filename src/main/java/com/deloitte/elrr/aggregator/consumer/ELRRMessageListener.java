@@ -1,5 +1,6 @@
 package com.deloitte.elrr.aggregator.consumer;
 
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deloitte.elrr.aggregator.InputSanitizer;
 import com.deloitte.elrr.aggregator.dto.MessageVO;
 import com.deloitte.elrr.aggregator.rules.Rule;
+import com.deloitte.elrr.aggregator.utils.PrettyJson;
 import com.deloitte.elrr.elrraggregator.exception.AggregatorException;
 import com.deloitte.elrr.elrraggregator.exception.PersonNotFoundException;
 import com.deloitte.elrr.entity.Person;
+import com.deloitte.elrr.exception.RuntimeServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yetanalytics.xapi.model.Statement;
@@ -58,6 +61,15 @@ public class ELRRMessageListener {
     private Rule processScheduled;
 
     @Autowired
+    private Rule processAssigned;
+
+    @Autowired
+    private Rule processWasAssigned;
+
+    @Autowired
+    private Rule processRemoved;
+
+    @Autowired
     private KafkaTemplate<?, String> kafkaTemplate;
 
     @Value("${kafka.dead.letter.topic}")
@@ -65,22 +77,29 @@ public class ELRRMessageListener {
 
     /**
      * @param message
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
      * @throws AggregatorException
      */
     @Transactional
     @KafkaListener(topics = "${kafka.topic}")
-    public void listen(final String message) {
+    public void listen(final String message) throws AggregatorException,
+            ClassCastException, NullPointerException, RuntimeServiceException,
+            URISyntaxException {
 
-        log.info("\n\n Received Messasge in group - group-id== \n" + message);
-
+        log.debug("\n\n Received Message in group - group-id== \n" + PrettyJson
+                .prettyJson(message));
         try {
 
             // If valid message process otherwise send to dead letter queue
             if (InputSanitizer.isValidInput(message)) {
                 processMessage(message);
             } else {
+
                 log.error("Invalid message did not pass whitelist check - "
-                        + message);
+                        + PrettyJson.prettyJson(message));
                 kafkaTemplate.send(deadLetterTopic, message);
             }
 
@@ -93,12 +112,18 @@ public class ELRRMessageListener {
 
     /**
      * @param payload
+     * @throws URISyntaxException
+     * @throws RuntimeServiceException
+     * @throws NullPointerException
+     * @throws ClassCastException
      * @throws AggregatorException
      */
     @Transactional
-    public void processMessage(final String payload) {
+    public void processMessage(final String payload) throws AggregatorException,
+            ClassCastException, NullPointerException, RuntimeServiceException,
+            URISyntaxException {
 
-        log.info(" \n\n ===============Process Kafka message===============");
+        log.debug(" \n\n ===============Process Kafka message===============");
 
         Statement statement = null;
         Person person = null;
@@ -112,18 +137,19 @@ public class ELRRMessageListener {
             messageVo = mapper.readValue(payload, MessageVO.class);
             statement = messageVo.getStatement();
 
-            // Process Person
-            person = processPerson.processPerson(statement);
-
             // *** ADD NEW RULES HERE ***
             List<Rule> classList = Arrays.asList(processCompetency,
                     processCompleted, processCredential, processFailed,
                     processInitialized, processPassed, processSatisfied,
-                    processRegistered, processScheduled);
+                    processRegistered, processScheduled, processAssigned,
+                    processWasAssigned, processRemoved);
 
             for (Rule rule : classList) {
 
                 if (rule.fireRule(statement)) {
+
+                    // Process Person
+                    person = processPerson.processPerson(statement);
 
                     // Process Rule
                     rule.processRule(person, statement);
@@ -132,7 +158,9 @@ public class ELRRMessageListener {
             }
 
         } catch (AggregatorException | PersonNotFoundException
-                | JsonProcessingException e) {
+                | JsonProcessingException | ClassCastException
+                | NullPointerException | RuntimeServiceException
+                | URISyntaxException e) {
 
             log.error("Error processing Kafka message", e);
             throw new AggregatorException("Error processing Kafka message.", e);

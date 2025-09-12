@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,8 @@ class LearningRecordUtilTest {
 
             Result result = stmt.getResult();
 
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
+
             Person person = new Person();
             person.setId(UUID.randomUUID());
             person.setName("test");
@@ -122,7 +125,8 @@ class LearningRecordUtilTest {
             learningRecord.setLearningResource(learningResource);
 
             LearningRecord learningRecordResult = learningRecordUtil
-                    .updateLearningRecord(person, learningRecord, verb, result);
+                    .updateLearningRecord(person, learningRecord, verb, result,
+                            enrollmentDate);
             assertNotNull(learningRecordResult);
 
         } catch (IOException e) {
@@ -172,6 +176,56 @@ class LearningRecordUtilTest {
             assertEquals(learningRecord.getLearningResource().getDescription(),
                     "A fictitious example CBT 2 course.");
 
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testPassedUpdate() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("passed.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Tom Brady");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("simple CBT 2 course");
+            learningResource.setDescription(
+                    "A fictitious example CBT 2 course.");
+
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+
+            learningRecord = learningRecordUtil.updateLearningRecord(person,
+                    learningRecord, verb, result);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.PASSED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "simple CBT 2 course");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "A fictitious example CBT 2 course.");
         } catch (IOException e) {
             fail("Should not have thrown any exception");
         }
@@ -269,4 +323,105 @@ class LearningRecordUtilTest {
         }
     }
 
+    @Test
+    void testRegistered() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("registered.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Luke Skywalker");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Example Registered Activity");
+            learningResource.setDescription(
+                    "Example Registered Activity Description");
+
+            LearningRecord learningRecord = learningRecordUtil
+                    .processLearningRecord(person, verb, result,
+                            learningResource, enrollmentDate);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.REGISTERED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Registered Activity");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example Registered Activity Description");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
+    @Test
+    void testRegisteredUpdate() {
+
+        try {
+
+            File testFile = TestFileUtil.getJsonTestFile("registered.json");
+
+            Statement stmt = Mapper.getMapper().readValue(testFile,
+                    Statement.class);
+            assertNotNull(stmt);
+
+            Activity activity = (Activity) stmt.getObject();
+            assertNotNull(activity);
+
+            Verb verb = stmt.getVerb();
+            assertNotNull(verb);
+
+            Result result = stmt.getResult();
+
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
+
+            Person person = new Person();
+            person.setId(UUID.randomUUID());
+            person.setName("Luke Skywalker");
+
+            LearningResource learningResource = new LearningResource();
+            learningResource.setId(UUID.randomUUID());
+            learningResource.setTitle("Example Registered Activity");
+            learningResource.setDescription(
+                    "Example Registered Activity Description");
+
+            LearningRecord learningRecord = new LearningRecord();
+            learningRecord.setId(UUID.randomUUID());
+            learningRecord.setPerson(person);
+            learningRecord.setLearningResource(learningResource);
+
+            learningRecord = learningRecordUtil.updateLearningRecord(person,
+                    learningRecord, verb, result, enrollmentDate);
+            assertNotNull(learningRecord);
+            assertNotNull(learningRecord.getPerson());
+            assertNotNull(learningRecord.getLearningResource());
+            assertEquals(learningRecord.getRecordStatus(),
+                    LearningStatus.REGISTERED);
+            assertEquals(learningRecord.getLearningResource().getTitle(),
+                    "Example Registered Activity");
+            assertEquals(learningRecord.getLearningResource().getDescription(),
+                    "Example Registered Activity Description");
+
+        } catch (IOException e) {
+            fail("Should not have thrown any exception");
+        }
+    }
 }

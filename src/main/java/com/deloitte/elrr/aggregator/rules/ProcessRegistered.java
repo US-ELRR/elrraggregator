@@ -1,6 +1,6 @@
 package com.deloitte.elrr.aggregator.rules;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +66,7 @@ public class ProcessRegistered implements Rule {
         Activity activity = (Activity) statement.getObject();
 
         // Get enrollment date
-        LocalDateTime enrollmentDate = statement.getTimestamp()
-                .toLocalDateTime();
+        ZonedDateTime enrollmentDate = statement.getTimestamp();
 
         // Process LearningResource
         LearningResource learningResource = learningResourceUtil

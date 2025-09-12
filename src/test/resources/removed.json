@@ -1,0 +1,29 @@
+ {
+    "id": "3d5065c4-2d0c-48da-986d-b84473730ec8",
+    "actor": {
+    "name": "Dawn Greer",
+     "account": {
+        "name": "DawnAccountName",
+        "homePage": "https://school.org/students"
+      }
+  },
+  "verb": {
+    "id": "http://activitystrea.ms/removed",
+    "display": {
+      "en-us": "Removed"
+    }
+  },
+  "object": {
+    "id": "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f0578",
+    "definition": {
+      "name": {
+        "en-us": "was assigned goal"
+      },
+      "type": "https://w3id.org/xapi/activities/goal",
+      "extensions": {
+        "http://xapi.edlm/goals/activity-extensions/goal-type": "SELF-ASSIGNED"
+      }
+    }
+  },
+  "timestamp": "2025-05-25T12:34:56Z"
+}

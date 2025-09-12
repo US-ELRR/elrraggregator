@@ -42,13 +42,11 @@ public class ProcessPerson {
 
         AbstractActor actor = null;
         Person person = null;
-        Account account = null;
 
         // Get Actor and account
         if (statement.getActor() instanceof AbstractActor) {
 
             actor = (AbstractActor) statement.getActor();
-            account = actor.getAccount();
 
         } else {
 
@@ -60,11 +58,11 @@ public class ProcessPerson {
         log.info("Process person.");
 
         // Get Person
-        person = getPerson(actor, account);
+        person = getPerson(actor);
 
         // If Person doesn't exist
         if (person == null) {
-            person = createPerson(actor, account);
+            person = createPerson(actor);
         }
 
         return person;
@@ -72,15 +70,39 @@ public class ProcessPerson {
 
     /**
      * @param actor
-     * @param account
+     * @return Person
+     * @throws PersonNotFoundException
+     */
+    public Person processAssignedPerson(AbstractActor actor) {
+
+        Person person = null;
+
+        log.info("Process person.");
+
+        // Get Person
+        person = getPerson(actor);
+
+        // If Person doesn't exist
+        if (person == null) {
+            person = createPerson(actor);
+        }
+
+        return person;
+    }
+
+    /**
+     * @param actor
      * @return person
      */
-    public Person getPerson(AbstractActor actor, Account account) {
+    public Person getPerson(AbstractActor actor) {
 
         Person person = null;
         String mBox = null;
         String mboxSha1sum = null;
         String openId = null;
+
+        // Get account
+        Account account = actor.getAccount();
 
         if (actor.getMbox() != null) {
             mBox = actor.getMbox().toString();
@@ -114,12 +136,9 @@ public class ProcessPerson {
 
     /**
      * @param actor
-     * @param account
      * @return Person
      */
-    public Person createPerson(AbstractActor actor, Account account) {
-
-        log.info("Creating new person.");
+    public Person createPerson(AbstractActor actor) {
 
         Email email = null;
 
@@ -138,7 +157,7 @@ public class ProcessPerson {
             person.getEmailAddresses().add(email);
         }
 
-        Identity identity = createIdentity(person, actor, account);
+        Identity identity = createIdentity(person, actor);
 
         person.setIdentities(new HashSet<Identity>());
         person.getIdentities().add(identity);
@@ -153,11 +172,9 @@ public class ProcessPerson {
     /**
      * @param person
      * @param actor
-     * @param account
      * @return Identity
      */
-    public Identity createIdentity(Person person, AbstractActor actor,
-            Account account) {
+    public Identity createIdentity(Person person, AbstractActor actor) {
 
         String mBox = null;
         String mboxSha1sum = null;
@@ -175,17 +192,15 @@ public class ProcessPerson {
             openId = actor.getOpenid().toString();
         }
 
-        log.info("Creating new identity.");
-
         Identity identity = new Identity();
         identity.setMboxSha1Sum(mboxSha1sum);
         identity.setMbox(mBox);
         identity.setOpenid(openId);
         identity.setPerson(person);
 
-        if (account != null) {
-            identity.setHomePage(account.getHomePage().toString());
-            identity.setName(account.getName());
+        if (actor.getAccount() != null) {
+            identity.setHomePage(actor.getAccount().getHomePage().toString());
+            identity.setName(actor.getAccount().getName());
         }
 
         identityService.save(identity);
@@ -200,7 +215,6 @@ public class ProcessPerson {
      * @return email
      */
     public Email createEmail(String emailAddress) {
-        log.info("Creating new email.");
         Email email = new Email();
         email.setEmailAddress(emailAddress);
         email.setEmailAddressType("primary");

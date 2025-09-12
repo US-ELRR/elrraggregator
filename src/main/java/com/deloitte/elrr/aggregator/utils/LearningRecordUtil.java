@@ -1,6 +1,6 @@
 package com.deloitte.elrr.aggregator.utils;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,34 +36,29 @@ public class LearningRecordUtil {
      */
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
-            final LearningResource learningResource) {
+            final LearningResource learningResource)
+            throws RuntimeServiceException {
 
         LearningRecord learningRecord = null;
 
-        try {
+        log.info("Process learning record.");
 
-            log.info("Process learning record.");
+        // Get LearningRecord
+        learningRecord = learningRecordService
+                .findByPersonIdAndLearningResourceId(person.getId(),
+                        learningResource.getId());
 
-            // Get LearningRecord
-            learningRecord = learningRecordService
-                    .findByPersonIdAndLearningResourceId(person.getId(),
-                            learningResource.getId());
+        // If LearningRecord doesn't exist
+        if (learningRecord == null) {
 
-            // If LearningRecord doesn't exist
-            if (learningRecord == null) {
+            learningRecord = createLearningRecord(person, learningResource,
+                    verb, result);
 
-                learningRecord = createLearningRecord(person, learningResource,
-                        verb, result);
+            // If learningRecord already exists
+        } else {
 
-                // If learningRecord already exists
-            } else {
-
-                learningRecord = updateLearningRecord(person, learningRecord,
-                        verb, result);
-            }
-
-        } catch (RuntimeServiceException e) {
-            throw e;
+            learningRecord = updateLearningRecord(person, learningRecord, verb,
+                    result);
         }
 
         return learningRecord;
@@ -74,41 +69,56 @@ public class LearningRecordUtil {
      * @param verb
      * @param result
      * @param learningResource
-     * @param enrolledDate
+     * @param enrollmentDate
      * @return learningRccord
      * @throws RuntimeServiceException
      */
+    @SuppressWarnings("checkstyle:linelength")
     public LearningRecord processLearningRecord(final Person person,
             final Verb verb, final Result result,
             final LearningResource learningResource,
-            final LocalDateTime enrolledDate) {
+            final ZonedDateTime enrollmentDate) throws RuntimeServiceException {
 
         LearningRecord learningRecord = null;
 
-        try {
+        log.info("Process learning record.");
 
-            log.info("Process learning record.");
+        // Get LearningRecord
+        learningRecord = learningRecordService
+                .findByPersonIdAndLearningResourceId(person.getId(),
+                        learningResource.getId());
 
-            // Get LearningRecord
-            learningRecord = learningRecordService
-                    .findByPersonIdAndLearningResourceId(person.getId(),
-                            learningResource.getId());
+        // If LearningRecord doesn't exist
+        if (learningRecord == null) {
 
-            // If LearningRecord doesn't exist
-            if (learningRecord == null) {
+            learningRecord = createLearningRecord(person, learningResource,
+                    verb, result, enrollmentDate);
 
-                learningRecord = createLearningRecord(person, learningResource,
-                        verb, result, enrolledDate);
+            // If learningRecord already exists
+        } else {
 
-                // If learningRecord already exists
-            } else {
+            // If existing LearningRecord is COMPLETED
+            if (learningRecord.getRecordStatus().equals(
+                    LearningStatus.COMPLETED)) {
 
-                learningRecord = updateLearningRecord(person, learningRecord,
-                        verb, result);
+                // If new registered enrollmentDate <= existing timestamp
+                if (enrollmentDate.isEqual(learningRecord.getInsertedDate())
+                        || enrollmentDate.isBefore(learningRecord
+                                .getInsertedDate())) {
+                    log.warn(
+                            "Error trying to re-register a completed activity. Learning Record for "
+                                    + person.getName() + " - " + learningRecord
+                                            .getLearningResource().getTitle()
+                                    + ".  Enrollment date " + enrollmentDate
+                                    + " before " + learningRecord
+                                            .getInsertedDate());
+                    return learningRecord;
+                }
+
             }
 
-        } catch (RuntimeServiceException e) {
-            throw e;
+            learningRecord = updateLearningRecord(person, learningRecord, verb,
+                    result, enrollmentDate);
         }
 
         return learningRecord;
@@ -125,7 +135,6 @@ public class LearningRecordUtil {
             final LearningResource learningResource, final Verb verb,
             final Result result) {
 
-        log.info("Creating new learning record.");
         LearningRecord learningRecord = new LearningRecord();
 
         LearningStatus learningStatus = getStatus(verb, result);
@@ -153,19 +162,18 @@ public class LearningRecordUtil {
      * @param learningResource
      * @param verb
      * @param result
-     * @param enrolledDate
+     * @param enrollmentDate
      * @return learningRecord
      */
     private LearningRecord createLearningRecord(final Person person,
             final LearningResource learningResource, final Verb verb,
-            final Result result, LocalDateTime enrolledDate) {
+            final Result result, ZonedDateTime enrollmentDate) {
 
-        log.info("Creating new learning record.");
         LearningRecord learningRecord = new LearningRecord();
 
         LearningStatus learningStatus = getStatus(verb, result);
 
-        learningRecord.setEnrollmentDate(enrolledDate);
+        learningRecord.setEnrollmentDate(enrollmentDate);
         learningRecord.setLearningResource(learningResource);
         learningRecord.setPerson(person);
         learningRecord.setRecordStatus(learningStatus);
@@ -193,32 +201,58 @@ public class LearningRecordUtil {
      * @throws RuntimeServiceException
      */
     public LearningRecord updateLearningRecord(Person person,
-            LearningRecord learningRecord, final Verb verb,
-            final Result result) {
+            LearningRecord learningRecord, final Verb verb, final Result result)
+            throws RuntimeServiceException {
 
-        log.info("Update learning record.");
+        LearningStatus learningStatus = getStatus(verb, result);
 
-        try {
+        learningRecord.setRecordStatus(learningStatus);
 
-            LearningStatus learningStatus = getStatus(verb, result);
-
-            learningRecord.setRecordStatus(learningStatus);
-
-            if (result != null && result.getScore() != null && result.getScore()
-                    .getScaled() != null) {
-                learningRecord.setAcademicGrade(result.getScore().getScaled()
-                        .toString());
-            }
-
-            learningRecordService.update(learningRecord);
-
-            log.info(LEARNING_RECORD_FOR + person.getName() + " - "
-                    + learningRecord.getLearningResource().getTitle()
-                    + " updated.");
-
-        } catch (RuntimeServiceException e) {
-            throw e;
+        if (result != null && result.getScore() != null && result.getScore()
+                .getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore().getScaled()
+                    .toString());
         }
+
+        learningRecordService.update(learningRecord);
+
+        log.info(LEARNING_RECORD_FOR + person.getName() + " - " + learningRecord
+                .getLearningResource().getTitle() + " updated.");
+
+        return learningRecord;
+
+    }
+
+    /**
+     * @param person
+     * @param learningRecord
+     * @param verb
+     * @param result
+     * @param enrollmentDate
+     * @return learningRecord
+     * @throws RuntimeServiceException
+     */
+    public LearningRecord updateLearningRecord(Person person,
+            LearningRecord learningRecord, final Verb verb, final Result result,
+            final ZonedDateTime enrollmentDate) throws RuntimeServiceException {
+
+        LearningStatus learningStatus = getStatus(verb, result);
+
+        learningRecord.setRecordStatus(learningStatus);
+        learningRecord.setEnrollmentDate(enrollmentDate);
+
+        if (result != null && result.getScore() != null && result.getScore()
+                .getScaled() != null) {
+            learningRecord.setAcademicGrade(result.getScore().getScaled()
+                    .toString());
+        }
+
+        learningRecordService.update(learningRecord);
+
+        log.info("Learning Record for " + person.getName() + " - "
+                + learningRecord.getLearningResource().getTitle()
+                + " updated.");
+
         return learningRecord;
     }
 

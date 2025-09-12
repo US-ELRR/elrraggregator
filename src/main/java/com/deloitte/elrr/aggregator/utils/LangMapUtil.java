@@ -64,7 +64,7 @@ public class LangMapUtil {
      * @return langCode
      * @throws AggregatorException
      */
-    public String getLangMapValue(LangMap langMap) {
+    public String getLangMapValue(LangMap langMap) throws AggregatorException {
 
         try {
 

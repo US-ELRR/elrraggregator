@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -72,8 +72,7 @@ class ProcessRegisteredTest {
 
             Result result = stmt.getResult();
 
-            LocalDateTime enrollmentDate = stmt.getTimestamp()
-                    .toLocalDateTime();
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -104,6 +103,7 @@ class ProcessRegisteredTest {
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
+            learningRecord.setEnrollmentDate(enrollmentDate);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
                             learningResource, enrollmentDate);
@@ -153,8 +153,7 @@ class ProcessRegisteredTest {
 
             Result result = stmt.getResult();
 
-            LocalDateTime enrollmentDate = stmt.getTimestamp()
-                    .toLocalDateTime();
+            ZonedDateTime enrollmentDate = stmt.getTimestamp();
 
             Email email = new Email();
             email.setId(UUID.randomUUID());
@@ -183,6 +182,7 @@ class ProcessRegisteredTest {
             learningRecord.setRecordStatus(LearningStatus.COMPLETED);
             learningRecord.setPerson(person);
             learningRecord.setLearningResource(learningResource);
+            learningRecord.setEnrollmentDate(enrollmentDate);
             Mockito.doReturn(learningRecord).when(learningRecordUtil)
                     .processLearningRecord(person, verb, result,
                             learningResource, enrollmentDate);

@@ -1,0 +1,64 @@
+{
+    "id": "7b5065c4-2d0c-48da-986d-b84473730ec8",
+    "actor": {
+    "name": "Bill Curry",
+    "account": {
+        "name": "1235678",
+        "homePage": "https://school.org/students"
+    }
+},
+"verb": {
+    "id": "https://w3id.org/xapi/tla/verbs/was-assigned",
+    "display": {
+        "en-us": "Was Assigned"
+    }
+},
+"object": {
+    "id": "http://xapi.edlm/goals/ab4cf800-2208-427c-bc24-7fafda9f4444",
+    "definition": {
+        "name": {
+            "en-us": "Bill Curry Professional Development Goal 1"
+        },
+        "type": "https://w3id.org/xapi/activities/goal",
+        "extensions": {
+            "http://xapi.edlm/goals/activity-extensions/goal-type": "ASSIGNED"
+        }
+    }
+},
+"context": {
+    "extensions": {
+        "https://yetanalytics.com/profiles/prepositions/concepts/context-extensions/by": { 
+            "name": "Professor Thompson",
+            "account": {
+                "name": "1234321",
+                "homePage": "https://school.org/teachers"
+            }
+        }
+    },
+    "contextActivities": {
+        "other": [
+            {
+                "objectType": "Activity",
+                "id": "http://school.org/courses/course100",
+                "definition": {
+                    "type": "http://adlnet.gov/expapi/activities/course",
+                    "name": {
+                        "en-us": "Course 100"
+                    }
+                }
+            },
+            {
+                "objectType": "Activity",
+                "id": "http://school.org/competencies/competencyAAA",
+                "definition": {
+                    "type": "https://w3id.org/xapi/comp/activities/competency",
+                    "name": {
+                        "en-us": "Competency AAA"
+                    }
+                }
+            }
+        ]
+    }
+},
+"timestamp": "2025-05-25T12:34:56Z"
+}   
