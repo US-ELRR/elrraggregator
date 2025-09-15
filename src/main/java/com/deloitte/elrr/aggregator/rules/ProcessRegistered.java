@@ -60,7 +60,7 @@ public class ProcessRegistered implements Rule {
     public Person processRule(final Person person, final Statement statement)
             throws AggregatorException {
 
-        log.info("Process activity registered");
+        log.debug("Process activity registered");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();

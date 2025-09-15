@@ -60,7 +60,7 @@ public class ProcessCompleted implements Rule {
     public Person processRule(Person person, final Statement statement)
             throws AggregatorException {
 
-        log.info("Process activity completed");
+        log.debug("Process activity completed");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -71,8 +71,8 @@ public class ProcessCompleted implements Rule {
 
         // Process LearningRecord
         LearningRecord learningRecord = learningRecordUtil
-                .processLearningRecord(person, statement.getVerb(),
-                        statement.getResult(), learningResource);
+                .processLearningRecord(person, statement.getVerb(), statement
+                        .getResult(), learningResource);
 
         if (person.getLearningRecords() == null) {
             person.setLearningRecords(new HashSet<LearningRecord>());

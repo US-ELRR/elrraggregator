@@ -43,7 +43,7 @@ public class ProcessPerson {
         AbstractActor actor = null;
         Person person = null;
 
-        // Get Actor and account
+        // Get Actor
         if (statement.getActor() instanceof AbstractActor) {
 
             actor = (AbstractActor) statement.getActor();
@@ -55,7 +55,7 @@ public class ProcessPerson {
 
         }
 
-        log.info("Process person.");
+        log.debug("Process person.");
 
         // Get Person
         person = getPerson(actor);
@@ -77,7 +77,7 @@ public class ProcessPerson {
 
         Person person = null;
 
-        log.info("Process person.");
+        log.debug("Process person.");
 
         // Get Person
         person = getPerson(actor);
@@ -127,7 +127,7 @@ public class ProcessPerson {
         if (identity != null) {
             person = identity.getPerson();
             if (person != null) {
-                log.info("Person " + person.getName() + " exists.");
+                log.debug("Person " + person.getName() + " exists.");
             }
         }
 
@@ -164,7 +164,7 @@ public class ProcessPerson {
 
         personService.save(person);
 
-        log.info("Person " + person.getName() + " " + CREATED_MESSAGE + ".");
+        log.debug("Person " + person.getName() + " " + CREATED_MESSAGE + ".");
 
         return person;
     }
@@ -205,7 +205,8 @@ public class ProcessPerson {
 
         identityService.save(identity);
 
-        log.info("Identity " + identity.getIfi() + " " + CREATED_MESSAGE + ".");
+        log.debug("Identity " + identity.getIfi() + " " + CREATED_MESSAGE
+                + ".");
 
         return identity;
     }
@@ -219,7 +220,7 @@ public class ProcessPerson {
         email.setEmailAddress(emailAddress);
         email.setEmailAddressType("primary");
         emailService.save(email);
-        log.info("Email " + emailAddress + " " + CREATED_MESSAGE + ".");
+        log.debug("Email " + emailAddress + " " + CREATED_MESSAGE + ".");
         return email;
     }
 }
