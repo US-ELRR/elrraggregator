@@ -41,7 +41,7 @@ public class LearningRecordUtil {
 
         LearningRecord learningRecord = null;
 
-        log.info("Process learning record.");
+        log.debug("Process learning record.");
 
         // Get LearningRecord
         learningRecord = learningRecordService
@@ -81,7 +81,7 @@ public class LearningRecordUtil {
 
         LearningRecord learningRecord = null;
 
-        log.info("Process learning record.");
+        log.debug("Process learning record.");
 
         // Get LearningRecord
         learningRecord = learningRecordService
@@ -151,7 +151,7 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
+        log.debug(LEARNING_RECORD_FOR + person.getName() + " - "
                 + learningResource.getTitle() + " created.");
 
         return learningRecord;
@@ -186,7 +186,7 @@ public class LearningRecordUtil {
 
         learningRecordService.save(learningRecord);
 
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - "
+        log.debug(LEARNING_RECORD_FOR + person.getName() + " - "
                 + learningResource.getTitle() + " created.");
 
         return learningRecord;
@@ -216,8 +216,9 @@ public class LearningRecordUtil {
 
         learningRecordService.update(learningRecord);
 
-        log.info(LEARNING_RECORD_FOR + person.getName() + " - " + learningRecord
-                .getLearningResource().getTitle() + " updated.");
+        log.debug(LEARNING_RECORD_FOR + person.getName() + " - "
+                + learningRecord.getLearningResource().getTitle()
+                + " updated.");
 
         return learningRecord;
 
@@ -249,7 +250,7 @@ public class LearningRecordUtil {
 
         learningRecordService.update(learningRecord);
 
-        log.info("Learning Record for " + person.getName() + " - "
+        log.debug("Learning Record for " + person.getName() + " - "
                 + learningRecord.getLearningResource().getTitle()
                 + " updated.");
 
@@ -263,7 +264,7 @@ public class LearningRecordUtil {
      */
     private LearningStatus getStatus(final Verb verb, final Result result) {
 
-        log.info("Verb = " + verb.getId());
+        log.debug("Verb = " + verb.getId());
 
         if (verb.getId().toString().equalsIgnoreCase(
                 VerbIdConstants.PASSED_VERB_ID.toString())) {

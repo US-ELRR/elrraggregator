@@ -84,7 +84,7 @@ public class ProcessCredential implements Rule {
     public Person processRule(final Person person, final Statement statement)
             throws AggregatorException {
 
-        log.info("Process credential.");
+        log.debug("Process credential.");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -122,13 +122,13 @@ public class ProcessCredential implements Rule {
         if (credential == null) {
 
             credential = createCredential(activity, endDate);
-            log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+            log.debug(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
                     + " created.");
 
         } else {
 
             credential = updateCredential(credential, activity, endDate);
-            log.info(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
+            log.debug(CREDENTIAL_MESSAGE + " " + credential.getIdentifier()
                     + " updated.");
 
         }
@@ -145,7 +145,7 @@ public class ProcessCredential implements Rule {
     public List<Credential> processAssignedCredentials(final Context context)
             throws AggregatorException, URISyntaxException {
 
-        log.info("Process assigned credentials.");
+        log.debug("Process assigned credentials.");
 
         List<Credential> credentials = new ArrayList<Credential>();
 
@@ -164,7 +164,7 @@ public class ProcessCredential implements Rule {
                 // If Credential already exists
                 if (credential != null) {
 
-                    log.info(CREDENTIAL_MESSAGE + " " + credential
+                    log.debug(CREDENTIAL_MESSAGE + " " + credential
                             .getIdentifier() + " already exists.");
 
                     // If Credential doesn't exist
@@ -173,7 +173,7 @@ public class ProcessCredential implements Rule {
                     credential = createCredential(activity, null);
                     credentials.add(credential);
 
-                    log.info(CREDENTIAL_MESSAGE + " " + credential
+                    log.debug(CREDENTIAL_MESSAGE + " " + credential
                             .getIdentifier() + " created.");
 
                 }

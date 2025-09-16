@@ -35,7 +35,7 @@ public class LearningResourceUtil {
     public LearningResource processLearningResource(final Activity activity)
             throws AggregatorException {
 
-        log.info("Process learning resource.");
+        log.debug("Process learning resource.");
 
         // Get learningResource
         LearningResource learningResource = learningResourceService.findByIri(
@@ -44,7 +44,7 @@ public class LearningResourceUtil {
         // If LearningResource already exists
         if (learningResource != null) {
 
-            log.info("Learning Resource " + learningResource.getTitle()
+            log.debug("Learning Resource " + learningResource.getTitle()
                     + " exists.");
 
         } else {
@@ -66,7 +66,7 @@ public class LearningResourceUtil {
             final Context context) throws URISyntaxException,
             AggregatorException {
 
-        log.info("Process learning resources.");
+        log.debug("Process learning resources.");
 
         List<LearningResource> lrnRes = new ArrayList<LearningResource>();
 
@@ -79,9 +79,8 @@ public class LearningResourceUtil {
             URI type = activity.getDefinition().getType();
 
             // Not a LearningResource if Credential or Competency
-            if (type.equals(ContextActivityTypeConstants.OTHER_CRED_URI)
-                    || type.equals(
-                            ContextActivityTypeConstants.OTHER_COMP_URI)) {
+            if (type.equals(ContextActivityTypeConstants.OTHER_CRED_URI) || type
+                    .equals(ContextActivityTypeConstants.OTHER_COMP_URI)) {
                 return lrnRes;
             }
 
@@ -91,7 +90,7 @@ public class LearningResourceUtil {
             // If LearningResource already exists
             if (learningResource != null) {
 
-                log.info("Learning Resource " + learningResource.getTitle()
+                log.debug("Learning Resource " + learningResource.getTitle()
                         + " exists.");
 
             } else {
@@ -128,7 +127,7 @@ public class LearningResourceUtil {
         learningResource.setTitle(activityName);
         learningResourceService.save(learningResource);
 
-        log.info("Learning Resource " + learningResource.getTitle()
+        log.debug("Learning Resource " + learningResource.getTitle()
                 + " created.");
 
         return learningResource;

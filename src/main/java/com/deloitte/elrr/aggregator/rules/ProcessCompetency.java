@@ -84,7 +84,7 @@ public class ProcessCompetency implements Rule {
     public Person processRule(final Person person, final Statement statement)
             throws AggregatorException {
 
-        log.info("Process competency.");
+        log.debug("Process competency.");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
@@ -122,13 +122,13 @@ public class ProcessCompetency implements Rule {
         if (competency == null) {
 
             competency = createCompetency(activity, endDate);
-            log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+            log.debug(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
                     + " created.");
 
         } else {
 
             competency = updateCompetency(competency, activity, endDate);
-            log.info(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
+            log.debug(COMPETENCY_MESSAGE + " " + competency.getIdentifier()
                     + " updated.");
 
         }
@@ -145,7 +145,7 @@ public class ProcessCompetency implements Rule {
     public List<Competency> processAssignedCompetencies(final Context context)
             throws AggregatorException, URISyntaxException {
 
-        log.info("Process assigned competencies.");
+        log.debug("Process assigned competencies.");
 
         List<Competency> competencies = new ArrayList<Competency>();
 
@@ -164,7 +164,7 @@ public class ProcessCompetency implements Rule {
                 // If Competency already exists
                 if (competency != null) {
 
-                    log.info(COMPETENCY_MESSAGE + " " + competency
+                    log.debug(COMPETENCY_MESSAGE + " " + competency
                             .getIdentifier() + " already exists.");
 
                     // If Competency doesn't exist
@@ -172,7 +172,7 @@ public class ProcessCompetency implements Rule {
 
                     competency = createCompetency(activity, null);
                     competencies.add(competency);
-                    log.info(COMPETENCY_MESSAGE + " " + competency
+                    log.debug(COMPETENCY_MESSAGE + " " + competency
                             .getIdentifier() + " created.");
 
                 }
@@ -223,12 +223,9 @@ public class ProcessCompetency implements Rule {
             final Activity activity, final ZonedDateTime endDate)
             throws AggregatorException {
 
-        String activityName = "";
-        String activityDescription = "";
-
-        activityName = langMapUtil.getLangMapValue(activity.getDefinition()
-                .getName());
-        activityDescription = langMapUtil.getLangMapValue(activity
+        String activityName = langMapUtil.getLangMapValue(activity
+                .getDefinition().getName());
+        String activityDescription = langMapUtil.getLangMapValue(activity
                 .getDefinition().getDescription());
 
         competency.setFrameworkTitle(activityName);
@@ -270,7 +267,7 @@ public class ProcessCompetency implements Rule {
                 person.getCompetencies().add(personalCompetency);
                 personService.save(person);
 
-                log.info("Personal Competency for " + person.getName() + " - "
+                log.debug("Personal Competency for " + person.getName() + " - "
                         + personalCompetency.getCompetency().getIdentifier()
                         + " created.");
 
@@ -279,7 +276,7 @@ public class ProcessCompetency implements Rule {
                 personalCompetency = updatePersonalCompetency(
                         personalCompetency, person, expires);
 
-                log.info("Personal Competency for " + person.getName() + " - "
+                log.debug("Personal Competency for " + person.getName() + " - "
                         + personalCompetency.getCompetency().getIdentifier()
                         + " updated.");
 

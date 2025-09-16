@@ -79,7 +79,7 @@ public class ProcessWasAssigned implements Rule {
             throws AggregatorException, ClassCastException,
             NullPointerException, RuntimeServiceException, URISyntaxException {
 
-        log.info("Process was assigned.");
+        log.debug("Process was assigned.");
 
         GoalType goalType = null;
 
@@ -154,13 +154,13 @@ public class ProcessWasAssigned implements Rule {
             goal = createGoal(activity, startDate, achievedByDate, endDate,
                     learningResource, credentials, competencies, person,
                     goalType);
-            log.info(GOAL_MESSAGE + " " + goal.getName() + " created.");
+            log.debug(GOAL_MESSAGE + " " + goal.getName() + " created.");
 
             // If goal already exists
         } else {
 
             goal = updateGoal(goal, activity, endDate, achievedByDate);
-            log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
+            log.debug(GOAL_MESSAGE + " " + goal.getName() + " updated.");
 
         }
 

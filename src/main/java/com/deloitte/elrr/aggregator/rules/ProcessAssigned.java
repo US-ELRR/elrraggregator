@@ -83,7 +83,7 @@ public class ProcessAssigned implements Rule {
             throws AggregatorException, ClassCastException,
             NullPointerException, RuntimeServiceException, URISyntaxException {
 
-        log.info("Process assigned.");
+        log.debug("Process assigned.");
 
         // Get start date
         ZonedDateTime startDate = statement.getTimestamp();
@@ -163,7 +163,7 @@ public class ProcessAssigned implements Rule {
                         + " as " + goal.getPerson().getName());
             } else {
                 goal = updateGoal(goal, activity, endDate, achievedByDate);
-                log.info(GOAL_MESSAGE + " " + goal.getName() + " updated.");
+                log.debug(GOAL_MESSAGE + " " + goal.getName() + " updated.");
             }
 
         }

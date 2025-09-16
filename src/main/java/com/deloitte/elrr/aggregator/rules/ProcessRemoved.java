@@ -58,7 +58,7 @@ public class ProcessRemoved implements Rule {
             throws AggregatorException, ClassCastException,
             NullPointerException, RuntimeServiceException, URISyntaxException {
 
-        log.info("Process removed.");
+        log.debug("Process removed.");
 
         // Get Activity
         Activity activity = (Activity) statement.getObject();
