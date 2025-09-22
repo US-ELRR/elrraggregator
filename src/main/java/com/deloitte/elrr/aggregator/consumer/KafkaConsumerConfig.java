@@ -28,6 +28,30 @@ public class KafkaConsumerConfig {
     @Value("${kafka.groupIdConfig}")
     private String groupIdConfig;
 
+    @Value("${kafka.fetch.min.bytes}")
+    private String fetchMinBytes;
+
+    @Value("${kafka.fetch.max.bytes}")
+    private String fetchMaxBytes;
+
+    @Value("${kafka.max.partition.fetch.bytes}")
+    private String maxPartitionFetchBytes;
+
+    @Value("${kafka.max.polling.records}")
+    private String maxPollingRecords;
+
+    @Value("${kafka.receive.buffer}")
+    private String receiveBuffer;
+
+    @Value("${kafka.send.buffer}")
+    private String sendBuffer;
+
+    @Value("${kafka.session.timeout.ms}")
+    private String sessionTimeout;
+
+    @Value("${kafka.auto.offset.reset}")
+    private String autoOffsetReset;
+
     /**
      * @return ConsumerFactory consumerFactory
      */
@@ -41,33 +65,15 @@ public class KafkaConsumerConfig {
                 StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
-
-        // Minimum 1MB data per fetch
-        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "1048576");
-
-        // Max 100MB per fetch
-        props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "104857600");
-
-        // Max 10MB per partition
-        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "10485760");
-
-        // Poll 1000 records per poll
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1000");
-
-        // 1MB receive buffer
-        props.put(ConsumerConfig.RECEIVE_BUFFER_CONFIG, "1048576");
-
-        // 1MB send buffer
-        props.put(ConsumerConfig.SEND_BUFFER_CONFIG, "1048576");
-
-        // Manual commit of offsets
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-
-        // Session timeout
-        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "10000");
-
-        // Start reading from latest
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
+        props.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, fetchMaxBytes);
+        props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG,
+                maxPartitionFetchBytes);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollingRecords);
+        props.put(ConsumerConfig.RECEIVE_BUFFER_CONFIG, receiveBuffer);
+        props.put(ConsumerConfig.SEND_BUFFER_CONFIG, sendBuffer);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
