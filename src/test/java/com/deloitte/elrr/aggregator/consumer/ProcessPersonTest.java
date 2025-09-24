@@ -86,7 +86,7 @@ class ProcessPersonTest {
 
             Person person = processPerson.processPerson(stmt);
             assertNotNull(person);
-            assertEquals(person.getName(), "Terry Bradshaw");
+            assertEquals(person.getName(), "Tom Shaw");
 
             Set<Identity> identities = person.getIdentities();
             assertNotNull(identities);
